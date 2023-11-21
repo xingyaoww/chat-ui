@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Message } from "$lib/types/Message";
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
+	import { base } from "$app/paths";
 
 	import CarbonSendAltFilled from "~icons/carbon/send-alt-filled";
 	import CarbonExport from "~icons/carbon/export";
@@ -18,6 +19,9 @@
 	import { page } from "$app/stores";
 	import DisclaimerModal from "../DisclaimerModal.svelte";
 	import RetryBtn from "../RetryBtn.svelte";
+	import ImageGallery from "./ImageGallery.svelte";
+	import type { Image } from "./ImageGallery.svelte";
+	import { goto } from "$app/navigation";
 
 	export let messages: Message[] = [];
 	export let loading = false;
@@ -32,7 +36,11 @@
 	$: isReadOnly = !models.some((model) => model.id === currentModel.id);
 
 	let loginModalOpen = false;
+	let isLoggedIn = false;
 	let message: string;
+	let imageGaleryOpened = false;
+	let images: Image[] = [];
+	let fileInput: HTMLInputElement;
 
 	const dispatch = createEventDispatcher<{
 		message: string;
@@ -46,11 +54,113 @@
 		dispatch("message", message);
 		message = "";
 	};
+	onMount(() => {
+		// Check if there is a JWT cookie
+		const jwtCookie = document.cookie.split(";").find((cookie) => cookie.trim().startsWith("jwt="));
+		console.log("jwtCookie", jwtCookie);
+		if (jwtCookie) {
+			isLoggedIn = true;
+		}
+	});
 
 	$: lastIsError = messages[messages.length - 1]?.from === "user" && !loading;
+	async function fetchAllOriginalImages() {
+		console.log("fetching images");
+		const response = await fetch(`${base}/images/me`, {
+			method: "GET",
+			headers: {
+				accept: "application/json",
+			},
+		});
+		console.log("response", response);
+
+		if (response.ok) {
+			const result = await response.json();
+			images = result;
+		} else {
+			console.log("Could not fetch all images URLs");
+			images = [];
+		}
+	}
+	async function handleFileChange(event: Event) {
+		const files = (event.target as HTMLInputElement).files;
+		if (!files) return;
+		const file = files[0];
+		if (file) {
+			// Convert the image file to a URL that can be displayed
+			// const imageUrl = URL.createObjectURL(file);
+
+			// Prepare the file to be sent in a FormData object
+			const formData = new FormData();
+			formData.append("title", "new image");
+			formData.append("file", file);
+			console.log("file", file);
+			// POST the image file to the server
+			const response = await fetch(`${base}/images/upload`, {
+				method: "POST",
+				headers: {
+					accept: "multipart/form-data",
+				},
+				body: formData,
+			});
+
+			// Handle the response
+			console.log("response", response);
+			if (response.ok) {
+				// Use the returned URL
+				const result = await response.json();
+				console.log("result", result);
+				const json = { id: result.id, url: result.url };
+				console.log("json", json);
+				if (loading) return;
+				dispatch(
+					"message",
+					`A new image has been added to the image database with the details: ${JSON.stringify(
+						result
+					)}. Show in "ecole-image" format`
+				);
+				fetchAllOriginalImages();
+			} else {
+				console.error("Upload failed", response);
+			}
+		}
+	}
+	function handleUploadClick(): void {
+		fileInput.click();
+	}
+	function handleImageGaleryClick(): void {
+		console.log("clicked");
+		imageGaleryOpened = !imageGaleryOpened;
+		if (imageGaleryOpened) {
+			fetchAllOriginalImages();
+		}
+	}
+	function onSelectImage(image: Image) {
+		dispatch(
+			"message",
+			`I chose this image: ${JSON.stringify(image)}. Show in "ecole-image" format.
+			`
+		);
+		console.log("dispatched message over here");
+	}
 </script>
 
 <div class="relative min-h-0 min-w-0">
+	<div class="absolute right-2 top-2 z-10">
+		{#if isLoggedIn}
+			<button
+				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+				>Signed In</button
+			>
+		{:else}
+			<button
+				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+				on:click={() => {
+					goto("/user/login");
+				}}>Sign In</button
+			>
+		{/if}
+	</div>
 	{#if !settings.ethicsModalAcceptedAt}
 		<DisclaimerModal {settings} />
 	{:else if loginModalOpen}
@@ -105,6 +215,37 @@
 				/>
 			{/if}
 		</div>
+
+		{#if imageGaleryOpened}
+			<div class="flex-2 flex items-center">
+				<ImageGallery {images} {onSelectImage} />
+			</div>
+		{/if}
+		<div class="flex-2 flex items-center">
+			<label for="imageUpload" class="custom-file-upload">
+				<input
+					type="file"
+					bind:this={fileInput}
+					id="imageUpload"
+					accept="image/*"
+					on:change={handleFileChange}
+					hidden
+				/>
+			</label>
+			<button
+				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+				on:click={handleUploadClick}
+			>
+				Upload Image
+			</button>
+			<button
+				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+				on:click={handleImageGaleryClick}
+			>
+				{imageGaleryOpened ? "Close" : "Open"} Image Gallery
+			</button>
+		</div>
+
 		<form
 			on:submit|preventDefault={handleSubmit}
 			class="relative flex w-full max-w-4xl flex-1 items-center rounded-xl border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500
@@ -131,19 +272,19 @@
 
 				{#if loading}
 					<button
-						class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:hidden"
+						class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40 md:hidden"
 						on:click={() => dispatch("stop")}
 					>
 						<CarbonStopFilledAlt />
 					</button>
 					<div
-						class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:flex"
+						class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40 md:flex"
 					>
 						<EosIconsLoading />
 					</div>
 				{:else}
 					<button
-						class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+						class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40"
 						disabled={!message || isReadOnly}
 						type="submit"
 					>
@@ -168,7 +309,7 @@
 					type="button"
 					on:click={() => dispatch("share")}
 				>
-					<CarbonExport class="text-[.6rem] sm:mr-1.5 sm:text-primary-500" />
+					<CarbonExport class="sm:text-primary-500 text-[.6rem] sm:mr-1.5" />
 					<div class="max-sm:hidden">Share this conversation</div>
 				</button>
 			{/if}
