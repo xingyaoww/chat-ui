@@ -351,9 +351,9 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 									console.error('Request to Jupyter failed with status:', resFromJupyter.status);
 									result = "\n" + "```result\n" + "Request to Code Execution failed with status: " + resFromJupyter.status + ". Please try again."
 								}
-							} catch (e) {
-								console.error('Error making the request:', e);
-								result = "\n" + "```result\n" + "Error making the request: " + e + ". Please try again."
+							} catch (error) {
+								console.error('Error making the request:', error);
+								result = "\n" + "```result\n" + "Error making the request: " + error + ". Please try again."
 							}
 
 							for (const token_ of result) {
