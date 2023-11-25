@@ -1,25 +1,20 @@
-import type { RequestHandler } from "@sveltejs/kit";
-import { serialize } from "cookie";
 import { IMAGE_SERVER_URL } from "$env/static/private";
+import type { RequestHandler } from "@sveltejs/kit";
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	// Check for existing JWT cookie
-	const cookies = request.headers.get("cookie");
-	const existingToken = cookies?.includes("jwt=");
+	console.log("cookies", cookies);
+
+	const existingToken = cookies?.get("jwt");
 	console.log("existingToken", existingToken);
 	console.log("request", request);
 	if (existingToken) {
-		return new Response(
-			JSON.stringify({
-				status: 400,
-				body: { error: "User already logged in" },
-			}),
-			{
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}
-		);
+		return new Response(JSON.stringify({ error: "User already logged in" }), {
+			status: 400,
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
 	}
 
 	// Process login credentials
@@ -30,10 +25,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	if (!username || !password) {
 		return new Response(
 			JSON.stringify({
-				status: 400,
 				body: { error: "Missing username or password" },
 			}),
 			{
+				status: 400,
 				headers: {
 					"Content-Type": "application/json",
 				},
@@ -44,30 +39,26 @@ export const POST: RequestHandler = async ({ request }) => {
 	// Authenticate user and get token
 	try {
 		const { access_token, token_type } = await registerUser(username, password);
-		console.log("token", { access_token, token_type });
+
 		// Set JWT token in cookie
+
+		cookies.set("jwt", `${token_type} ${access_token}`, {
+			path: "/",
+			httpOnly: true,
+		});
+		console.log("cookies", cookies);
 		return new Response(JSON.stringify({ success: true }), {
 			status: 200,
-			headers: {
-				"Set-Cookie": serialize("jwt", `${token_type} ${access_token}`, {
-					path: "/",
-					httpOnly: true,
-				}),
-			},
+			headers: {},
 		});
 	} catch (error) {
 		console.log("error", error);
-		return new Response(
-			JSON.stringify({
-				status: 401,
-				body: { error: "Invalid credentials" },
-			}),
-			{
-				headers: {
-					"Content-Type": "application/json",
-				},
-			}
-		);
+		return new Response(JSON.stringify({ error: "Invalid credentials" }), {
+			status: 401,
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
 	}
 };
 
@@ -85,8 +76,17 @@ async function registerUser(username: string, password: string) {
 		throw new Error("Authentication failed");
 	}
 
-	const data = await response.json();
-	const access_token = data.access_token;
-	const token_type = data.token_type;
+	const { access_token, token_type } = await fetch(`${IMAGE_SERVER_URL}/token`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/x-www-form-urlencoded",
+		},
+		body: new URLSearchParams({ username, password }).toString(),
+	})
+		.then((res) => res.json())
+		.catch((err) => {
+			console.log("err", err);
+			throw new Error("Authentication failed");
+		});
 	return { access_token, token_type }; // Assuming the response contains a JWT token
 }

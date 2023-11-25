@@ -1,17 +1,22 @@
-import type { RequestHandler } from "@sveltejs/kit";
-import { IMAGE_SERVER_URL, IMAGE_SERVER_TOKEN } from "$env/static/private";
+import { redirect, type RequestHandler } from "@sveltejs/kit";
+import { IMAGE_SERVER_URL } from "$env/static/private";
 import { base } from "$app/paths";
+import type { Image } from "$lib/components/chat/ImageGallery.svelte";
 
-export const GET: RequestHandler = async ({ fetch }) => {
+export const GET: RequestHandler = async ({ fetch, cookies }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
-		const token = IMAGE_SERVER_TOKEN;
-		console.log("imageUrl", imageUrl);
+		const tokenCookie = cookies.get("jwt");
+		if (!tokenCookie) {
+			// redirect to login
+			throw redirect(302, `${base}/user/login`);
+		}
+
 		// Assuming the image server expects a token in the headers for authentication
 		const response = await fetch(`${imageUrl}/images/me`, {
 			method: "GET",
 			headers: {
-				Authorization: `Bearer ${token}`,
+				Authorization: tokenCookie,
 				"Content-Type": "application/json",
 			},
 		});
@@ -22,7 +27,7 @@ export const GET: RequestHandler = async ({ fetch }) => {
 
 		const imageData = await response.json();
 		console.log("imageData", imageData);
-		imageData.forEach((image) => {
+		imageData.forEach((image: Image) => {
 			image.url = `${base}/images/${image.id}`;
 		});
 		return new Response(JSON.stringify(imageData), {

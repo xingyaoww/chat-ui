@@ -47,6 +47,7 @@
 		share: void;
 		stop: void;
 		retry: { id: Message["id"]; content: string };
+		imageUpload: void;
 	}>();
 
 	const handleSubmit = () => {
@@ -54,34 +55,24 @@
 		dispatch("message", message);
 		message = "";
 	};
-	onMount(() => {
+	onMount(async () => {
 		// Check if there is a JWT cookie
-		const jwtCookie = document.cookie.split(";").find((cookie) => cookie.trim().startsWith("jwt="));
-		console.log("jwtCookie", jwtCookie);
-		if (jwtCookie) {
-			isLoggedIn = true;
+		const response = await fetch(`${base}/user/login`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		if (!response.ok) {
+			// Handle error
+			console.error("No user cookies");
+			return;
 		}
+		isLoggedIn = true;
 	});
 
 	$: lastIsError = messages[messages.length - 1]?.from === "user" && !loading;
-	async function fetchAllOriginalImages() {
-		console.log("fetching images");
-		const response = await fetch(`${base}/images/me`, {
-			method: "GET",
-			headers: {
-				accept: "application/json",
-			},
-		});
-		console.log("response", response);
 
-		if (response.ok) {
-			const result = await response.json();
-			images = result;
-		} else {
-			console.log("Could not fetch all images URLs");
-			images = [];
-		}
-	}
 	async function handleFileChange(event: Event) {
 		const files = (event.target as HTMLInputElement).files;
 		if (!files) return;
@@ -113,13 +104,7 @@
 				const json = { id: result.id, url: result.url };
 				console.log("json", json);
 				if (loading) return;
-				dispatch(
-					"message",
-					`A new image has been added to the image database with the details: ${JSON.stringify(
-						result
-					)}. Show in "ecole-image" format`
-				);
-				fetchAllOriginalImages();
+				dispatch("imageUpload");
 			} else {
 				console.error("Upload failed", response);
 			}
@@ -131,9 +116,6 @@
 	function handleImageGaleryClick(): void {
 		console.log("clicked");
 		imageGaleryOpened = !imageGaleryOpened;
-		if (imageGaleryOpened) {
-			fetchAllOriginalImages();
-		}
 	}
 	function onSelectImage(image: Image) {
 		dispatch(
@@ -150,7 +132,9 @@
 		{#if isLoggedIn}
 			<button
 				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-				>Signed In</button
+				on:click={() => {
+					goto("/user/login");
+				}}>Signed In</button
 			>
 		{:else}
 			<button
@@ -272,19 +256,19 @@
 
 				{#if loading}
 					<button
-						class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40 md:hidden"
+						class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:hidden"
 						on:click={() => dispatch("stop")}
 					>
 						<CarbonStopFilledAlt />
 					</button>
 					<div
-						class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40 md:flex"
+						class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:flex"
 					>
 						<EosIconsLoading />
 					</div>
 				{:else}
 					<button
-						class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40"
+						class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
 						disabled={!message || isReadOnly}
 						type="submit"
 					>
@@ -309,7 +293,7 @@
 					type="button"
 					on:click={() => dispatch("share")}
 				>
-					<CarbonExport class="sm:text-primary-500 text-[.6rem] sm:mr-1.5" />
+					<CarbonExport class="text-[.6rem] sm:mr-1.5 sm:text-primary-500" />
 					<div class="max-sm:hidden">Share this conversation</div>
 				</button>
 			{/if}

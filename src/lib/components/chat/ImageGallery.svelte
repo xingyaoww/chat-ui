@@ -6,16 +6,41 @@
 </script>
 
 <script lang="ts">
+	import { base } from "$app/paths";
+	import { onMount } from "svelte";
+
 	export let onSelectImage: (image: Image) => void;
 
 	export let images: Array<Image> = [];
 
 	let selectedImage: Image | null = null;
 
+	async function fetchAllOriginalImages() {
+		console.log("fetching images");
+		const responseFetch = await fetch(`${base}/images/me`, {
+			method: "GET",
+			headers: {
+				accept: "application/json",
+			},
+		});
+		console.log("response", responseFetch);
+
+		if (responseFetch.ok) {
+			const result = await responseFetch.json();
+			images = result;
+		} else {
+			console.log("Could not fetch all images URLs");
+			images = [];
+		}
+	}
+
 	function selectImage(image: Image) {
 		selectedImage = image;
 		onSelectImage(image);
 	}
+	onMount(async () => {
+		await fetchAllOriginalImages();
+	});
 </script>
 
 <div

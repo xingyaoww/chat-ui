@@ -9,7 +9,7 @@
 	export let settings: LayoutData["settings"];
 </script>
 
-<Modal on:close>
+<Modal>
 	<div
 		class="flex w-full flex-col items-center gap-6 bg-gradient-to-b from-primary-500/40 via-primary-500/10 to-primary-500/0 px-5 pb-8 pt-9 text-center"
 	>

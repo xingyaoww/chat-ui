@@ -1,18 +1,28 @@
 import type { RequestHandler } from "@sveltejs/kit";
-import { IMAGE_SERVER_URL, IMAGE_SERVER_TOKEN } from "$env/static/private";
+import { IMAGE_SERVER_URL } from "$env/static/private";
+import { goto } from "$app/navigation";
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		console.log("imageUrl", imageUrl);
 		const requestBody = request.body;
 		console.log("requestBody", requestBody);
 		// Redirect to the FastAPI server
+		const cookie = cookies.get("jwt");
+		console.log("cookie", cookie);
+		// Redirect to login if no cookie
+		if (!cookie || cookie === undefined) {
+			goto("/user/login");
+		}
+
+		// Assuming the image server expects a token in the headers for authentication
+		const definedCookie = cookie as string;
 		const response = await fetch(`${imageUrl}/images/`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/form-data",
-				Authorization: `Bearer ${IMAGE_SERVER_TOKEN}`,
+				Authorization: definedCookie,
 			},
 			body: requestBody,
 		});
