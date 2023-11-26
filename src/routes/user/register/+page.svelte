@@ -2,6 +2,8 @@
 	import { base } from "$app/paths";
 	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";
+	import Modal from "$lib/components/Modal.svelte";
+	import CarbonClose from "~icons/carbon/close";
 
 	let username = "";
 	let password = "";
@@ -16,9 +18,6 @@
 			isLoggedIn = true;
 		}
 	});
-	function close() {
-		goto(closeRoute);
-	}
 	const handleRegister = async () => {
 		// Call the backend server to authenticate the user
 		const response = await fetch(`${base}/user/register`, {
@@ -59,56 +58,59 @@
 	};
 </script>
 
-<div class="fixed inset-0 h-full w-full overflow-y-auto bg-gray-600 bg-opacity-50">
-	<div class="relative top-20 mx-auto w-96 rounded-md border bg-white p-5 shadow-lg">
-		<div class="items-right absolute right-0 top-0 px-4 py-3">
-			<button on:click={close}>
-				<i class="mi mi-close"><span class="u-sr-only" /></i>
-			</button>
-		</div>
-		<div class="mt-3 text-center">
-			<h3 class="text-lg font-medium leading-6 text-gray-900">Register</h3>
-			<div class="mt-2 px-7 py-3">
-				<p class="text-sm text-gray-500">
-					{#if isLoggedIn}
-						<p>Already logged in</p>
-						<button
-							class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-							on:click={handleLogout}>Logout</button
-						>
-					{:else}
-						<form on:submit|preventDefault={handleRegister}>
-							<label for="username" class="">Username:</label>
-							<input
-								class="my-2 border border-gray-200"
-								type="text"
-								id="username"
-								bind:value={username}
-								required
-							/>
-
-							<label for="password">Password:</label>
-							<input
-								class="my-2 border border-gray-200"
-								type="password"
-								id="password"
-								bind:value={password}
-								required
-							/>
-							<br />
-							<button
-								type="submit"
-								class="blue m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-								>Register</button
-							>
-						</form>
-						<button
-							class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-							on:click={handleSignIn}>Return to Sign In</button
-						>
-					{/if}
-				</p>
+<Modal on:close>
+	<div
+		class="relative flex w-full flex-col items-center gap-6 from-primary-500/40 via-primary-500/10 to-primary-500/0 px-5 pb-8 pt-9 text-center"
+	>
+		<div class="flex items-start justify-between text-xl font-semibold text-gray-800">
+			<div class="absolute right-2 top-2">
+				<button type="button" class="group" on:click={() => goto(closeRoute)}>
+					<CarbonClose class="text-gray-900 group-hover:text-gray-500" />
+				</button>
 			</div>
+			<h2 class="">Sign Up</h2>
+		</div>
+
+		<div class="mt-2 px-7 py-3">
+			<p class="text-sm text-gray-500">
+				{#if isLoggedIn}
+					<p>Already logged in</p>
+					<button
+						class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+						on:click={handleLogout}>Logout</button
+					>
+				{:else}
+					<form on:submit|preventDefault={handleRegister}>
+						<label for="username" class="">Username:</label>
+						<input
+							class="my-2 border border-gray-200"
+							type="text"
+							id="username"
+							bind:value={username}
+							required
+						/>
+
+						<label for="password">Password:</label>
+						<input
+							class="my-2 border border-gray-200"
+							type="password"
+							id="password"
+							bind:value={password}
+							required
+						/>
+						<br />
+						<button
+							type="submit"
+							class="blue m-4 w-full rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+							>Register</button
+						>
+					</form>
+					<button
+						class="m-4 w-full rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+						on:click={handleSignIn}>Return to Sign In</button
+					>
+				{/if}
+			</p>
 		</div>
 	</div>
-</div>
+</Modal>

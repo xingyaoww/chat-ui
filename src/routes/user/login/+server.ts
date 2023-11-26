@@ -76,7 +76,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	}
 };
 
+// Authenticate user and get token
 async function authenticateUser(username: string, password: string) {
+	// Authenticate user and get token
 	const response = await fetch(`${IMAGE_SERVER_URL}/token`, {
 		method: "POST",
 		headers: {
@@ -85,11 +87,13 @@ async function authenticateUser(username: string, password: string) {
 		body: new URLSearchParams({ username, password }).toString(),
 	});
 
+	// If the credentials are invalid, throw an error
 	if (!response.ok) {
 		console.log("response", response);
 		throw new Error("Authentication failed");
 	}
 
+	// If the credentials are valid, return the token
 	const data = await response.json();
 	const access_token = data.access_token;
 	const refresh_token = data.refresh_token;
@@ -109,7 +113,8 @@ export const GET = async ({ cookies, fetch }) => {
 			},
 		});
 	}
-	console.log("existingToken over here", existingToken);
+
+	// Verify the access token
 	const response = await fetch(`${IMAGE_SERVER_URL}/users/verify_access_token/`, {
 		method: "POST",
 		headers: {
@@ -118,12 +123,54 @@ export const GET = async ({ cookies, fetch }) => {
 		body: JSON.stringify({ access_token: existingToken }),
 	});
 
+	// If the access token is invalid, try to refresh it
 	if (!response.ok) {
-		console.log("response over here", await response.json());
-		// cookies.delete("jwt", { path: "/" });
-		// cookies.delete("refresh_token", { path: "/" });
+		// Check for existing refresh token
+		const existingRefreshToken = cookies.get("refresh_token");
+		if (!existingRefreshToken || existingRefreshToken === "undefined") {
+			cookies.delete("jwt", { path: "/" });
+			cookies.delete("refresh_token", { path: "/" });
+			throw redirect(302, `${base}/user/login`);
+		}
+		const verifyRefreshToken = await fetch(`${IMAGE_SERVER_URL}/users/verify_refresh_token/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ refresh_token: existingRefreshToken }),
+		});
 
-		throw redirect(302, `${base}/user/login`);
+		// If the refresh token is invalid, redirect to login
+		if (!verifyRefreshToken.ok) {
+			cookies.delete("jwt", { path: "/" });
+			cookies.delete("refresh_token", { path: "/" });
+			throw redirect(302, `${base}/user/login`);
+		}
+
+		// Refresh the access token
+		const refreshResponse = await fetch(`${IMAGE_SERVER_URL}/token/refresh/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ refresh_token: cookies.get("refresh_token") }),
+		});
+
+		// If the refresh token is invalid, redirect to login
+		if (!refreshResponse.ok) {
+			cookies.delete("jwt", { path: "/" });
+			cookies.delete("refresh_token", { path: "/" });
+			throw redirect(302, `${base}/user/login`);
+		}
+
+		// Set the new access token in the cookie
+		const data = await refreshResponse.json();
+		const access_token = data.access_token;
+		const token_type = data.token_type;
+		cookies.set("jwt", `${token_type} ${access_token}`, {
+			path: "/",
+			httpOnly: true,
+		});
 	}
 
 	// Process login credentials

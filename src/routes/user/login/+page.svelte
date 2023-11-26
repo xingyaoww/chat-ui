@@ -72,15 +72,14 @@
 
 <Modal on:close>
 	<div
-		class="flex w-full flex-col items-center gap-6 from-primary-500/40 via-primary-500/10 to-primary-500/0 px-5 pb-8 pt-9 text-center"
+		class="relative flex w-full flex-col items-center gap-6 from-primary-500/40 via-primary-500/10 to-primary-500/0 px-5 pb-8 pt-9 text-center"
 	>
-		<div class="absolute right-2 top-2">
-			<button type="button" class="group" on:click={() => goto(closeRoute)}>
-				<CarbonClose class="text-gray-900 group-hover:text-gray-500" />
-			</button>
-		</div>
-
 		<div class="flex items-start justify-between text-xl font-semibold text-gray-800">
+			<div class="absolute right-2 top-2">
+				<button type="button" class="group" on:click={() => goto(closeRoute)}>
+					<CarbonClose class="text-gray-900 group-hover:text-gray-500" />
+				</button>
+			</div>
 			<h2 class="">Sign In</h2>
 		</div>
 		<div class="mt-2 px-7 py-3">
@@ -88,8 +87,8 @@
 				{#if isLoggedIn}
 					<p>Already logged in</p>
 					<button
-						class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-						on:click={handleLogout}>Logout</button
+						class=" m-4 w-full rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+						on:click={handleLogout}>Sign Out</button
 					>
 				{:else}
 					<form on:submit|preventDefault={handleLogin}>
