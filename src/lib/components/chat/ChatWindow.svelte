@@ -47,7 +47,7 @@
 		share: void;
 		stop: void;
 		retry: { id: Message["id"]; content: string };
-		imageUpload: void;
+		imageUpload: { id: string; url: string };
 	}>();
 
 	const handleSubmit = () => {
@@ -83,7 +83,6 @@
 
 			// Prepare the file to be sent in a FormData object
 			const formData = new FormData();
-			formData.append("title", "new image");
 			formData.append("file", file);
 			// POST the image file to the server
 			const response = await fetch(`${base}/images/upload`, {
@@ -95,11 +94,9 @@
 			});
 
 			// Handle the response
-			console.log("response", response);
 			if (response.ok) {
 				// Use the returned URL
 				const result = await response.json();
-				console.log("result", result);
 				const json = { id: result.id, url: result.url };
 				console.log("json", json);
 				if (loading) return;
@@ -130,11 +127,18 @@
 	<div class="absolute right-2 top-2 z-10">
 		{#if isLoggedIn}
 			<button
-				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+				class="m-4 rounded-full border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 				on:click={() => {
-					goto("/user/login");
-				}}>Signed In</button
+					goto("/user/me");
+				}}
 			>
+				<!--  display a user placeholder icon -->
+				<img
+					src="https://eu.ui-avatars.com/api/?name=John+Doe&size=250"
+					alt="user icon"
+					class="h-6 w-6 rounded-full"
+				/>
+			</button>
 		{:else}
 			<button
 				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
@@ -255,19 +259,19 @@
 
 				{#if loading}
 					<button
-						class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:hidden"
+						class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40 md:hidden"
 						on:click={() => dispatch("stop")}
 					>
 						<CarbonStopFilledAlt />
 					</button>
 					<div
-						class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:flex"
+						class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40 md:flex"
 					>
 						<EosIconsLoading />
 					</div>
 				{:else}
 					<button
-						class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+						class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 enabled:hover:text-gray-700 disabled:opacity-60 enabled:dark:hover:text-gray-100 dark:disabled:opacity-40"
 						disabled={!message || isReadOnly}
 						type="submit"
 					>
@@ -292,7 +296,7 @@
 					type="button"
 					on:click={() => dispatch("share")}
 				>
-					<CarbonExport class="text-[.6rem] sm:mr-1.5 sm:text-primary-500" />
+					<CarbonExport class="sm:text-primary-500 text-[.6rem] sm:mr-1.5" />
 					<div class="max-sm:hidden">Share this conversation</div>
 				</button>
 			{/if}

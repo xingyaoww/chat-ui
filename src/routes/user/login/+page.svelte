@@ -27,6 +27,7 @@
 		}
 		// Set the isLoggedIn variable
 		isLoggedIn = true;
+		goto("/user/me");
 	});
 	const handleLogin = async () => {
 		// Call the backend server to authenticate the user
@@ -41,6 +42,7 @@
 		if (response.ok) {
 			// Set the JWT cookie
 			isLoggedIn = true;
+			goto("/user/me");
 		} else {
 			// Handle login error
 			console.error("Login failed");
@@ -87,7 +89,7 @@
 				{#if isLoggedIn}
 					<p>Already logged in</p>
 					<button
-						class=" m-4 w-full rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+						class="rounded-lg bg-red-500 px-4 py-2 font-semibold text-white shadow-md hover:bg-red-600"
 						on:click={handleLogout}>Sign Out</button
 					>
 				{:else}

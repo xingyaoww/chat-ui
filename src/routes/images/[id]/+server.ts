@@ -7,6 +7,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		const pathname = url.pathname.split("/")[2];
 		// Redirect to the FastAPI server
 		if (pathname === "images" || pathname === "upload") {
+			console.log("pathname", pathname);
 			return new Response(undefined, {
 				status: 302,
 				headers: {
