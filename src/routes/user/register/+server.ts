@@ -53,7 +53,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		});
 	} catch (error) {
 		console.log("error", error);
-		return new Response(JSON.stringify({ error: "Invalid credentials" }), {
+		const { message } = error as Error;
+		return new Response(JSON.stringify({ error: message }), {
 			status: 401,
 			headers: {
 				"Content-Type": "application/json",
@@ -72,8 +73,9 @@ async function registerUser(username: string, password: string) {
 	});
 
 	if (!response.ok) {
-		console.log("response", response);
-		throw new Error("Authentication failed");
+		const error = await response.json();
+		console.log("error", error);
+		throw new Error(error.detail);
 	}
 
 	const { access_token, token_type } = await fetch(`${IMAGE_SERVER_URL}/token`, {
@@ -86,7 +88,7 @@ async function registerUser(username: string, password: string) {
 		.then((res) => res.json())
 		.catch((err) => {
 			console.log("err", err);
-			throw new Error("Authentication failed");
+			throw new Error("Register user failed");
 		});
 	return { access_token, token_type }; // Assuming the response contains a JWT token
 }

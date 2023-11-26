@@ -7,7 +7,8 @@
 
 	let username = "";
 	let password = "";
-	let isLoggedIn = false;
+	let isRegistered = false;
+	let error = "";
 	export let closeRoute = "/"; // Default route to navigate to when the popup is closed
 
 	onMount(async () => {
@@ -15,7 +16,7 @@
 		const jwtCookie = document.cookie.split(";").find((cookie) => cookie.trim().startsWith("jwt="));
 
 		if (jwtCookie) {
-			isLoggedIn = true;
+			isRegistered = true;
 		}
 	});
 	const handleRegister = async () => {
@@ -30,10 +31,13 @@
 
 		if (response.ok) {
 			// Set the JWT cookie
-			isLoggedIn = true;
+			isRegistered = true;
 		} else {
 			// Handle login error
-			console.error("Login failed");
+			response.json().then((data) => {
+				error = data.error;
+			});
+			return;
 		}
 	};
 	const handleLogout = async () => {
@@ -47,7 +51,7 @@
 
 		if (response.ok) {
 			// Remove the JWT cookie
-			isLoggedIn = false;
+			isRegistered = false;
 		} else {
 			// Handle logout error
 			console.error("Logout failed");
@@ -73,7 +77,7 @@
 
 		<div class="mt-2 px-7 py-3">
 			<p class="text-sm text-gray-500">
-				{#if isLoggedIn}
+				{#if isRegistered}
 					<p>Already logged in</p>
 					<button
 						class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
@@ -81,6 +85,9 @@
 					>
 				{:else}
 					<form on:submit|preventDefault={handleRegister}>
+						{#if error && error !== ""}
+							<p class="text-sm italic text-red-500">{error}</p>
+						{/if}
 						<label for="username" class="">Username:</label>
 						<input
 							class="my-2 border border-gray-200"

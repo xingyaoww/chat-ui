@@ -85,7 +85,6 @@
 			const formData = new FormData();
 			formData.append("title", "new image");
 			formData.append("file", file);
-			console.log("file", file);
 			// POST the image file to the server
 			const response = await fetch(`${base}/images/upload`, {
 				method: "POST",
