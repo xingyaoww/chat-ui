@@ -137,8 +137,6 @@
 		}, 1000);
 	}
 
-	$: console.log(marked.lexer(message.content.trim(), options));
-
 	// check valid JSON
 	function isJSON(str: string) {
 		try {
