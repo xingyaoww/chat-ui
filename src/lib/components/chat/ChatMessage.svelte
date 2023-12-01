@@ -18,11 +18,14 @@
 
 	import OpenWebSearchResults from "../OpenWebSearchResults.svelte";
 	import type { WebSearchUpdate } from "$lib/types/MessageUpdate";
+	import ImageReader from "../ImageReader.svelte";
 
 	function sanitizeMd(md: string) {
 		let ret = md
-			.replace(/<execute(\s)*(>)?(\s)*/g, '\n```python\n')
-			.replace(/<\/execute(>)?/g, '\n```')
+			.replace(/<execute(\s)*(>)?(\s)*/g, "\n```python\n")
+			.replace(/<\/execute(>)?/g, "\n```")
+			.replace(/<image(\s)*(>)?(\s)*/g, "\n```ecole-image\n")
+			.replace(/<\/image(>)?/g, "\n```")
 			.replace(/<\|[a-z]*$/, "")
 			.replace(/<\|[a-z]+\|$/, "")
 			.replace(/<$/, "")
@@ -69,25 +72,28 @@
 		return `<code>${code.replaceAll("&amp;", "&")}</code>`;
 	};
 
+	// declare custom tokenizer
+	// Extend the tokenizer
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { extensions, ...defaults } = marked.getDefaults() as marked.MarkedOptions & {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		extensions: any;
 	};
+
 	const options: marked.MarkedOptions = {
 		...defaults,
 		gfm: true,
 		breaks: true,
 		renderer,
 	};
-
+	// Define a custom rule for the lexer
 	marked.use(
 		markedKatex({
 			throwOnError: false,
 			// output: "html",
 		})
 	);
-
 	$: tokens = marked.lexer(sanitizeMd(message.content));
 
 	afterUpdate(() => {
@@ -130,6 +136,17 @@
 			isCopied = false;
 		}, 1000);
 	}
+
+	$: console.log(marked.lexer(message.content.trim(), options));
+
+	// check valid JSON
+	function isJSON(str: string) {
+		try {
+			return JSON.parse(str) && !!str;
+		} catch (e) {
+			return false;
+		}
+	}
 </script>
 
 {#if message.from === "assistant"}
@@ -164,7 +181,17 @@
 			>
 				{#each tokens as token}
 					{#if token.type === "code"}
-						<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+						{#if (token.lang === "ecole-image" || token.lang === "{.ecole-image}") && isJSON(unsanitizeMd(token.text))}
+							{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
+								{#each JSON.parse(unsanitizeMd(token.text)) as json}
+									<ImageReader {json} />
+								{/each}
+							{:else}
+								<ImageReader json={JSON.parse(unsanitizeMd(token.text))} />
+							{/if}
+						{:else}
+							<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+						{/if}
 					{:else}
 						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html marked.parse(token.raw, options)}
@@ -239,7 +266,32 @@
 		<div
 			class="max-w-full whitespace-break-spaces break-words rounded-2xl px-5 py-3.5 text-gray-500 dark:text-gray-400"
 		>
-			{message.content.trim()}
+			{#each marked.lexer(sanitizeMd(message.content.trim())) as token}
+				{#if token.type === "code"}
+					{#if token.lang === "ecole-image"}
+						{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
+							{#each JSON.parse(unsanitizeMd(token.text)) as json}
+								<ImageReader {json} />
+							{/each}
+						{:else}
+							<ImageReader json={JSON.parse(unsanitizeMd(token.text))} />
+						{/if}
+					{:else}
+						<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+					{/if}
+				{:else if token.type === "html"}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html token.raw}
+				{:else if token.type === "text"}
+					{#if token.text.trim()}
+						<p class="mb-2">{token.text}</p>
+					{/if}
+				{:else}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html marked.parse(token.raw, options)}
+				{/if}
+			{/each}
+			<!-- {message.content.trim()} -->
 		</div>
 		{#if !loading}
 			<div class="absolute right-0 top-3.5 flex gap-2 lg:-right-2">

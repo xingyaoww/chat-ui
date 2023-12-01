@@ -105,7 +105,6 @@ export const GET = async ({ cookies, fetch }) => {
 	// Check for existing JWT cookie
 	const existingToken = cookies.get("jwt");
 	if (!existingToken || existingToken === "undefined") {
-		console.log("go over here", existingToken);
 		return new Response(JSON.stringify({ error: "User not logged in" }), {
 			status: 400,
 			headers: {

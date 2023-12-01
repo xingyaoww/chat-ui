@@ -1,4 +1,9 @@
-import { HF_ACCESS_TOKEN, MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL } from "$env/static/private";
+import {
+	HF_ACCESS_TOKEN,
+	MESSAGES_BEFORE_LOGIN,
+	RATE_LIMIT,
+	JUPYTER_API_URL,
+} from "$env/static/private";
 import { buildPrompt } from "$lib/buildPrompt";
 import { PUBLIC_SEP_TOKEN } from "$lib/constants/publicSepToken";
 import { authCondition, requiresUser } from "$lib/server/auth";
@@ -149,8 +154,6 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 		}
 	);
 
-
-
 	// we now build the stream
 	const stream = new ReadableStream({
 		async start(controller) {
@@ -257,7 +260,6 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 						}
 					);
 
-
 					update({
 						type: "finalAnswer",
 						text: generated_text,
@@ -313,7 +315,6 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 							} else {
 								const date = abortedGenerations.get(convId.toString());
 								if (date && date > promptedAt) {
-
 									saveLast(lastMessage.content);
 								}
 								if (!output) {
@@ -326,34 +327,42 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 						}
 					} else {
 						const inputString = output.generated_text;
-
+						console.log("inputString", inputString);
 						const pattern = /<execute>([\s\S]*?)<\/execute>/;
 						const match = inputString.match(pattern);
 
 						if (match) {
+							console.log("it is a match", match);
 							const substringBetweenExecuteTags = match[1].trim();
-							var result;
+							let result;
 							try {
+								console.log("Sending request to Jupyter at ", JUPYTER_API_URL + "/execute");
 								const resFromJupyter = await fetch(JUPYTER_API_URL + "/execute", {
 									headers: {
-										'Content-Type': 'application/json',
+										"Content-Type": "application/json",
 									},
 									method: "POST",
 									body: JSON.stringify({
 										convid: convId.toString(),
-										code: substringBetweenExecuteTags
+										code: substringBetweenExecuteTags,
 									}),
 								});
 								if (resFromJupyter.ok) {
 									const data = await resFromJupyter.json();
-									result = "\n" + "```result\n" + data["result"]
+									result = "\n" + "```result\n" + data["result"];
 								} else {
-									console.error('Request to Jupyter failed with status:', resFromJupyter.status);
-									result = "\n" + "```result\n" + "Request to Code Execution failed with status: " + resFromJupyter.status + ". Please try again."
+									console.error("Request to Jupyter failed with status:", resFromJupyter.status);
+									result =
+										"\n" +
+										"```result\n" +
+										"Request to Code Execution failed with status: " +
+										resFromJupyter.status +
+										". Please try again.";
 								}
 							} catch (e) {
-								console.error('Error making the request:', e);
-								result = "\n" + "```result\n" + "Error making the request: " + e + ". Please try again."
+								console.error("Error making the request:", e);
+								result =
+									"\n" + "```result\n" + "Error making the request: " + e + ". Please try again.";
 							}
 
 							for (const token_ of result) {
@@ -363,7 +372,6 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 								});
 							}
 							output.generated_text += result;
-
 						}
 						saveLast(output.generated_text);
 					}
