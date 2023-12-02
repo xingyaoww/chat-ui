@@ -3,20 +3,26 @@
 	import { InferenceSession, Tensor, env } from "onnxruntime-web";
 	import npyjs from "npyjs";
 	import Stage from "$lib/components/Stage.svelte";
+	import { v4 as uuid } from "uuid";
 	import { handleImageScale } from "$lib/components/models/SAM/scaleHelper";
 	import { onnxMaskToImage } from "$lib/components/models/SAM//maskUtils";
 	import { modelData } from "$lib/components/models/SAM/onnxModelAPI";
+	import { randomUUID } from "$lib/utils/randomUuid";
 
-	const IMAGE_PATH = "src/assets/data/image3.jpg";
-	const IMAGE_EMBEDDING = "src/assets/data/embedding.npy";
-	const MODEL_DIR = "src/model/sam_onnx_quantized.onnx";
+	export let IMAGE_PATH = "src/assets/data/image3.jpg";
+	export let IMAGE_EMBEDDING = "src/assets/data/embedding.npy";
+	export let MODEL_DIR = "src/model/sam_onnx_quantized.onnx";
 
 	let model;
 	let tensor;
 	let modelScale;
 	let image;
 	let maskImg;
+	let savedMaskImgs = [];
+	let savedMask;
 	let clicks = []; // Replace with your actual logic for handling clicks
+	let savedClicks = [];
+	let savedOutput;
 
 	onMount(async () => {
 		if (MODEL_DIR) {
@@ -54,27 +60,63 @@
 	}
 
 	async function runONNX() {
-		if (!model || !clicks || !tensor || !modelScale) return;
+		if (!model || !clicks || !tensor || !modelScale || clicks == []) return;
 
 		const feeds = modelData({ clicks, tensor, modelScale });
 		if (!feeds) return;
 
 		const results = await model.run(feeds);
 		const output = results[model.outputNames[0]];
-		console.log("output", output);
+		savedOutput = output;
 		maskImg = onnxMaskToImage(output.data, output.dims[2], output.dims[3]);
 	}
 
 	// Reactive statement to run the ONNX model when 'clicks' changes
 	$: if (clicks) {
-		runONNX();
+		if (clicks.length === 0) {
+			maskImg = null;
+		} else {
+			runONNX();
+		}
 	}
 
+	$: if (savedMaskImgs) {
+		console.log("savedMaskImgs", savedMaskImgs);
+	}
 	// Function to handle mouse click event
+	const handleMouseHover = (event) => {
+		event.preventDefault();
+		clicks = [...savedClicks.map((detail) => detail.click), event.detail.click];
+	};
 	const handleMouseClick = (event) => {
 		event.preventDefault();
-		clicks = [event.detail.click];
+		savedClicks = [...savedClicks, event.detail];
+	};
+	const handleMouseOut = () => {
+		clicks = [...savedClicks.map((detail) => detail.click)];
+	};
+	const handleUndo = () => {
+		savedClicks = savedClicks.slice(0, -1);
+		clicks = [...savedClicks.map((detail) => detail.click)];
+	};
+	const handleSave = (event) => {
+		savedMaskImgs = [
+			...savedMaskImgs,
+			{ id: uuid(), output: savedOutput, clicks: savedClicks, maskImg },
+		];
+		savedClicks = [];
+		clicks = [];
 	};
 </script>
 
-<Stage on:mouseClick={handleMouseClick} {image} {maskImg} {clicks} />
+<Stage
+	on:mouseHover={handleMouseHover}
+	on:mouseClick={handleMouseClick}
+	on:mouseOut={handleMouseOut}
+	on:undo={handleUndo}
+	on:save={handleSave}
+	{image}
+	{maskImg}
+	{savedClicks}
+	{savedMaskImgs}
+/>
