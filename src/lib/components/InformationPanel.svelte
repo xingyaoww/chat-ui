@@ -1,25 +1,28 @@
 <script>
+	import { createEventDispatcher } from "svelte";
 	export let savedMaskImgs = [];
 	let selectedImageId = "";
 	let editableLabel = "";
 	let editableDescription = "";
-    const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher();
 
 	function handleImageSelection(event) {
-		selectedImageId.set(event.target.value);
+		event.preventDefault();
+		selectedImageId = event.target.value;
 	}
 
-	$: if (selectedImageId) {
-		const selected = savedMaskImgs.find((img) => img.id === selectedImageId);
-		if (selected) {
-			editableLabel = selected.label;
-			editableDescription = selected.description;
-		} 
-	}
+	$: dispatch("update", {
+		id: selectedImageId,
+		name: editableLabel,
+		description: editableDescription,
+	});
 </script>
 
 <div class="panel">
-	<select on:change={handleImageSelection}>
+	<select
+		class="resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-0 bg-transparent p-3 outline-none focus:ring-0 focus-visible:ring-0"
+		on:change={handleImageSelection}
+	>
 		<option value="">Select an Image</option>
 		{#each savedMaskImgs as img}
 			<option value={img.id}>{img.name}</option>

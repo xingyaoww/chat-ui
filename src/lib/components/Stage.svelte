@@ -10,12 +10,14 @@
 	export let maskImg: unknown = null;
 	export let savedMaskImgs: unknown = [];
 	export let savedClicks: unknown = [];
+	let current_image_id = "";
 	let mask_name = "";
 	let mask_description = "";
 	let clickType = 1;
 	function getClick(x: number, y: number) {
 		return { x, y, clickType };
 	}
+	$: dispatch("select", current_image_id);
 
 	const dispatch = createEventDispatcher();
 	function handleMouseMove(event: MouseEvent) {
@@ -70,9 +72,28 @@
 				{savedClicks}
 			/>
 		</div>
-		<!-- {#if (savedMaskImgs && savedMaskImgs.length > 0) || (savedClicks && savedClicks.length > 0)}
-			<InformationPanel {savedMaskImgs} />
-		{/if} -->
+		{#if (savedMaskImgs && savedMaskImgs.length > 0) || (savedClicks && savedClicks.length > 0)}
+			<InformationPanel
+				{savedMaskImgs}
+				on:update={(event) => {
+					if (current_image_id !== event.detail.id) {
+						current_image_id = event.detail.id;
+					}
+					if (event.detail.id && event.detail.id !== "") {
+						savedMaskImgs.forEach((img) => {
+							if (img.id === event.detail.id) {
+								img.name = event.detail.name;
+								img.description = event.detail.description;
+							}
+							return img;
+						});
+					} else {
+						mask_name = event.detail.name;
+						mask_description = event.detail.description;
+					}
+				}}
+			/>
+		{/if}
 	</div>
 
 	<Toolbar
@@ -85,7 +106,10 @@
 			console.log("clickType", clickType);
 		}}
 		handleSave={() => {
-			dispatch("save");
+			dispatch("save", {
+				name: mask_name,
+				description: mask_description,
+			});
 			console.log("saved", savedClicks);
 		}}
 		handleRemove={() => {

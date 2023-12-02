@@ -19,7 +19,6 @@
 	let image;
 	let maskImg;
 	let savedMaskImgs = [];
-	let savedMask;
 	let clicks = []; // Replace with your actual logic for handling clicks
 	let savedClicks = [];
 	let savedOutput;
@@ -100,12 +99,28 @@
 		clicks = [...savedClicks.map((detail) => detail.click)];
 	};
 	const handleSave = (event) => {
+		console.log("handleSave", event.detail);
 		savedMaskImgs = [
 			...savedMaskImgs,
-			{ id: uuid(), output: savedOutput, clicks: savedClicks, maskImg },
+			{ id: uuid(), output: savedOutput, clicks: savedClicks, maskImg, ...event.detail },
 		];
 		savedClicks = [];
 		clicks = [];
+	};
+	const handleSelect = (event) => {
+		console.log("handleSelect", event.detail);
+		if (event.detail && savedMaskImgs && savedMaskImgs.length > 0) {
+			const savedMaskImg = savedMaskImgs.find((savedMaskImg) => savedMaskImg.id === event.detail);
+			if (savedMaskImg) {
+				savedOutput = savedMaskImg.output;
+				savedClicks = savedMaskImg.clicks;
+				maskImg = savedMaskImg.maskImg;
+			}
+		} else {
+			savedOutput = null;
+			savedClicks = [];
+			maskImg = null;
+		}
 	};
 </script>
 
@@ -115,6 +130,7 @@
 	on:mouseOut={handleMouseOut}
 	on:undo={handleUndo}
 	on:save={handleSave}
+	on:select={handleSelect}
 	{image}
 	{maskImg}
 	{savedClicks}
