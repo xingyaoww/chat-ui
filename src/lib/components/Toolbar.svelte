@@ -72,7 +72,7 @@
 		<button on:click={handleUpload} class="bg-yellow-500">
 			<i class="fa-solid fa-upload" />
 		</button>
-		Download
+		Upload
 	</div>
 </div>
 

@@ -13,9 +13,9 @@
 	} from "$lib/components/models/SAM//maskUtils";
 	import { modelData } from "$lib/components/models/SAM/onnxModelAPI";
 
-	export let IMAGE_PATH = "src/assets/data/image3.jpg";
-	export let IMAGE_EMBEDDING = "src/assets/data/embedding.npy";
-	export let MODEL_DIR = "src/model/sam_onnx_quantized.onnx";
+	export let IMAGE_PATH = "./assets/data/image3.jpg";
+	export let IMAGE_EMBEDDING = "./assets/data/embedding.npy";
+	export let MODEL_DIR = "./model/sam_onnx_quantized.onnx";
 
 	let model;
 	let tensor;
@@ -31,7 +31,6 @@
 	onMount(async () => {
 		if (MODEL_DIR) {
 			try {
-				env.wasm.wasmPaths = "node_modules/onnxruntime-web/dist/";
 				model = await InferenceSession.create(MODEL_DIR, { executionProviders: ["wasm"] });
 				console.log("model instantiated", model);
 			} catch (e) {

@@ -2,11 +2,10 @@
 	"name": "chat-ui",
 	"version": "0.6.0",
 	"private": true,
-	"packageManager": "npm@9.5.0",
+	"packageManager": "yarn@1.22.10",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"deploy": "npm run build && gh-pages -d build -t true",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -32,7 +31,6 @@
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte": "^2.30.0",
-		"gh-pages": "^6.1.0",
 		"marked-katex-extension": "^3.0.6",
 		"npyjs": "^0.5.0",
 		"prettier": "^2.8.0",
@@ -45,6 +43,7 @@
 		"typescript": "^5.0.0",
 		"unplugin-icons": "^0.16.1",
 		"vite": "^4.3.9",
+		"vite-plugin-static-copy": "^1.0.0",
 		"vitest": "^0.31.0"
 	},
 	"type": "module",
