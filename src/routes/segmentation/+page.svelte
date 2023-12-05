@@ -160,7 +160,6 @@
 			return {
 				...img,
 				output: {
-					colorSpace: img.output.colorSpace,
 					height: img.output.height,
 					width: img.output.width,
 					data: compressor(img.output.data),
@@ -197,15 +196,18 @@
 					savedMaskImgs = data.map((img) => {
 						return {
 							...img,
-							output: {
-								colorSpace: img.output.colorSpace,
-								height: img.output.height,
-								width: img.output.width,
-								data: decompressor(img.output.data),
-							},
+							output: new ImageData(
+								decompressor(img.output.data),
+								img.output.width,
+								img.output.height
+							),
 						};
 					});
-
+					if (savedMaskImgs && savedMaskImgs.length > 0) {
+						maskImg = imageDataToImage(savedMaskImgs[0].output);
+						clicks = savedMaskImgs[0].clicks;
+						savedOutput = savedMaskImgs[0].output;
+					}
 					console.log(data);
 				} catch (e) {
 					console.error("Error parsing JSON:", e);

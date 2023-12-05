@@ -56,6 +56,15 @@ function toBase64(compressedData) {
 	return btoa(String.fromCharCode.apply(null, new Uint8Array(compressedData)));
 }
 
+function fromBase64(base64String) {
+	const binaryString = atob(base64String);
+	const bytes = new Uint8Array(binaryString.length);
+	for (let i = 0; i < binaryString.length; i++) {
+		bytes[i] = binaryString.charCodeAt(i);
+	}
+	return bytes;
+}
+
 // Assuming you have the pako library included
 function compressString(str) {
 	return deflate(str);
@@ -67,7 +76,8 @@ function rleCompress(str) {
 		if (str[i] === str[i + 1]) {
 			count++;
 		} else {
-			compressed += str[i] + count;
+			// Use a delimiter (e.g., "|") between the character and the count
+			compressed += str[i] + "|" + count + "|";
 			count = 1;
 		}
 	}
@@ -83,25 +93,18 @@ export function compressor(byteArray) {
 	return base64Compressed;
 }
 
-// Converts a Base64-encoded string to a Uint8Array
-function fromBase64(base64String) {
-	const binaryString = atob(base64String);
-	const length = binaryString.length;
-	const bytes = new Uint8Array(length);
-	for (let i = 0; i < length; i++) {
-		bytes[i] = binaryString.charCodeAt(i);
-	}
-	return bytes;
-}
-
-// Decompresses data using RLE
 function rleDecompress(compressed) {
 	let decompressed = "";
-	const regex = /([a-zA-Z0-9+/=])(\d+)/g;
-	let match;
-	while ((match = regex.exec(compressed))) {
-		decompressed += match[1].repeat(Number(match[2]));
+	// Split the compressed string at the delimiters
+	const parts = compressed.split("|");
+
+	// Iterate through the parts array in steps of 2 (character, count)
+	for (let i = 0; i < parts.length - 1; i += 2) {
+		const character = parts[i];
+		const count = parseInt(parts[i + 1], 10);
+		decompressed += character.repeat(count);
 	}
+
 	return decompressed;
 }
 
@@ -121,15 +124,12 @@ function base64ToArray(base64String) {
 }
 
 export function decompressor(base64Compressed) {
-	const compressed = decompressString(base64Compressed);
-
+	// Decompress the Base64 String
+	const rleCompressed = decompressString(base64Compressed);
 	// Apply RLE Decompression
-	const rleDecompressed = rleDecompress(compressed);
-
+	const base64String = rleDecompress(rleCompressed);
 	// Convert from Base64 to ByteArray
-	const byteArray = base64ToArray(rleDecompressed);
-	console.log(byteArray);
-	return byteArray;
+	const byteArray = base64ToArray(base64String);
 
-	// return base64ToArray(base64String);
+	return byteArray;
 }
