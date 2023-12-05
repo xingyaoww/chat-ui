@@ -79,18 +79,8 @@
 					if (current_image_id !== event.detail.id) {
 						current_image_id = event.detail.id;
 					}
-					if (event.detail.id && event.detail.id !== "") {
-						savedMaskImgs.forEach((img) => {
-							if (img.id === event.detail.id) {
-								img.name = event.detail.name;
-								img.description = event.detail.description;
-							}
-							return img;
-						});
-					} else {
-						mask_name = event.detail.name;
-						mask_description = event.detail.description;
-					}
+					mask_name = event.detail.name;
+					mask_description = event.detail.description;
 				}}
 			/>
 		{/if}
@@ -107,6 +97,7 @@
 		}}
 		handleSave={() => {
 			dispatch("save", {
+				id: current_image_id,
 				name: mask_name,
 				description: mask_description,
 			});
@@ -114,6 +105,12 @@
 		}}
 		handleRemove={() => {
 			dispatch("undo");
+		}}
+		handleDownload={() => {
+			dispatch("download");
+		}}
+		handleDelete={() => {
+			dispatch("delete", current_image_id);
 		}}
 	/>
 </div>

@@ -5,9 +5,8 @@
 	import Stage from "$lib/components/Stage.svelte";
 	import { v4 as uuid } from "uuid";
 	import { handleImageScale } from "$lib/components/models/SAM/scaleHelper";
-	import { onnxMaskToImage } from "$lib/components/models/SAM//maskUtils";
+	import { onnxMaskToImage, arrayToImageData } from "$lib/components/models/SAM//maskUtils";
 	import { modelData } from "$lib/components/models/SAM/onnxModelAPI";
-	import { randomUUID } from "$lib/utils/randomUuid";
 
 	export let IMAGE_PATH = "src/assets/data/image3.jpg";
 	export let IMAGE_EMBEDDING = "src/assets/data/embedding.npy";
@@ -66,7 +65,7 @@
 
 		const results = await model.run(feeds);
 		const output = results[model.outputNames[0]];
-		savedOutput = output;
+		savedOutput = arrayToImageData(output.data, output.dims[2], output.dims[3]);
 		maskImg = onnxMaskToImage(output.data, output.dims[2], output.dims[3]);
 	}
 
@@ -100,9 +99,33 @@
 	};
 	const handleSave = (event) => {
 		console.log("handleSave", event.detail);
+
+		if (event.detail.id && event.detail.id !== "") {
+			console.log("go here", event.detail.id);
+			savedMaskImgs = [
+				...savedMaskImgs.filter((img) => img.id !== event.detail.id),
+				{
+					id: event.detail.id,
+					output: savedOutput,
+					clicks: savedClicks,
+					maskImg,
+					name: event.detail.name,
+					description: event.detail.description,
+				},
+			];
+			return;
+		}
+
 		savedMaskImgs = [
 			...savedMaskImgs,
-			{ id: uuid(), output: savedOutput, clicks: savedClicks, maskImg, ...event.detail },
+			{
+				id: uuid(),
+				output: savedOutput,
+				clicks: savedClicks,
+				maskImg,
+				name: event.detail.name,
+				description: event.detail.description,
+			},
 		];
 		savedClicks = [];
 		clicks = [];
@@ -122,6 +145,25 @@
 			maskImg = null;
 		}
 	};
+	const handleDelete = (event) => {
+		savedMaskImgs = savedMaskImgs.filter((img) => img.id !== event.detail);
+		savedOutput = null;
+		savedClicks = [];
+		maskImg = null;
+	};
+
+	const handleDownload = () => {
+		const jsonContent = JSON.stringify(savedMaskImgs);
+		const blob = new Blob([jsonContent], { type: "application/json" });
+		const url = URL.createObjectURL(blob);
+
+		const a = document.createElement("a");
+		a.href = url;
+		a.download = "data.json";
+		a.click();
+
+		URL.revokeObjectURL(url);
+	};
 </script>
 
 <Stage
@@ -131,6 +173,8 @@
 	on:undo={handleUndo}
 	on:save={handleSave}
 	on:select={handleSelect}
+	on:delete={handleDelete}
+	on:download={handleDownload}
 	{image}
 	{maskImg}
 	{savedClicks}

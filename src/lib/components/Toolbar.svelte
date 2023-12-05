@@ -15,6 +15,14 @@
 	export let handleSave = () => {
 		console.log("Save clicked");
 	};
+
+	export let handleDelete = () => {
+		console.log("Delete clicked");
+	};
+
+	export let handleDownload = () => {
+		console.log("Download clicked");
+	};
 </script>
 
 <div class="toolbar">
@@ -41,6 +49,20 @@
 			<i class="fa-solid fa-rotate-left" />
 		</button>
 		Undo
+	</div>
+	<br class="border" />
+	<div class="button-group">
+		<button on:click={handleDelete} class="bg-red-500">
+			<i class="fa-solid fa-trash" />
+		</button>
+		Delete
+	</div>
+
+	<div class="button-group">
+		<button on:click={handleDownload} class="bg-green-500">
+			<i class="fa-solid fa-download" />
+		</button>
+		Download
 	</div>
 </div>
 

@@ -5,7 +5,7 @@
 // LICENSE file in the root directory of this source tree.
 
 // Convert the onnx model mask prediction to ImageData
-function arrayToImageData(input: any, width: number, height: number) {
+export function arrayToImageData(input: any, width: number, height: number) {
 	const [r, g, b, a] = [0, 114, 189, 255]; // the masks's blue color
 	const arr = new Uint8ClampedArray(4 * width * height).fill(0);
 	for (let i = 0; i < input.length; i++) {
