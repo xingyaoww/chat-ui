@@ -20,7 +20,6 @@
 		shouldFitToWidth = imageAspectRatio > screenAspectRatio;
 	};
 
-	$: console.log("maskImage");
 	// Setup ResizeObserver
 	onMount(() => {
 		const bodyEl = document.body;
@@ -39,8 +38,6 @@
 			resizeObserver.unobserve(bodyEl);
 		};
 	});
-
-	$: console.log("saved clicks", savedClicks);
 </script>
 
 <div class="relative min-h-0 min-w-0">
