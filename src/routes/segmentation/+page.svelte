@@ -5,7 +5,12 @@
 	import Stage from "$lib/components/Stage.svelte";
 	import { v4 as uuid } from "uuid";
 	import { handleImageScale } from "$lib/components/models/SAM/scaleHelper";
-	import { onnxMaskToImage, arrayToImageData } from "$lib/components/models/SAM//maskUtils";
+	import {
+		arrayToImageData,
+		imageDataToImage,
+		compressor,
+		decompressor,
+	} from "$lib/components/models/SAM//maskUtils";
 	import { modelData } from "$lib/components/models/SAM/onnxModelAPI";
 
 	export let IMAGE_PATH = "src/assets/data/image3.jpg";
@@ -16,6 +21,7 @@
 	let tensor;
 	let modelScale;
 	let image;
+	let fileInput;
 	let maskImg;
 	let savedMaskImgs = [];
 	let clicks = []; // Replace with your actual logic for handling clicks
@@ -66,7 +72,7 @@
 		const results = await model.run(feeds);
 		const output = results[model.outputNames[0]];
 		savedOutput = arrayToImageData(output.data, output.dims[2], output.dims[3]);
-		maskImg = onnxMaskToImage(output.data, output.dims[2], output.dims[3]);
+		maskImg = imageDataToImage(savedOutput);
 	}
 
 	// Reactive statement to run the ONNX model when 'clicks' changes
@@ -108,7 +114,6 @@
 					id: event.detail.id,
 					output: savedOutput,
 					clicks: savedClicks,
-					maskImg,
 					name: event.detail.name,
 					description: event.detail.description,
 				},
@@ -122,7 +127,6 @@
 				id: uuid(),
 				output: savedOutput,
 				clicks: savedClicks,
-				maskImg,
 				name: event.detail.name,
 				description: event.detail.description,
 			},
@@ -137,7 +141,7 @@
 			if (savedMaskImg) {
 				savedOutput = savedMaskImg.output;
 				savedClicks = savedMaskImg.clicks;
-				maskImg = savedMaskImg.maskImg;
+				maskImg = imageDataToImage(savedOutput);
 			}
 		} else {
 			savedOutput = null;
@@ -153,7 +157,18 @@
 	};
 
 	const handleDownload = () => {
-		const jsonContent = JSON.stringify(savedMaskImgs);
+		const saveContent = savedMaskImgs.map((img) => {
+			return {
+				...img,
+				output: {
+					colorSpace: img.output.colorSpace,
+					height: img.output.height,
+					width: img.output.width,
+					data: compressor(img.output.data),
+				},
+			};
+		});
+		const jsonContent = JSON.stringify(saveContent);
 		const blob = new Blob([jsonContent], { type: "application/json" });
 		const url = URL.createObjectURL(blob);
 
@@ -164,7 +179,50 @@
 
 		URL.revokeObjectURL(url);
 	};
+
+	const handleUpload = () => {
+		fileInput.click(); // triggers the hidden file input
+	};
+
+	const processFile = () => {
+		const file = fileInput.files[0];
+
+		if (file) {
+			const reader = new FileReader();
+
+			reader.onload = (event) => {
+				const jsonContent = event.target.result;
+				try {
+					const data = JSON.parse(jsonContent);
+					// Process your data here
+					savedMaskImgs = data.map((img) => {
+						return {
+							...img,
+							output: {
+								colorSpace: img.output.colorSpace,
+								height: img.output.height,
+								width: img.output.width,
+								data: decompressor(img.output.data),
+							},
+						};
+					});
+
+					console.log(data);
+				} catch (e) {
+					console.error("Error parsing JSON:", e);
+				}
+			};
+
+			reader.onerror = (error) => {
+				console.error("Error reading file:", error);
+			};
+
+			reader.readAsText(file);
+		}
+	};
 </script>
+
+<input type="file" id="fileInput" bind:this={fileInput} on:change={processFile} hidden />
 
 <Stage
 	on:mouseHover={handleMouseHover}
@@ -175,6 +233,7 @@
 	on:select={handleSelect}
 	on:delete={handleDelete}
 	on:download={handleDownload}
+	on:upload={handleUpload}
 	{image}
 	{maskImg}
 	{savedClicks}

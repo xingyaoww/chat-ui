@@ -23,6 +23,9 @@
 	export let handleDownload = () => {
 		console.log("Download clicked");
 	};
+	export let handleUpload = () => {
+		console.log("Upload clicked");
+	};
 </script>
 
 <div class="toolbar">
@@ -61,6 +64,13 @@
 	<div class="button-group">
 		<button on:click={handleDownload} class="bg-green-500">
 			<i class="fa-solid fa-download" />
+		</button>
+		Download
+	</div>
+
+	<div class="button-group">
+		<button on:click={handleUpload} class="bg-yellow-500">
+			<i class="fa-solid fa-upload" />
 		</button>
 		Download
 	</div>

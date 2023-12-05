@@ -112,5 +112,8 @@
 		handleDelete={() => {
 			dispatch("delete", current_image_id);
 		}}
+		handleUpload={() => {
+			dispatch("upload");
+		}}
 	/>
 </div>
