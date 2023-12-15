@@ -77,7 +77,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (
 			!requiresUser &&
 			!event.url.pathname.startsWith(`${base}/settings`) &&
-			!!PUBLIC_APP_DISCLAIMER
+			PUBLIC_APP_DISCLAIMER == "true"
 		) {
 			const hasAcceptedEthicsModal = await collections.settings.countDocuments({
 				sessionId: event.locals.sessionId,

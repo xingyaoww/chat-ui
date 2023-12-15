@@ -51,7 +51,7 @@
 </script>
 
 <div class="relative min-h-0 min-w-0">
-	{#if !settings.ethicsModalAcceptedAt}
+	<!-- {#if !settings.ethicsModalAcceptedAt}
 		<DisclaimerModal {settings} />
 	{:else if loginModalOpen}
 		<LoginModal
@@ -60,7 +60,7 @@
 				loginModalOpen = false;
 			}}
 		/>
-	{/if}
+	{/if} -->
 	<ChatMessages
 		{loading}
 		{pending}
