@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		console.log("response", response);
 		const responseData = await response.json();
 		console.log("responseData", responseData);
-		return new Response(JSON.stringify({ success: true }), {
+		return new Response(JSON.stringify(responseData), {
 			status: 200,
 			headers: {
 				"Content-Type": "application/json",

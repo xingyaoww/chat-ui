@@ -95,6 +95,7 @@
 			if (response.ok) {
 				// Use the returned URL
 				const result = await response.json();
+				console.log("result", result);
 				const json = { id: result.id, url: result.url };
 				dispatch("imageUpload", json);
 				currentSelectedImage = json;
