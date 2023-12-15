@@ -7,6 +7,7 @@
 	import { page } from "$app/stores";
 
 	import CodeBlock from "../CodeBlock.svelte";
+	import ImageReader from "../ImageReader.svelte";
 	import CopyToClipBoardBtn from "../CopyToClipBoardBtn.svelte";
 	import IconLoading from "../icons/IconLoading.svelte";
 	import CarbonRotate360 from "~icons/carbon/rotate-360";
@@ -21,8 +22,10 @@
 
 	function sanitizeMd(md: string) {
 		let ret = md
-			.replace(/<execute(\s)*(>)?(\s)*/g, '\n```python\n')
-			.replace(/<\/execute(>)?/g, '\n```')
+			.replace(/<execute(\s)*(>)?(\s)*/g, "\n```python\n")
+			.replace(/<\/execute(>)?/g, "\n```")
+			.replace(/<image(\s)*(>)?(\s)*/g, "\n```image\n")
+			.replace(/<\/image(>)?/g, "\n```")
 			.replace(/<\|[a-z]*$/, "")
 			.replace(/<\|[a-z]+\|$/, "")
 			.replace(/<$/, "")
@@ -31,6 +34,7 @@
 			.replaceAll(/<br\s?\/?>/gi, "\n")
 			.replaceAll("<", "&lt;")
 			.trim();
+		console.log("ret", ret);
 
 		for (const stop of [...(model.parameters?.stop ?? []), "<|endoftext|>"]) {
 			if (ret.endsWith(stop)) {
@@ -164,7 +168,17 @@
 			>
 				{#each tokens as token}
 					{#if token.type === "code"}
-						<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+						{#if (token.lang === "image" || token.lang === "{.image}") && isJSON(unsanitizeMd(token.text))}
+							{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
+								{#each JSON.parse(unsanitizeMd(token.text)) as json}
+									<ImageReader {json} />
+								{/each}
+							{:else}
+								<ImageReader json={JSON.parse(unsanitizeMd(token.text))} />
+							{/if}
+						{:else}
+							<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+						{/if}
 					{:else}
 						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 						{@html marked.parse(token.raw, options)}
@@ -239,7 +253,32 @@
 		<div
 			class="max-w-full whitespace-break-spaces break-words rounded-2xl px-5 py-3.5 text-gray-500 dark:text-gray-400"
 		>
-			{message.content.trim()}
+			{#each marked.lexer(sanitizeMd(message.content.trim())) as token}
+				{#if token.type === "code"}
+					{#if token.lang === "image"}
+						{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
+							{#each JSON.parse(unsanitizeMd(token.text)) as json}
+								<ImageReader {json} />
+							{/each}
+						{:else}
+							<ImageReader json={JSON.parse(unsanitizeMd(token.text))} />
+						{/if}
+					{:else}
+						<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+					{/if}
+				{:else if token.type === "html"}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html token.raw}
+				{:else if token.type === "text"}
+					{#if token.text.trim()}
+						<p class="mb-2">{token.text}</p>
+					{/if}
+				{:else}
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					{@html marked.parse(token.raw, options)}
+				{/if}
+			{/each}
+			<!-- {message.content.trim()} -->
 		</div>
 		{#if !loading}
 			<div class="absolute right-0 top-3.5 flex gap-2 lg:-right-2">

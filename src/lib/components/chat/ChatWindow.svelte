@@ -56,9 +56,17 @@
 	const handleSubmit = () => {
 		if (loading) return;
 		message = currentSelectedImage
-			? `<image>${JSON.stringify({ id: currentSelectedImage.id })}</image>\n${message}`
+			? `<image>
+				{
+				"url": "${base + "/images/" + currentSelectedImage.id}",
+				"id": "${currentSelectedImage.id}"
+			}
+			</image>
+
+			${message}`
 			: message;
 		dispatch("message", message);
+		console.log("message", message);
 		currentSelectedImage = undefined;
 		message = "";
 	};
@@ -199,65 +207,65 @@
 			</button>
 		</div>
 		<!-- End Image UI -->
-
-		<div class="">
+		<div class="w-full rounded-xl bg-black bg-opacity-20">
 			{#if currentSelectedImage}
-				<img
-					src={currentSelectedImage.url}
-					alt={currentSelectedImage.id}
-					height="50px"
-					width="50px"
-					class="border-grey-300 m-4 rounded-lg border"
-				/>
-			{/if}
-		</div>
-		<form
-			on:submit|preventDefault={handleSubmit}
-			class="relative flex w-full max-w-4xl flex-1 items-center rounded-xl border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500
-			{isReadOnly ? 'opacity-30' : ''}"
-		>
-			<div class="flex w-full flex-1 border-none bg-transparent">
-				{#if lastIsError}
-					<ChatInput value="Sorry, something went wrong. Please try again." disabled={true} />
-				{:else}
-					<ChatInput
-						placeholder="Ask anything"
-						bind:value={message}
-						on:submit={handleSubmit}
-						on:keypress={() => {
-							// if ($page.data.loginRequired) {
-							// 	ev.preventDefault();
-							// 	// loginModalOpen = true;
-							// }
-						}}
-						maxRows={4}
-						disabled={isReadOnly || lastIsError}
+				<div class="op flex w-full items-center justify-start p-4">
+					<img
+						src={currentSelectedImage.url}
+						alt={currentSelectedImage.id}
+						height="50px"
+						class="border-grey-300 m-4 rounded-lg border"
 					/>
-				{/if}
+				</div>
+			{/if}
+			<form
+				on:submit|preventDefault={handleSubmit}
+				class="relative flex w-full max-w-4xl flex-1 items-center rounded-xl border bg-gray-100 focus-within:border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:focus-within:border-gray-500
+			{isReadOnly ? 'opacity-30' : ''}"
+			>
+				<div class="flex w-full flex-1 border-none bg-transparent">
+					{#if lastIsError}
+						<ChatInput value="Sorry, something went wrong. Please try again." disabled={true} />
+					{:else}
+						<ChatInput
+							placeholder="Ask anything"
+							bind:value={message}
+							on:submit={handleSubmit}
+							on:keypress={() => {
+								// if ($page.data.loginRequired) {
+								// 	ev.preventDefault();
+								// 	// loginModalOpen = true;
+								// }
+							}}
+							maxRows={4}
+							disabled={isReadOnly || lastIsError}
+						/>
+					{/if}
 
-				{#if loading}
-					<button
-						class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:hidden"
-						on:click={() => dispatch("stop")}
-					>
-						<CarbonStopFilledAlt />
-					</button>
-					<div
-						class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:flex"
-					>
-						<EosIconsLoading />
-					</div>
-				{:else}
-					<button
-						class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
-						disabled={!message || isReadOnly}
-						type="submit"
-					>
-						<CarbonSendAltFilled />
-					</button>
-				{/if}
-			</div>
-		</form>
+					{#if loading}
+						<button
+							class="btn mx-1 my-1 inline-block h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:hidden"
+							on:click={() => dispatch("stop")}
+						>
+							<CarbonStopFilledAlt />
+						</button>
+						<div
+							class="mx-1 my-1 hidden h-[2.4rem] items-center p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100 md:flex"
+						>
+							<EosIconsLoading />
+						</div>
+					{:else}
+						<button
+							class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
+							disabled={!message || isReadOnly}
+							type="submit"
+						>
+							<CarbonSendAltFilled />
+						</button>
+					{/if}
+				</div>
+			</form>
+		</div>
 		<div class="mt-2 flex justify-between self-stretch px-1 text-xs text-gray-400/90 max-sm:gap-2">
 			<p>
 				Model: <a

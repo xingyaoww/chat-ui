@@ -8,6 +8,7 @@ export const GET: RequestHandler = async ({ url }) => {
 		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/images/${pathname}`);
+
 		if (!response.ok) throw new Error(response.statusText);
 		const arrayBuffer = await response.arrayBuffer();
 
