@@ -15,10 +15,17 @@ export const GET: RequestHandler = async ({ url }) => {
 				},
 			});
 		}
-		return new Response(undefined, {
-			status: 302,
+		console.log("pathname", pathname);
+
+		const response = await fetch(`${imageUrl}/images/${pathname}`);
+		if (!response.ok) throw new Error(response.statusText);
+		const arrayBuffer = await response.arrayBuffer();
+
+		return new Response(arrayBuffer, {
+			status: 200,
 			headers: {
-				location: `${imageUrl}/images/${pathname}`,
+				"Content-Type": response.headers.get("Content-Type"), // Set the correct Content-Type for the image
+				"Content-Length": response.headers.get("Content-Length"),
 			},
 		});
 	} catch (error) {
