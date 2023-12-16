@@ -20,6 +20,7 @@
 	// import { page } from "$app/stores";
 	// import DisclaimerModal from "../DisclaimerModal.svelte";
 	import RetryBtn from "../RetryBtn.svelte";
+	import ImagePreview from "../ImagePreview.svelte";
 
 	type ImageJSON = {
 		id: string;
@@ -209,11 +210,11 @@ ${message}`
 		<div class="w-full rounded-xl bg-black bg-opacity-20">
 			{#if currentSelectedImage}
 				<div class="op flex w-full items-center justify-start p-4">
-					<img
-						src={currentSelectedImage.url}
-						alt={currentSelectedImage.id}
-						height="50px"
-						class="border-grey-300 m-4 rounded-lg border"
+					<ImagePreview
+						json={currentSelectedImage}
+						on:deleteImage={() => {
+							currentSelectedImage = undefined;
+						}}
 					/>
 				</div>
 			{/if}

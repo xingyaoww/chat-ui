@@ -83,6 +83,33 @@
 					{/if}
 				{/if}
 			{/if}
+		{:else if contentType === "ecole-json-reason"}
+			{#if parsedJson.reasons}
+				<p>{parsedJson.reasons.text}</p>
+				<button
+					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+					on:click={() => {
+						chartType = chartType === "horizontalBar" ? "pie" : "horizontalBar";
+					}}
+				>
+					{chartType === "horizontalBar" ? "Show Pie Chart" : "Show Horizontal Bar Chart"}
+				</button>
+				{#if chartType === "pie"}
+					<PieChart
+						data={parsedJson.reasons.descriptions.map((desc, index) => ({
+							name: desc,
+							value: parseFloat(parsedJson.reasons.scores[index]),
+						}))}
+					/>
+				{:else}
+					<HorizontalBarCharts
+						data={parsedJson.reasons.descriptions.map((desc, index) => ({
+							name: desc,
+							value: parseFloat(parsedJson.reasons.scores[index]),
+						}))}
+					/>
+				{/if}
+			{/if}
 		{:else}
 			<div class="rounded-lg bg-gray-700 p-4 text-xs">
 				<div class="mb-1 text-gray-400">STDOUT/STDERR</div>

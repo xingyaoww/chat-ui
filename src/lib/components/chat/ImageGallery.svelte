@@ -8,6 +8,7 @@
 <script lang="ts">
 	import { base } from "$app/paths";
 	import { onMount } from "svelte";
+	import ImagePreview from "../ImagePreview.svelte";
 
 	export let onSelectImage: (image: Image) => void;
 
@@ -47,15 +48,13 @@
 	class="image-gallery mb-6 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm dark:border-gray-600"
 >
 	{#each images as image}
-		<button on:click={() => selectImage(image)}>
-			<img
-				src={image.url}
-				alt={image.id}
-				class:selected={selectedImage === image}
-				height="200px"
-				class="border-grey-300 m-4 rounded-lg border hover:border-red-400"
-			/>
-		</button>
+		<ImagePreview
+			json={image}
+			on:deleteImage={() => {
+				fetchAllOriginalImages();
+			}}
+			clickHandler={() => selectImage(image)}
+		/>
 	{/each}
 </div>
 
