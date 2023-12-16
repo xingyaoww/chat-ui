@@ -53,6 +53,7 @@
 			on:deleteImage={() => {
 				fetchAllOriginalImages();
 			}}
+			mode="1"
 			clickHandler={() => selectImage(image)}
 		/>
 	{/each}

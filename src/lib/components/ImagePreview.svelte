@@ -5,6 +5,7 @@
 		url: "https://via.placeholder.com/400x400",
 		id: "1234",
 	};
+	export let mode = 0;
 	export let clickHandler: (image: Image) => void = () => {};
 	$: console.log("json", json);
 	const dispatch = createEventDispatcher<{ deleteImage: void }>();
@@ -18,6 +19,10 @@
 				accept: "application/json",
 			},
 		});
+		dispatch("deleteImage");
+	}
+	function removeImage() {
+		// Implement the logic for deleting the image
 		dispatch("deleteImage");
 	}
 
@@ -38,8 +43,15 @@
 		class="absolute -bottom-3 -right-3 cursor-pointer rounded-full bg-yellow-400 px-2 py-1 text-white"
 		on:click={editImage}>✎</button
 	> -->
-	<button
-		class="absolute -right-3 -top-3 cursor-pointer rounded-full bg-red-400 px-3 py-1 text-white"
-		on:click={deleteImage}>-</button
-	>
+	{#if mode === "1"}
+		<button
+			class="absolute -right-3 -top-3 cursor-pointer rounded-full bg-red-400 px-3 py-1 text-white"
+			on:click={deleteImage}>-</button
+		>
+	{:else}
+		<button
+			class="absolute -right-3 -top-3 cursor-pointer rounded-full bg-gray-400 px-2 text-white"
+			on:click={removeImage}>x</button
+		>
+	{/if}
 </div>
