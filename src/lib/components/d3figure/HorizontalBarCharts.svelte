@@ -1,0 +1,161 @@
+<script>
+	import { onMount } from "svelte";
+	import * as d3 from "d3";
+
+	// Sample data
+	export let data = [
+		{ name: "Category A", value: 30 },
+		{ name: "Category B", value: 80 },
+		{ name: "Category C", value: 45 },
+		// ... more categories
+	];
+
+	// Axis labels
+	export let xAxisLabel = "Value";
+	export let yAxisLabel = "Category";
+
+	// Set dimensions and margins for the graph
+	const margin = { top: 20, right: 30, bottom: 60, left: 100 };
+	const width = 600 - margin.left - margin.right;
+	const height = 400 - margin.top - margin.bottom;
+	function wrapText(text, width) {
+		text.each(function () {
+			var text = d3.select(this),
+				words = text.text().split(/\s+/).reverse(),
+				word,
+				line = [],
+				lineNumber = 0,
+				lineHeight = 1.1, // ems
+				y = text.attr("y"),
+				dy = parseFloat(text.attr("dy")),
+				tspan = text
+					.text(null)
+					.append("tspan")
+					.attr("x", 0)
+					.attr("y", y)
+					.attr("dy", dy + "em");
+
+			while ((word = words.pop())) {
+				line.push(word);
+				tspan.text(line.join(" "));
+				if (tspan.node().getComputedTextLength() > width) {
+					line.pop();
+					tspan.text(line.join(" "));
+					line = [word];
+					tspan = text
+						.append("tspan")
+						.attr("x", 0)
+						.attr("y", y)
+						.attr("dy", ++lineNumber * lineHeight + dy + "em")
+						.text(word);
+				}
+			}
+		});
+	}
+
+	onMount(() => {
+		// Append the svg object to a div or other container
+		const svg = d3
+			.select("#bar-chart")
+			.append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		// X axis: scale and draw
+		const x = d3
+			.scaleLinear()
+			.domain([0, d3.max(data, (d) => d.value)])
+			.range([0, width]);
+
+		svg
+			.append("g")
+			.attr("transform", "translate(0," + height + ")")
+			.call(d3.axisBottom(x));
+
+		// Add X axis label
+		svg
+			.append("text")
+			.attr("text-anchor", "end")
+			.attr("x", width)
+			.attr("y", height + margin.bottom - 15)
+			.text(xAxisLabel);
+
+		// Y axis: scale and draw
+		const y = d3
+			.scaleBand()
+			.range([0, height])
+			.domain(data.map((d) => d.name))
+			.padding(0.1);
+
+		svg.append("g").call(d3.axisLeft(y));
+
+		// Add Y axis label
+		svg
+			.append("text")
+			.attr("text-anchor", "end")
+			// .attr("transform", "rotate(-90)")
+			.attr("y", -margin.left + 20)
+			.attr("x", -margin.top)
+			.text(yAxisLabel);
+
+		// Bars
+		svg
+			.selectAll("rect")
+			.data(data)
+			.join("rect")
+			.attr("x", x(0))
+			.attr("y", (d) => y(d.name))
+			.attr("width", (d) => x(d.value))
+			.attr("height", y.bandwidth())
+			.attr("fill", "#69b3a2");
+
+		const tooltip = d3.select("#bar-chart-tooltip");
+
+		// Mouseover event
+		const mouseover = (event, d) => {
+			tooltip.transition().duration(200).style("opacity", 0.9);
+			tooltip
+				.html(d.name + ": " + d.value)
+				.style("left", event.pageX + 10 + "px") // Offset by 10px from mouse x
+				.style("top", event.pageY - 10 + "px"); // Offset by 10px from mouse y
+		};
+
+		// Mouseout event
+		const mouseout = (event, d) => {
+			tooltip.transition().duration(500).style("opacity", 0);
+		};
+		// Add interactivity (optional)
+		svg
+			.selectAll("rect")
+			.on("mouseover", function () {
+				d3.select(this).attr("fill", "#b4e3b7");
+			})
+			.on("mouseout", function () {
+				d3.select(this).attr("fill", "#69b3a2");
+			})
+			.on("mouseover", mouseover)
+			.on("mouseout", mouseout);
+		// Apply text wrapping to the Y-axis labels
+		svg.selectAll(".y-axis text").call(wrapText, margin.left - 10);
+	});
+</script>
+
+<div id="bar-chart" />
+<div id="bar-chart-tooltip" class="tooltip" style="opacity: 0;" />
+
+<style>
+	.tooltip {
+		position: fixed;
+		text-align: center;
+		padding: 8px;
+		font: 12px sans-serif;
+		background: black;
+		color: white;
+		opacity: 0.8;
+		border: 0px;
+		border-radius: 8px;
+		pointer-events: none;
+	}
+</style>

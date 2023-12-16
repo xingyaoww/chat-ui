@@ -72,6 +72,14 @@
 		// Unsanitize double-sanitized code
 		return `<code>${code.replaceAll("&amp;", "&")}</code>`;
 	};
+	function isJSON(str: string) {
+		try {
+			JSON.parse(str);
+		} catch (e) {
+			return false;
+		}
+		return true;
+	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { extensions, ...defaults } = marked.getDefaults() as marked.MarkedOptions & {

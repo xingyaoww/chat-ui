@@ -41,8 +41,8 @@
 				</div>
 			</div>
 			<p class="text-base text-gray-600 dark:text-gray-400">
-				{PUBLIC_APP_DESCRIPTION ||
-					"Making the community's best AI chat models available to everyone."}
+				<!-- {PUBLIC_APP_DESCRIPTION ||
+					"Making the community's best AI chat models available to everyone."} -->
 			</p>
 		</div>
 	</div>
