@@ -56,14 +56,12 @@
 	const handleSubmit = () => {
 		if (loading) return;
 		message = currentSelectedImage
-			? `<image>
-				{
+			? `<image>{
 				"url": "${base + "/images/" + currentSelectedImage.id}",
 				"id": "${currentSelectedImage.id}"
-			}
-			</image>
+			}</image>
 
-			${message}`
+${message}`
 			: message;
 		dispatch("message", message);
 		console.log("message", message);
