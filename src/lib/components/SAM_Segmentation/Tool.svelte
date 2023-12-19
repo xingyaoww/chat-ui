@@ -1,5 +1,7 @@
 <script>
 	import { onMount } from "svelte";
+	import CarbonAdd from "~icons/carbon/add-alt";
+	import CarbonSubtract from "~icons/carbon/subtract-alt";
 	export let handleMouseMove = null;
 	export let handleMouseClick = null;
 	export let handleMouseOut = null;
@@ -8,9 +10,9 @@
 	export let savedClicks = [];
 	export let savedMaskImgs = [];
 	export let modelScale = null;
-	let samScale = 1;
-	$: samScale = modelScale && modelScale.samScale ? modelScale.samScale : 1;
-
+	let ratio = 1;
+	$: ratio = shouldFitToWidth ? window.innerWidth / image.width : window.innerHeight / image.height;
+	$: console.log("ratio", ratio);
 	let shouldFitToWidth = true;
 	let imageClasses = "";
 	let maskImageClasses =
@@ -36,14 +38,23 @@
 
 		fitToPage();
 		resizeObserver.observe(bodyEl);
+		const element = document.getElementById("img-div");
+		if (element) {
+			const styles = getComputedStyle(element);
+			const marginTop = styles.marginTop;
+			const marginRight = styles.marginRight;
+			const marginBottom = styles.marginBottom;
+			const marginLeft = styles.marginLeft;
 
+			console.log({ marginTop, marginRight, marginBottom, marginLeft });
+		}
 		return () => {
 			resizeObserver.unobserve(bodyEl);
 		};
 	});
 </script>
 
-<div class="relative min-h-0 min-w-0">
+<div id="img-div" class="relative min-h-0 min-w-0">
 	{#if image}
 		<div
 			on:mousemove={handleMouseMove}
@@ -52,7 +63,7 @@
 			on:mousedown={handleMouseClick}
 			class={(shouldFitToWidth ? "w-full" : "h-full") + " " + imageClasses}
 		>
-			<img src={image.src} />
+			<img src={image.src} class="h-full w-full" />
 		</div>
 	{/if}
 	{#if maskImg}
@@ -67,14 +78,26 @@
 			</div>
 		{/each}
 	{/if}
-	<div class="border-3 pointer-events-none absolute left-0 top-0 z-10 h-full w-full border-red-500">
+	<div class={" border-3 absolute left-0 top-0 z-10 bg-red-500 bg-red-800"}>
 		{#if savedClicks}
 			{#each savedClicks as savedClick}
-				<div
-					class={"border-3 absolute z-10 h-4 w-4 rounded-full " +
-						(savedClick.click.clickType === 1 ? "bg-blue-500" : "bg-red-500")}
-					style="left: {savedClick.click.x / samScale}px; top: {savedClick.click.y / samScale}px;"
-				/>
+				{#if savedClick.click.clickType === 1}
+					<div
+						class={"border-3 absolute z-10 h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-white"}
+						style="left: {(savedClick.click.x - 14) * 0.8}px; top: {(savedClick.click.y - 10) *
+							0.8}px;"
+					>
+						<CarbonAdd class />
+					</div>
+				{:else}
+					<div
+						class={"border-3 absolute z-10 h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white"}
+						style="left: {(savedClick.click.x - 14) * 0.8}px; top: {(savedClick.click.y - 10) *
+							0.8}px;"
+					>
+						<CarbonSubtract />
+					</div>
+				{/if}
 			{/each}
 		{/if}
 	</div>

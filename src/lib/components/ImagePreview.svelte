@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { base } from "$app/paths";
 	import { createEventDispatcher } from "svelte";
+	import CarbonClose from "~icons/carbon/close";
+	import CarbonSubtract from "~icons/carbon/subtract";
+	import CarbonEdit from "~icons/carbon/edit";
+	import { goto } from "$app/navigation";
 	export let json = {
 		url: "https://via.placeholder.com/400x400",
 		id: "1234",
@@ -29,6 +33,7 @@
 	function editImage() {
 		// Implement the logic for editing the image
 		console.log("Edit Image", json.id);
+		goto(`${base}/segmentation/${json.id}`);
 	}
 </script>
 
@@ -45,13 +50,17 @@
 	> -->
 	{#if mode === "1"}
 		<button
-			class="absolute -right-3 -top-3 cursor-pointer rounded-full bg-red-400 px-3 py-1 text-white"
-			on:click={deleteImage}>-</button
+			class="absolute -right-3 -top-3 cursor-pointer rounded-full bg-red-400 p-2 text-white"
+			on:click={deleteImage}><CarbonSubtract /></button
 		>
 	{:else}
 		<button
-			class="absolute -right-3 -top-3 cursor-pointer rounded-full bg-gray-400 px-2 text-white"
-			on:click={removeImage}>x</button
+			class="absolute -right-3 -top-3 cursor-pointer rounded-full bg-gray-400 p-2 text-white"
+			on:click={removeImage}><CarbonClose /></button
 		>
 	{/if}
+	<button
+		class="absolute -bottom-3 -right-3 cursor-pointer rounded-full bg-yellow-400 p-2 text-white"
+		on:click={editImage}><CarbonEdit /></button
+	>
 </div>

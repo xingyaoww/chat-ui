@@ -5,7 +5,6 @@ export const GET: RequestHandler = async ({ params }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		const pathname = params.id;
-		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/annotations/${pathname}`);
 
@@ -19,6 +18,11 @@ export const GET: RequestHandler = async ({ params }) => {
 			},
 		});
 	} catch (error) {
+		await fetch(`${imageUrl}/annotations/${pathname}`, {
+			method: "POST",
+			body: JSON.stringify([]),
+		});
+
 		return new Response(JSON.stringify({ error: error as Error }), {
 			status: 500,
 			headers: { "Content-Type": "application/json" },
@@ -51,16 +55,37 @@ export const POST: RequestHandler = async ({ params }) => {
 	}
 };
 
-export const PUT: RequestHandler = async ({ params }) => {
+export const PUT: RequestHandler = async ({ params, request }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		const pathname = params.id;
-		console.log("pathname", pathname);
+		let body = [];
+		try {
+			// Attempt to parse the JSON body of the request
+			if (request) {
+				const requestBody = await request.json();
+				body = requestBody;
+			}
+		} catch (error) {
+			// Handle parsing error
+			return new Response(JSON.stringify({ error: "Invalid JSON" }), {
+				status: 400,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
 
+		console.log("body to upload", body);
 		const response = await fetch(`${imageUrl}/annotations/${pathname}`, {
 			method: "PUT",
+			body: JSON.stringify(body),
+			headers: {
+				"Content-Type": "application/json",
+			},
 		});
-		if (!response.ok) throw new Error(response.statusText);
+		if (!response.ok) {
+			console.log("error ", await response.text());
+			throw new Error(response.statusText);
+		}
 		const responseData = await response.json();
 
 		return new Response(JSON.stringify(responseData), {

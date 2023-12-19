@@ -14,7 +14,6 @@
 	import { handleImageScale } from "$lib/components/SAM_Segmentation/scaleHelper";
 	import { modelData } from "$lib/components/SAM_Segmentation/onnxModelAPI";
 	import Modal from "$lib/components/Modal.svelte";
-	import { error } from "@sveltejs/kit";
 
 	export let MODEL_DIR = new URL(
 		"$lib/components/SAM_Segmentation/model/sam_onnx_quantized.onnx",
@@ -60,9 +59,13 @@
 		};
 		tensor = data.props.tensor;
 		try {
-			const fetch_annotations = await fetch(
-				`/api/annotations/${data.props.image.split("/").pop().split(".")[0]}`
-			);
+			const fetch_annotations = await fetch(`/annotations/${data.props.id}`);
+			if (!fetch_annotations.ok) {
+				savedMaskImgs = [];
+				return;
+			}
+			const annotations = await fetch_annotations.json();
+			loadSavedMaskImgs(annotations);
 		} catch (e) {
 			console.error("cannot instantiate", e);
 		}
@@ -93,6 +96,35 @@
 	$: if (savedMaskImgs) {
 		console.log("savedMaskImgs", savedMaskImgs);
 	}
+
+	const saveSavedImgMasks = () => {
+		const saveContent = savedMaskImgs.map((img) => {
+			return {
+				...img,
+				output: {
+					height: img.output.height,
+					width: img.output.width,
+					data: compressor(img.output.data),
+				},
+			};
+		});
+		return JSON.stringify(saveContent);
+	};
+
+	const loadSavedMaskImgs = (jsondata) => {
+		savedMaskImgs = jsondata.map((img) => {
+			return {
+				...img,
+				output: new ImageData(decompressor(img.output.data), img.output.width, img.output.height),
+			};
+		});
+		if (savedMaskImgs && savedMaskImgs.length > 0) {
+			maskImg = imageDataToImage(savedMaskImgs[0].output);
+			clicks = savedMaskImgs[0].clicks;
+			savedOutput = savedMaskImgs[0].output;
+		}
+	};
+
 	// Function to handle mouse click event
 	const handleMouseHover = (event) => {
 		event.preventDefault();
@@ -109,7 +141,7 @@
 		savedClicks = savedClicks.slice(0, -1);
 		clicks = [...savedClicks.map((detail) => detail.click)];
 	};
-	const handleSave = (event) => {
+	const handleSave = async (event) => {
 		console.log("handleSave", event.detail);
 
 		if (event.detail.id && event.detail.id !== "") {
@@ -124,6 +156,7 @@
 					description: event.detail.description,
 				},
 			];
+
 			return;
 		}
 
@@ -139,6 +172,21 @@
 		];
 		savedClicks = [];
 		clicks = [];
+		const jsonString = saveSavedImgMasks();
+		console.log("jsonString", jsonString);
+		const response = await fetch(`/annotations/${data.props.id}`, {
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: jsonString,
+		});
+		if (!response.ok) {
+			console.error("Error while saving annotations, try again.");
+			return;
+		} else {
+			console.log("annotations saved");
+		}
 	};
 	const handleSelect = (event) => {
 		console.log("handleSelect", event.detail);
@@ -163,17 +211,7 @@
 	};
 
 	const handleDownload = () => {
-		const saveContent = savedMaskImgs.map((img) => {
-			return {
-				...img,
-				output: {
-					height: img.output.height,
-					width: img.output.width,
-					data: compressor(img.output.data),
-				},
-			};
-		});
-		const jsonContent = JSON.stringify(saveContent);
+		const jsonContent = saveSavedImgMasks();
 		const blob = new Blob([jsonContent], { type: "application/json" });
 		const url = URL.createObjectURL(blob);
 
@@ -198,24 +236,10 @@
 			reader.onload = (event) => {
 				const jsonContent = event.target.result;
 				try {
-					const data = JSON.parse(jsonContent);
+					const jsondata = JSON.parse(jsonContent);
 					// Process your data here
-					savedMaskImgs = data.map((img) => {
-						return {
-							...img,
-							output: new ImageData(
-								decompressor(img.output.data),
-								img.output.width,
-								img.output.height
-							),
-						};
-					});
-					if (savedMaskImgs && savedMaskImgs.length > 0) {
-						maskImg = imageDataToImage(savedMaskImgs[0].output);
-						clicks = savedMaskImgs[0].clicks;
-						savedOutput = savedMaskImgs[0].output;
-					}
-					console.log(data);
+					loadSavedMaskImgs(jsondata);
+					console.log(jsondata);
 				} catch (e) {
 					console.error("Error parsing JSON:", e);
 				}
@@ -231,7 +255,7 @@
 </script>
 
 <Modal
-	width="max-w-4xl"
+	width="max-w-max"
 	on:close={() => {
 		window.history.back();
 	}}

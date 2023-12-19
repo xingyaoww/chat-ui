@@ -4,8 +4,9 @@
 // This source code is licensed under the license found in the
 // LICENSE file in the root directory of this source tree.
 
-import { Tensor } from "onnxruntime-web";
+import * as ort from "onnxruntime-web";
 import type { UserInput, ModelInput } from "./Interfaces";
+const { Tensor } = ort;
 
 function modelData({ clicks, tensor, modelScale }: UserInput): ModelInput | undefined {
 	const imageEmbedding = tensor;

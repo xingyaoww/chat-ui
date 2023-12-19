@@ -1,7 +1,7 @@
 import { base } from "$app/paths";
 import { error } from "@sveltejs/kit";
 import npyjs from "npyjs";
-import { Tensor } from "onnxruntime-web";
+import * as ort from "onnxruntime-web";
 
 // Assuming 'PageLoad' type is correctly imported from './$types'
 /** @type {import('./$types').PageServerLoad} */
@@ -14,7 +14,7 @@ export async function load({ params, fetch }) {
 	async function loadNpyTensor(tensorFile, dType) {
 		const npLoader = new npyjs();
 		const npArray = await npLoader.load(tensorFile);
-		return new Tensor(dType, npArray.data, npArray.shape);
+		return new ort.Tensor(dType, npArray.data, npArray.shape);
 	}
 
 	try {
@@ -45,6 +45,7 @@ export async function load({ params, fetch }) {
 		// Return the props
 		return {
 			props: {
+				id: id,
 				image: imageUrl,
 				tensor: embeddingTensor,
 			},

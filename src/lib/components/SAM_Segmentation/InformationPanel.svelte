@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher } from "svelte";
+	import CarbonAdd from "~icons/carbon/add-alt";
 	export let savedMaskImgs = [];
 	let selectedImageId = "";
 	let editableLabel = "";
@@ -19,15 +20,39 @@
 </script>
 
 <div class="panel">
-	<select
-		class="resize-none scroll-p-3 overflow-x-hidden overflow-y-scroll border-0 bg-transparent p-3 outline-none focus:ring-0 focus-visible:ring-0"
-		on:change={handleImageSelection}
-	>
-		<option value="">Choose An Annotation</option>
+	<div class="flex flex-wrap">
+		<button
+			type="button"
+			class={(selectedImageId === ""
+				? "border-white bg-emerald-500 text-white"
+				: "border-gray-200") +
+				" hover:bg- m-4 flex items-center justify-center rounded-lg border px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"}
+			on:click={() => {
+				selectedImageId = "";
+				editableLabel = "";
+				editableDescription = "";
+			}}
+		>
+			<CarbonAdd class="mx-2" /> New Annotation
+		</button>
 		{#each savedMaskImgs as img}
-			<option value={img.id}>{img.name}</option>
+			<button
+				type="button"
+				class={(selectedImageId === img.id
+					? "border-white bg-emerald-500 text-white"
+					: "border-gray-200") +
+					" hover:bg- m-4 flex items-center justify-center rounded-lg border px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"}
+				class:selected={img.id === selectedImageId}
+				on:click={() => {
+					selectedImageId = img.id;
+					editableLabel = img.name;
+					editableDescription = img.description;
+				}}
+			>
+				{img.name}
+			</button>
 		{/each}
-	</select>
+	</div>
 
 	<input
 		type="text"

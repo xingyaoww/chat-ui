@@ -36,53 +36,56 @@
 	};
 </script>
 
-<div class="toolbar">
-	<div class="button-group">
-		<button on:click={handleAdd} class="flex items-center justify-center bg-blue-500">
-			<CarbonAdd />
-		</button>
-		Add
-	</div>
-	<div class="button-group">
-		<button on:click={handleMinus} class="flex items-center justify-center bg-red-500">
-			<CarbonSubtract />
-		</button>
-		Minus
-	</div>
-	<div class="button-group">
-		<button on:click={handleRemove} class="flex items-center justify-center bg-yellow-500">
-			<CarbonUndo />
-		</button>
-		Undo
-	</div>
-	<div class="button-group">
-		<button on:click={handleSave} class="flex items-center justify-center bg-green-500">
-			<CarbonSaveAnnotation />
-		</button>
-		Save
-	</div>
+<div>
+	<div class="toolbar">
+		<div class="button-group">
+			<button on:click={handleAdd} class="flex items-center justify-center bg-blue-500">
+				<CarbonAdd />
+			</button>
+			Add
+		</div>
+		<div class="button-group">
+			<button on:click={handleMinus} class="flex items-center justify-center bg-red-500">
+				<CarbonSubtract />
+			</button>
+			Minus
+		</div>
+		<div class="button-group">
+			<button on:click={handleRemove} class="flex items-center justify-center bg-yellow-500">
+				<CarbonUndo />
+			</button>
+			Undo
+		</div>
+		<div class="button-group">
+			<button on:click={handleSave} class="flex items-center justify-center bg-green-500">
+				<CarbonSaveAnnotation />
+			</button>
+			Save
+		</div>
 
-	<div class="button-group">
-		<button on:click={handleDelete} class="flex items-center justify-center bg-red-500">
-			<CarbonDelete />
-		</button>
-		Delete
-	</div>
+		<div class="button-group">
+			<button on:click={handleDelete} class="flex items-center justify-center bg-red-500">
+				<CarbonDelete />
+			</button>
+			Delete
+		</div>
 
-	<!-- <br class="border" /> -->
-	<div class="button-group">
-		<button on:click={handleDownload} class="flex items-center justify-center bg-green-500">
-			<CarbonDownload />
-		</button>
-		Download
-	</div>
+		<!-- <br class="border" /> -->
+		<div class="button-group">
+			<button on:click={handleDownload} class="flex items-center justify-center bg-green-500">
+				<CarbonDownload />
+			</button>
+			Download
+		</div>
 
-	<!-- <div class="button-group">
+		<!-- <div class="button-group">
 		<button on:click={handleUpload} class="flex items-center justify-center bg-yellow-500">
 			<CarbonUpload />
 		</button>
 		Upload
 	</div> -->
+	</div>
+	<div />
 </div>
 
 <style>

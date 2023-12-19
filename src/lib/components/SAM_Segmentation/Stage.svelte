@@ -61,9 +61,9 @@
 	const throttledMouseClick = throttle(handleMouseClick, 15);
 </script>
 
-<div class="flex h-full w-full items-center justify-center">
+<div class="relative flex h-full w-full items-stretch justify-center">
 	<div class="flex h-full w-full flex-col items-center justify-center">
-		<div class="relative flex h-[90%] w-[90%] items-center justify-center">
+		<div class="relative flex h-[80%] w-[80%] items-center justify-center">
 			<Tool
 				handleMouseMove={throttledMouseMove}
 				handleMouseClick={throttledMouseClick}
