@@ -11,8 +11,8 @@
 	];
 
 	// Axis labels
-	export let xAxisLabel = "Value";
-	export let yAxisLabel = "Category";
+	export let xAxisLabel = "Reasons";
+	export let yAxisLabel = "Attributes";
 
 	// Set dimensions and margins for the graph
 	const margin = { top: 20, right: 30, bottom: 60, left: 100 };
@@ -52,8 +52,15 @@
 			}
 		});
 	}
+	function sortData(data) {
+		return data.sort((a, b) => d3.descending(a.value, b.value));
+	}
 
 	onMount(() => {
+		// Clear existing content
+		d3.select("#bar-chart").selectAll("*").remove();
+		// Sort data
+		data = sortData(data);
 		// Append the svg object to a div or other container
 		const svg = d3
 			.select("#bar-chart")
