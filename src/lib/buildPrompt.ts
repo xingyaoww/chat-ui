@@ -48,11 +48,12 @@ export async function buildPrompt({
 			},
 		];
 	}
-
+	console.log("messages", messages);
 	return (
 		model
 			.chatPromptRender({ messages, preprompt })
 			// Not super precise, but it's truncated in the model's backend anyway
+			// TODO: make this more precise (keep the preprompt, etc.)
 			.split(" ")
 			.slice(-(model.parameters?.truncate ?? 0))
 			.join(" ")
