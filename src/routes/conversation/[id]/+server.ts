@@ -1,26 +1,21 @@
-import { HF_ACCESS_TOKEN, MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL } from "$env/static/private";
-import { buildPrompt } from "$lib/buildPrompt";
-import { PUBLIC_SEP_TOKEN } from "$lib/constants/publicSepToken";
+import { MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL } from "$env/static/private";
 import { authCondition, requiresUser } from "$lib/server/auth";
 import { collections } from "$lib/server/database";
-import { modelEndpoint } from "$lib/server/modelEndpoint";
 import { models } from "$lib/server/models";
 import { ERROR_MESSAGES } from "$lib/stores/errors";
 import type { Message } from "$lib/types/Message";
-import { trimPrefix } from "$lib/utils/trimPrefix";
-import { trimSuffix } from "$lib/utils/trimSuffix";
-import { textGenerationStream } from "@huggingface/inference";
 import { error } from "@sveltejs/kit";
 import { ObjectId } from "mongodb";
 import { z } from "zod";
-import { AwsClient } from "aws4fetch";
 import type { MessageUpdate } from "$lib/types/MessageUpdate";
 import { runWebSearch } from "$lib/server/websearch/runWebSearch";
 import type { WebSearch } from "$lib/types/WebSearch";
 import { abortedGenerations } from "$lib/server/abortedGenerations";
 import { summarize } from "$lib/server/summarize";
+import { uploadFile } from "$lib/server/files/uploadFile";
+import sizeof from "image-size";
 
-export async function POST({ request, fetch, locals, params, getClientAddress }) {
+export async function POST({ request, locals, params, getClientAddress }) {
 	const id = z.string().parse(params.id);
 	const convId = new ObjectId(id);
 	const promptedAt = new Date();
@@ -99,6 +94,7 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 		id: messageId,
 		is_retry,
 		web_search: webSearch,
+		files: b64files,
 	} = z
 		.object({
 			inputs: z.string().trim().min(1),
@@ -106,8 +102,41 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 			response_id: z.optional(z.string().uuid()),
 			is_retry: z.optional(z.boolean()),
 			web_search: z.optional(z.boolean()),
+			files: z.optional(z.array(z.string())),
 		})
 		.parse(json);
+
+	// files is an array of base64 strings encoding Blob objects
+	// we need to convert this array to an array of File objects
+
+	const files = b64files?.map((file) => {
+		const blob = Buffer.from(file, "base64");
+		return new File([blob], "image.png");
+	});
+
+	// check sizes
+	if (files) {
+		const filechecks = await Promise.all(
+			files.map(async (file) => {
+				const dimensions = sizeof(Buffer.from(await file.arrayBuffer()));
+				return (
+					file.size > 2 * 1024 * 1024 ||
+					(dimensions.width ?? 0) > 224 ||
+					(dimensions.height ?? 0) > 224
+				);
+			})
+		);
+
+		if (filechecks.some((check) => check)) {
+			throw error(413, "File too large, should be <2MB and 224x224 max.");
+		}
+	}
+
+	let hashes: undefined | string[];
+
+	if (files) {
+		hashes = await Promise.all(files.map(async (file) => await uploadFile(file, conv)));
+	}
 
 	// get the list of messages
 	// while checking for retries
@@ -120,7 +149,13 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 			}
 			return [
 				...conv.messages.slice(0, retryMessageIdx),
-				{ content: newPrompt, from: "user", id: messageId as Message["id"], updatedAt: new Date() },
+				{
+					content: newPrompt,
+					from: "user",
+					id: messageId as Message["id"],
+					updatedAt: new Date(),
+					files: conv.messages[retryMessageIdx]?.files,
+				},
 			];
 		} // else append the message at the bottom
 
@@ -132,6 +167,7 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 				id: (messageId as Message["id"]) || crypto.randomUUID(),
 				createdAt: new Date(),
 				updatedAt: new Date(),
+				files: hashes,
 			},
 		];
 	})() satisfies Message[];
@@ -160,19 +196,30 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 				if (newUpdate.type !== "stream") {
 					updates.push(newUpdate);
 				}
+
+				if (newUpdate.type === "stream" && newUpdate.token === "") {
+					return;
+				}
 				controller.enqueue(JSON.stringify(newUpdate) + "\n");
+
+				if (newUpdate.type === "finalAnswer") {
+					// 4096 of spaces to make sure the browser doesn't blocking buffer that holding the response
+					controller.enqueue(" ".repeat(4096));
+				}
 			}
 
 			update({ type: "status", status: "started" });
 
-			if (conv.title === "New Chat" && messages.length === 1) {
-				try {
-					conv.title = (await summarize(newPrompt)) ?? conv.title;
-					update({ type: "status", status: "title", message: conv.title });
-				} catch (e) {
-					console.error(e);
+			const summarizeIfNeeded = (async () => {
+				if (conv.title === "New Chat" && messages.length === 1) {
+					try {
+						conv.title = (await summarize(newPrompt)) ?? conv.title;
+						update({ type: "status", status: "title", message: conv.title });
+					} catch (e) {
+						console.error(e);
+					}
 				}
-			}
+			})();
 
 			await collections.conversations.updateOne(
 				{
@@ -193,107 +240,28 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 				webSearchResults = await runWebSearch(conv, newPrompt, update);
 			}
 
-			// we can now build the prompt using the messages
-			const prompt = await buildPrompt({
-				messages,
-				model,
-				webSearch: webSearchResults,
-				preprompt: conv.preprompt ?? model.preprompt,
-				locals: locals,
-			});
-
-			// fetch the endpoint
-			const randomEndpoint = modelEndpoint(model);
-
-			let usedFetch = fetch;
-
-			if (randomEndpoint.host === "sagemaker") {
-				const aws = new AwsClient({
-					accessKeyId: randomEndpoint.accessKey,
-					secretAccessKey: randomEndpoint.secretKey,
-					sessionToken: randomEndpoint.sessionToken,
-					service: "sagemaker",
-				});
-
-				usedFetch = aws.fetch.bind(aws) as typeof fetch;
-			}
-
-			async function saveLast(generated_text: string) {
-				if (!conv) {
-					throw error(404, "Conversation not found");
-				}
-
-				const lastMessage = messages[messages.length - 1];
-
-				if (lastMessage) {
-					// We could also check if PUBLIC_ASSISTANT_MESSAGE_TOKEN is present and use it to slice the text
-					if (generated_text.startsWith(prompt)) {
-						generated_text = generated_text.slice(prompt.length);
-					}
-
-					generated_text = trimSuffix(
-						trimPrefix(generated_text, "<|startoftext|>"),
-						PUBLIC_SEP_TOKEN
-					).trimEnd();
-
-					// remove the stop tokens
-					for (const stop of [...(model?.parameters?.stop ?? []), "<|endoftext|>"]) {
-						if (generated_text.endsWith(stop)) {
-							generated_text = generated_text.slice(0, -stop.length).trimEnd();
-						}
-					}
-					lastMessage.content = generated_text;
-
-					await collections.conversations.updateOne(
-						{
-							_id: convId,
-						},
-						{
-							$set: {
-								messages,
-								title: conv.title,
-								updatedAt: new Date(),
-							},
-						}
-					);
+			messages[messages.length - 1].webSearch = webSearchResults;
 
 
-					update({
-						type: "finalAnswer",
-						text: generated_text,
-					});
-				}
-			}
+			// const handleUserMessage = (async () => {
 
-			const tokenStream = textGenerationStream(
-				{
-					parameters: {
-						...models.find((m) => m.id === conv.model)?.parameters,
-						return_full_text: false,
-					},
-					model: randomEndpoint.url,
-					inputs: prompt,
-					accessToken: randomEndpoint.host === "sagemaker" ? undefined : HF_ACCESS_TOKEN,
-				},
-				{
-					use_cache: false,
-					fetch: usedFetch,
-				}
-			);
+			conv.messages = messages;
 
-			(async () => {
-				for await (const output of tokenStream) {
+			try {
+				const endpoint = await model.getEndpoint();
+				for await (const output of await endpoint({ conversation: conv })) {
 					// if not generated_text is here it means the generation is not done
 					if (!output.generated_text) {
 						// else we get the next token
 						if (!output.token.special) {
-							const lastMessage = messages[messages.length - 1];
 							update({
 								type: "stream",
 								token: output.token.text,
 							});
 
 							// if the last message is not from assistant, it means this is the first token
+							const lastMessage = messages[messages.length - 1];
+
 							if (lastMessage?.from !== "assistant") {
 								// so we create a new message
 								messages = [
@@ -311,11 +279,12 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 									},
 								];
 							} else {
+								// abort check
 								const date = abortedGenerations.get(convId.toString());
 								if (date && date > promptedAt) {
-
-									saveLast(lastMessage.content);
+									break;
 								}
+
 								if (!output) {
 									break;
 								}
@@ -325,50 +294,110 @@ export async function POST({ request, fetch, locals, params, getClientAddress })
 							}
 						}
 					} else {
-						const inputString = output.generated_text;
-
-						const pattern = /<execute>([\s\S]*?)<\/execute>/;
-						const match = inputString.match(pattern);
-
-						if (match) {
-							const substringBetweenExecuteTags = match[1].trim();
-							var result;
-							try {
-								const resFromJupyter = await fetch(JUPYTER_API_URL + "/execute", {
-									headers: {
-										'Content-Type': 'application/json',
-									},
-									method: "POST",
-									body: JSON.stringify({
-										convid: convId.toString(),
-										code: substringBetweenExecuteTags
-									}),
-								});
-								if (resFromJupyter.ok) {
-									const data = await resFromJupyter.json();
-									result = "\n" + "```result\n" + data["result"]
-								} else {
-									console.error('Request to Jupyter failed with status:', resFromJupyter.status);
-									result = "\n" + "```result\n" + "Request to Code Execution failed with status: " + resFromJupyter.status + ". Please try again."
-								}
-							} catch (error) {
-								console.error('Error making the request:', error);
-								result = "\n" + "```result\n" + "Error making the request: " + error + ". Please try again."
-							}
-
-							for (const token_ of result) {
-								update({
-									type: "stream",
-									token: token_,
-								});
-							}
-							output.generated_text += result;
-
-						}
-						saveLast(output.generated_text);
+						// add output.generated text to the last message
+						messages = [
+							...messages.slice(0, -1),
+							{
+								...messages[messages.length - 1],
+								content: output.generated_text,
+								updates: updates,
+								updatedAt: new Date(),
+							},
+						];
 					}
 				}
+			} catch (e) {
+				update({ type: "status", status: "error", message: (e as Error).message });
+			}
+			await collections.conversations.updateOne(
+				{
+					_id: convId,
+				},
+				{
+					$set: {
+						messages,
+						title: conv?.title,
+						updatedAt: new Date(),
+					},
+				}
+			);
+
+			update({
+				type: "finalAnswer",
+				text: messages[messages.length - 1].content,
+			});
+
+			await summarizeIfNeeded;
+
+			const handleCodeExecution = (async () => {
+				// get the last message
+				const lastMessage = messages[messages.length - 1];
+
+				console.log(messages)
+				console.log("Last message: ", lastMessage)
+				// assert that the last message is from the assistant, if not raise an error
+				if (lastMessage.from !== "assistant") {
+					throw new Error("Last message is not from the assistant");
+				}
+				
+				// match execute tag to see if we need to execute code
+				const pattern = /<execute>([\s\S]*?)<\/execute>/;
+				const match = lastMessage.content.match(pattern);
+				console.log("match: " + match)
+				
+				if (match) {
+					const substringBetweenExecuteTags = match[1].trim();
+					var execution_output = "";
+					try {
+						const resFromJupyter = await fetch(JUPYTER_API_URL + "/execute", {
+							headers: {
+								'Content-Type': 'application/json',
+							},
+							method: "POST",
+							body: JSON.stringify({
+								convid: convId.toString(),
+								code: substringBetweenExecuteTags
+							}),
+						});
+						if (resFromJupyter.ok) {
+							const data = await resFromJupyter.json();
+							// result = "\n" + "```result\n" + data["result"]
+							execution_output = data["result"]
+						} else {
+							console.error('Request to Jupyter failed with status:', resFromJupyter.status);
+							execution_output = "Request to Code Execution failed with status: " + resFromJupyter.status + ". Please try again."
+						}
+					} catch (error) {
+						console.error('Error making the request:', error);
+						execution_output = "Error making the request: " + error + ". Please try again."
+					}
+					console.log("execution_output: " + execution_output)
+					// append the result to the last message
+					lastMessage.content += "\n" + "```result\n" + execution_output + "\n```";
+					// update the conversation
+					await collections.conversations.updateOne(
+						{
+							_id: convId,
+						},
+						{
+							$set: {
+								messages,
+								title: conv.title,
+								updatedAt: new Date(),
+							},
+						}
+					);
+					update({
+						type: "finalAnswer",
+						text: messages[messages.length - 1].content,
+					});
+				}
+
 			})();
+
+			await handleCodeExecution;
+
+			return;
 		},
 		async cancel() {
 			await collections.conversations.updateOne(

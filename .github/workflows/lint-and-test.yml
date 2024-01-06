@@ -15,7 +15,7 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "npm"
       - run: |
           npm install ci
@@ -40,10 +40,17 @@ jobs:
 
       - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "npm"
       - run: |
           npm ci
       - name: "Tests"
         run: |
           npm run test
+  build-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker image
+        run: docker build --secret id=DOTENV_LOCAL,src=.env.ci -t chat-ui:latest .
