@@ -6,6 +6,7 @@ export type Message = Partial<Timestamps> & {
 	from: "user" | "assistant";
 	id: ReturnType<typeof crypto.randomUUID>;
 	content: string;
+	isExecutionOutput?: boolean;
 	updates?: MessageUpdate[];
 	webSearchId?: WebSearch["_id"]; // legacy version
 	webSearch?: WebSearch;

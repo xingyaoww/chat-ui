@@ -87,8 +87,14 @@
 			// output: "html",
 		})
 	);
+	
+	var cur_msg_content = message.content;
+	if (message.from === "user" && message.isExecutionOutput) {
+		// replace "Execution Output:" with "```results"
+		cur_msg_content = cur_msg_content.replace("Execution Output:", "```result") + "```";
+	}
+	$: tokens = marked.lexer(sanitizeMd(cur_msg_content));
 
-	$: tokens = marked.lexer(sanitizeMd(message.content));
 
 	afterUpdate(() => {
 		loadingEl?.$destroy();
@@ -233,7 +239,41 @@
 		{/if}
 	</div>
 {/if}
-{#if message.from === "user"}
+
+{#if message.from === "user" && message.isExecutionOutput}
+<div
+class="group relative -mb-8 flex items-start justify-start gap-4 pb-8 leading-relaxed"
+role="presentation"
+on:click={() => (isTapped = !isTapped)}
+on:keypress={() => (isTapped = !isTapped)}
+>
+<img
+	alt=""
+	src="https://huggingface.co/avatars/2edb18bd0206c16b433841a47f53fa8e.svg"
+	class="mt-5 h-3 w-3 flex-none select-none rounded-full shadow-lg"
+/>
+<div
+	class="relative min-h-[calc(2rem+theme(spacing[3.5])*2)] min-w-[60px] break-words rounded-2xl border border-gray-100 bg-gradient-to-br from-gray-50 px-5 py-3.5 text-gray-600 prose-pre:my-2 dark:border-gray-800 dark:from-gray-800/40 dark:text-gray-300"
+>
+	<div
+		class="prose max-w-none max-sm:prose-sm dark:prose-invert prose-headings:font-semibold prose-h1:text-lg prose-h2:text-base prose-h3:text-base prose-pre:bg-gray-800 dark:prose-pre:bg-gray-900"
+		bind:this={contentEl}
+	>
+
+		{#each tokens as token}
+			{#if token.type === "code"}
+				<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+			{:else}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html marked.parse(token.raw, options)}
+			{/if}
+		{/each}
+	</div>
+</div>
+</div>
+{/if}
+
+{#if message.from === "user" && !message.isExecutionOutput}
 	<div class="group relative flex items-start justify-start gap-4 max-sm:text-sm">
 		<div class="flex flex-col">
 			{#if message.files && message.files.length > 0}

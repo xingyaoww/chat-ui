@@ -372,9 +372,21 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						execution_output = "Error making the request: " + error + ". Please try again."
 					}
 					console.log("execution_output: " + execution_output)
-					// append the result to the last message
-					lastMessage.content += "\n" + "```result\n" + execution_output + "\n```";
-					// update the conversation
+
+					// create a new message with the execution output
+					messages = [
+						...messages,
+						{
+							from: "user",
+							content: "Execution Output:\n" + execution_output + "\n",
+							isExecutionOutput: true,
+							webSearch: webSearchResults,
+							updates: updates,
+							id: (responseId as Message["id"]) || crypto.randomUUID(),
+							createdAt: new Date(),
+							updatedAt: new Date(),
+						},
+					];
 					await collections.conversations.updateOne(
 						{
 							_id: convId,
@@ -382,7 +394,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						{
 							$set: {
 								messages,
-								title: conv.title,
+								title: conv?.title,
 								updatedAt: new Date(),
 							},
 						}
@@ -391,11 +403,14 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						type: "finalAnswer",
 						text: messages[messages.length - 1].content,
 					});
+
+					console.log("messages: " + messages)
 				}
 
 			})();
 
 			await handleCodeExecution;
+
 
 			return;
 		},
