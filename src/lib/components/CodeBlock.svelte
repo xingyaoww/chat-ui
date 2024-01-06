@@ -4,6 +4,7 @@
 	import HorizontalBarCharts from "./d3figure/HorizontalBarCharts.svelte";
 	import JSON5 from "json5";
 	import PieChart from "./d3figure/PieChart.svelte";
+	import ImageAnnotation from "./ImageAnnotation.svelte";
 
 	export let code = "";
 	export let lang = "";
@@ -42,6 +43,11 @@
 			<p>{parsedJson.data}</p>
 		{:else if contentType === "ecole-image"}
 			<img src={parsedJson.data} />
+		{:else if contentType === "ecole-grounding-data"}
+			<div>
+				<p>{parsedJson.data}</p>
+				<ImageAnnotation data={parsedJson} />
+			</div>
 		{:else if contentType === "ecole-json"}
 			{#if parsedJson.data}
 				<p>{parsedJson.data}</p>
