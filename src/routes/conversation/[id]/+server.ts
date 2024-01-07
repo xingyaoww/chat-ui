@@ -420,7 +420,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 			}
 
 			if (execCount >= parseInt(N_EXECUTION_LIMIT)) {
-				let templatedResponse = "I have reached the maximum number of executions (=" + N_EXECUTION_LIMIT + "). Can you assist me or ask me another question?";
+				let templatedResponse = "I have reached the maximum number of executions specified by the administrator (=" + N_EXECUTION_LIMIT + "). Can you assist me or ask me another question? You can also ask me to continue.";
 				messages = [
 					...messages,
 					{
