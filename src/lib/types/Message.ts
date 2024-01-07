@@ -6,7 +6,10 @@ export type Message = Partial<Timestamps> & {
 	from: "user" | "assistant";
 	id: ReturnType<typeof crypto.randomUUID>;
 	content: string;
-	isExecutionOutput?: boolean;
+	executionType?: "triggered" | "output";
+	// message with inExecutionOutput is true & triggersExecution is true will be skipped
+	// the next message with displayContent will be displayed instead, which is an aggregation of all messages with inExecutionOutput is true & triggersExecution is true
+	displayContent?: string;
 	updates?: MessageUpdate[];
 	webSearchId?: WebSearch["_id"]; // legacy version
 	webSearch?: WebSearch;

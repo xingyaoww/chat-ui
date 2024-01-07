@@ -1,4 +1,4 @@
-import { MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL } from "$env/static/private";
+import { MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL, N_EXECUTION_LIMIT } from "$env/static/private";
 import { authCondition, requiresUser } from "$lib/server/auth";
 import { collections } from "$lib/server/database";
 import { models } from "$lib/server/models";
@@ -193,7 +193,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 			const updates: MessageUpdate[] = [];
 
 			function update(newUpdate: MessageUpdate) {
-				if (newUpdate.type !== "stream") {
+				if (newUpdate.type !== "stream" && newUpdate.type !== "messageDone") {
 					updates.push(newUpdate);
 				}
 
@@ -243,108 +243,121 @@ export async function POST({ request, locals, params, getClientAddress }) {
 			messages[messages.length - 1].webSearch = webSearchResults;
 
 
-			// const handleUserMessage = (async () => {
-
-			conv.messages = messages;
-
-			try {
-				const endpoint = await model.getEndpoint();
-				for await (const output of await endpoint({ conversation: conv })) {
-					// if not generated_text is here it means the generation is not done
-					if (!output.generated_text) {
-						// else we get the next token
-						if (!output.token.special) {
-							update({
-								type: "stream",
-								token: output.token.text,
-							});
-
-							// if the last message is not from assistant, it means this is the first token
-							const lastMessage = messages[messages.length - 1];
-
-							if (lastMessage?.from !== "assistant") {
-								// so we create a new message
-								messages = [
-									...messages,
-									// id doesn't match the backend id but it's not important for assistant messages
-									// First token has a space at the beginning, trim it
-									{
-										from: "assistant",
-										content: output.token.text.trimStart(),
-										webSearch: webSearchResults,
-										updates: updates,
-										id: (responseId as Message["id"]) || crypto.randomUUID(),
-										createdAt: new Date(),
-										updatedAt: new Date(),
-									},
-								];
-							} else {
-								// abort check
-								const date = abortedGenerations.get(convId.toString());
-								if (date && date > promptedAt) {
-									break;
-								}
-
-								if (!output) {
-									break;
-								}
-
-								// otherwise we just concatenate tokens
-								lastMessage.content += output.token.text;
-							}
-						}
-					} else {
-						// add output.generated text to the last message
-						messages = [
-							...messages.slice(0, -1),
-							{
-								...messages[messages.length - 1],
-								content: output.generated_text,
-								updates: updates,
-								updatedAt: new Date(),
-							},
-						];
-					}
-				}
-			} catch (e) {
-				update({ type: "status", status: "error", message: (e as Error).message });
-			}
-			await collections.conversations.updateOne(
-				{
-					_id: convId,
-				},
-				{
-					$set: {
-						messages,
-						title: conv?.title,
-						updatedAt: new Date(),
-					},
-				}
-			);
-
-			update({
-				type: "finalAnswer",
-				text: messages[messages.length - 1].content,
-			});
-
 			await summarizeIfNeeded;
 
-			const handleCodeExecution = (async () => {
-				// get the last message
-				const lastMessage = messages[messages.length - 1];
+			let execCount = 0;
+			let fullContentForDisplay: string = "";
+			
+			while (
+				messages[messages.length - 1].from === "user" &&
+				execCount < parseInt(N_EXECUTION_LIMIT)
+			) {
+				// ===== handle user message =====
+				try {
+					const endpoint = await model.getEndpoint();
+					conv.messages = messages;
+					// console.log("conv.messages (for inference): " + conv.messages)
+					for await (const output of await endpoint({ conversation: conv })) {
+						// if not generated_text is here it means the generation is not done
+						if (!output.generated_text) {
+							// else we get the next token
+							if (!output.token.special) {
+								update({
+									type: "stream",
+									token: output.token.text,
+								});
 
-				console.log(messages)
-				console.log("Last message: ", lastMessage)
-				// assert that the last message is from the assistant, if not raise an error
+								// if the last message is not from assistant, it means this is the first token
+								const lastMessage = messages[messages.length - 1];
+
+								if (lastMessage?.from !== "assistant") {
+									// so we create a new message
+									messages = [
+										...messages,
+										// id doesn't match the backend id but it's not important for assistant messages
+										// First token has a space at the beginning, trim it
+										{
+											from: "assistant",
+											content: output.token.text.trimStart(),
+											webSearch: webSearchResults,
+											updates: updates,
+											id: (responseId as Message["id"]) || crypto.randomUUID(),
+											createdAt: new Date(),
+											updatedAt: new Date(),
+										},
+									];
+								} else {
+									// abort check
+									const date = abortedGenerations.get(convId.toString());
+									if (date && date > promptedAt) {
+										break;
+									}
+
+									if (!output) {
+										break;
+									}
+
+									// otherwise we just concatenate tokens
+									lastMessage.content += output.token.text;
+								}
+							}
+						} else {
+							// add output.generated text to the last message
+							messages = [
+								...messages.slice(0, -1),
+								{
+									...messages[messages.length - 1],
+									content: output.generated_text,
+									updates: updates,
+									updatedAt: new Date(),
+								},
+							];
+							fullContentForDisplay += output.generated_text;
+						}
+					}
+				} catch (e) {
+					update({ type: "status", status: "error", message: (e as Error).message });
+				}
+
+				// Check for whether to perform code execution
+				const lastMessage = messages[messages.length - 1];
 				if (lastMessage.from !== "assistant") {
 					throw new Error("Last message is not from the assistant");
 				}
-				
-				// match execute tag to see if we need to execute code
 				const pattern = /<execute>([\s\S]*?)<\/execute>/;
 				const match = lastMessage.content.match(pattern);
-				console.log("match: " + match)
-				
+
+				if (match) {
+					// update the last message with triggersExecution = true
+					messages = [
+						...messages.slice(0, -1),
+						{
+							...messages[messages.length - 1],
+							// triggersExecution: true,
+							executionType: "triggered",
+							updatedAt: new Date(),
+						},
+					];
+				}
+				await collections.conversations.updateOne(
+					{
+						_id: convId,
+					},
+					{
+						$set: {
+							messages,
+							title: conv?.title,
+							updatedAt: new Date(),
+						},
+					}
+				);
+				update({
+					type: "messageDone",
+					text: fullContentForDisplay,
+					role: "assistant",
+				});
+
+				// ===== handle code execution =====
 				if (match) {
 					const substringBetweenExecuteTags = match[1].trim();
 					var execution_output = "";
@@ -371,15 +384,13 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						console.error('Error making the request:', error);
 						execution_output = "Error making the request: " + error + ". Please try again."
 					}
-					console.log("execution_output: " + execution_output)
-
 					// create a new message with the execution output
 					messages = [
 						...messages,
 						{
 							from: "user",
 							content: "Execution Output:\n" + execution_output + "\n",
-							isExecutionOutput: true,
+							executionType: "output",
 							webSearch: webSearchResults,
 							updates: updates,
 							id: (responseId as Message["id"]) || crypto.randomUUID(),
@@ -399,18 +410,87 @@ export async function POST({ request, locals, params, getClientAddress }) {
 							},
 						}
 					);
+					let displayExecutionResult = "\n```result\n" + execution_output + "```\n"
+					fullContentForDisplay += displayExecutionResult
 					update({
-						type: "finalAnswer",
-						text: messages[messages.length - 1].content,
-					});
-
-					console.log("messages: " + messages)
+						type: "stream",
+						token: displayExecutionResult
+					})
+					execCount += 1;
 				}
+			}
 
-			})();
+			if (execCount >= parseInt(N_EXECUTION_LIMIT)) {
+				let templatedResponse = "I have reached the maximum number of executions (=" + N_EXECUTION_LIMIT + "). Can you assist me or ask me another question?";
+				messages = [
+					...messages,
+					{
+						from: "assistant",
+						content: templatedResponse,
+						webSearch: webSearchResults,
+						updates: updates,
+						id: (responseId as Message["id"]) || crypto.randomUUID(),
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					},
+				];
+				await collections.conversations.updateOne(
+					{
+						_id: convId,
+					},
+					{
+						$set: {
+							messages,
+							title: conv?.title,
+							updatedAt: new Date(),
+						},
+					}
+				);
+				fullContentForDisplay += templatedResponse
+				update({
+					type: "stream",
+					token: messages[messages.length - 1].content
+				});
+			}
+			update({
+				type: "finalAnswer",
+				text: fullContentForDisplay,
+			});
 
-			await handleCodeExecution;
-
+			// Assert the last message is from the assistant that did NOT triggers an execution
+			const lastMessage = messages[messages.length - 1];
+			if (lastMessage.from !== "assistant") {
+				throw new Error("Last message is not from the assistant");
+			}
+			if (lastMessage.executionType === "output") {
+				throw new Error("Last message is an execution output");
+			}
+			if (lastMessage.executionType === "triggered") {
+				throw new Error("Last message is a triggered execution");
+			}
+			
+			// add the fullContentForDisplay to the last message for front-end display
+			messages = [
+				...messages.slice(0, -1),
+				{
+					...messages[messages.length - 1],
+					displayContent: fullContentForDisplay,
+					updates: updates,
+					updatedAt: new Date(),
+				},
+			];
+			await collections.conversations.updateOne(
+				{
+					_id: convId,
+				},
+				{
+					$set: {
+						messages,
+						title: conv?.title,
+						updatedAt: new Date(),
+					},
+				}
+			);
 
 			return;
 		},

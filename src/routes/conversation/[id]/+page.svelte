@@ -179,6 +179,21 @@
 								loading = false;
 								pending = false;
 								invalidate(UrlDependency.Conversation);
+							} else if (update.type === "messageDone") {
+								pending = false;
+								
+								let lastMessage = messages[messages.length - 1];
+								console.log("update", update);
+								
+								if (lastMessage.from === update.role) {
+									messages[messages.length - 1].content = update.text;
+								} else {
+									messages = [
+										...messages,
+										{ from: update.role, id: randomUUID(), content: update.text },
+									];
+								}
+								console.log("messages", messages);
 							} else if (update.type === "stream") {
 								pending = false;
 
