@@ -312,7 +312,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 									updatedAt: new Date(),
 								},
 							];
-							fullContentForDisplay += output.generated_text;
+							fullContentForDisplay += output.generated_text + "\n";
 						}
 					}
 				} catch (e) {
@@ -374,7 +374,6 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						});
 						if (resFromJupyter.ok) {
 							const data = await resFromJupyter.json();
-							// result = "\n" + "```result\n" + data["result"]
 							execution_output = data["result"]
 						} else {
 							console.error('Request to Jupyter failed with status:', resFromJupyter.status);
@@ -410,7 +409,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 							},
 						}
 					);
-					let displayExecutionResult = "\n```result\n" + execution_output + "```\n"
+					let displayExecutionResult = "\n```result\n" + execution_output + "\n```\n"
 					fullContentForDisplay += displayExecutionResult
 					update({
 						type: "stream",
