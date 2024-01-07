@@ -4,22 +4,21 @@
 	import { PUBLIC_APP_DESCRIPTION } from "$env/static/public";
 	import Logo from "$lib/components/icons/Logo.svelte";
 	import { createEventDispatcher } from "svelte";
-	import IconChevron from "$lib/components/icons/IconChevron.svelte";
+	import IconGear from "~icons/bi/gear-fill";
 	import CarbonArrowUpRight from "~icons/carbon/arrow-up-right";
 	import AnnouncementBanner from "../AnnouncementBanner.svelte";
-	import ModelsModal from "../ModelsModal.svelte";
 	import type { Model } from "$lib/types/Model";
 	import ModelCardMetadata from "../ModelCardMetadata.svelte";
-	import type { LayoutData } from "../../../routes/$types";
 	import { findCurrentModel } from "$lib/utils/models";
+	import { base } from "$app/paths";
+	import { useSettingsStore } from "$lib/stores/settings";
 
 	export let currentModel: Model;
-	export let settings: LayoutData["settings"];
 	export let models: Model[];
 
-	let isModelsModalOpen = false;
+	const settings = useSettingsStore();
 
-	$: currentModelMetadata = findCurrentModel(models, settings.activeModel);
+	$: currentModelMetadata = findCurrentModel(models, $settings.activeModel);
 
 	const announcementBanners = PUBLIC_ANNOUNCEMENT_BANNERS
 		? JSON.parse(PUBLIC_ANNOUNCEMENT_BANNERS)
@@ -57,21 +56,16 @@
 				>
 			</AnnouncementBanner>
 		{/each}
-
-		{#if isModelsModalOpen}
-			<ModelsModal {settings} {models} on:close={() => (isModelsModalOpen = false)} />
-		{/if}
 		<div class="overflow-hidden rounded-xl border dark:border-gray-800">
 			<div class="flex p-3">
 				<div>
 					<div class="text-sm text-gray-600 dark:text-gray-400">Current Model</div>
 					<div class="font-semibold">{currentModel.displayName}</div>
 				</div>
-				<button
-					type="button"
-					on:click={() => (isModelsModalOpen = true)}
+				<a
+					href="{base}/settings/{currentModel.id}"
 					class="btn ml-auto flex h-7 w-7 self-start rounded-full bg-gray-100 p-1 text-xs hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-800 dark:hover:bg-gray-600"
-					><IconChevron /></button
+					><IconGear /></a
 				>
 			</div>
 			<ModelCardMetadata variant="dark" model={currentModel} />
@@ -84,7 +78,7 @@
 				{#each currentModelMetadata.promptExamples as example}
 					<button
 						type="button"
-						class="rounded-xl border bg-gray-50 p-2.5 text-gray-600 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 sm:p-4"
+						class="rounded-xl border bg-gray-50 p-2.5 text-gray-600 hover:bg-gray-100 sm:p-4 dark:border-gray-800 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
 						on:click={() => dispatch("message", example.prompt)}
 					>
 						{example.title}

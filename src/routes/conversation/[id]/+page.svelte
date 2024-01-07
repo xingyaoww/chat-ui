@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ChatWindow from "$lib/components/chat/ChatWindow.svelte";
 	import { pendingMessage } from "$lib/stores/pendingMessage";
+	import { isAborted } from "$lib/stores/isAborted";
 	import { onMount } from "svelte";
 	import { page } from "$app/stores";
 	import { goto, invalidate } from "$app/navigation";
@@ -14,12 +15,11 @@
 	import type { Message } from "$lib/types/Message";
 	import type { MessageUpdate, WebSearchUpdate } from "$lib/types/MessageUpdate";
 	import titleUpdate from "$lib/stores/titleUpdate";
-
+	import file2base64 from "$lib/utils/file2base64";
 	export let data;
 
 	let messages = data.messages;
 	let lastLoadedMessages = data.messages;
-	let isAborted = false;
 
 	let webSearchMessages: WebSearchUpdate[] = [];
 
@@ -31,6 +31,8 @@
 
 	let loading = false;
 	let pending = false;
+
+	let files: File[] = [];
 
 	async function convFromShared() {
 		try {
@@ -66,7 +68,7 @@
 		if (!message.trim()) return;
 
 		try {
-			isAborted = false;
+			$isAborted = false;
 			loading = true;
 			pending = true;
 
@@ -79,14 +81,37 @@
 				retryMessageIndex = messages.length;
 			}
 
+			const module = await import("browser-image-resizer");
+
+			// currently, only IDEFICS is supported by TGI
+			// the size of images is hardcoded to 224x224 in TGI
+			// this will need to be configurable when support for more models is added
+			const resizedImages = await Promise.all(
+				files.map(async (file) => {
+					return await module
+						.readAndCompressImage(file, {
+							maxHeight: 224,
+							maxWidth: 224,
+							quality: 1,
+						})
+						.then(async (el) => await file2base64(el as File));
+				})
+			);
+
 			// slice up to the point of the retry
 			messages = [
 				...messages.slice(0, retryMessageIndex),
-				{ from: "user", content: message, id: messageId },
+				{
+					from: "user",
+					content: message,
+					id: messageId,
+					files: isRetry ? messages[retryMessageIndex].files : resizedImages,
+				},
 			];
 
-			const responseId = randomUUID();
+			files = [];
 
+			const responseId = randomUUID();
 			const response = await fetch(`${base}/conversation/${$page.params.id}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -96,9 +121,11 @@
 					response_id: responseId,
 					is_retry: isRetry,
 					web_search: $webSearchParameters.useSearch,
+					files: isRetry ? undefined : resizedImages,
 				}),
 			});
 
+			files = [];
 			if (!response.body) {
 				throw new Error("Body not defined");
 			}
@@ -107,18 +134,22 @@
 				error.set((await response.json())?.message);
 				return;
 			}
+
 			// eslint-disable-next-line no-undef
 			const encoder = new TextDecoderStream();
 			const reader = response?.body?.pipeThrough(encoder).getReader();
 			let finalAnswer = "";
 
+			// set str queue
+			// ex) if the last response is => {"type": "stream", "token":
+			// It should be => {"type": "stream", "token": "Hello"} = prev_input_chunk + "Hello"}
+			let prev_input_chunk = [""];
+
 			// this is a bit ugly
 			// we read the stream until we get the final answer
 			while (finalAnswer === "") {
-				await new Promise((r) => setTimeout(r, 25));
-
 				// check for abort
-				if (isAborted) {
+				if ($isAborted) {
 					reader?.cancel();
 					break;
 				}
@@ -135,6 +166,8 @@
 						return;
 					}
 
+					value = prev_input_chunk.pop() + value;
+
 					// if it's not done we parse the value, which contains all messages
 					const inputs = value.split("\n");
 					inputs.forEach(async (el: string) => {
@@ -143,7 +176,24 @@
 							if (update.type === "finalAnswer") {
 								finalAnswer = update.text;
 								reader.cancel();
+								loading = false;
+								pending = false;
 								invalidate(UrlDependency.Conversation);
+							} else if (update.type === "messageDone") {
+								pending = false;
+								
+								let lastMessage = messages[messages.length - 1];
+								console.log("update", update);
+								
+								if (lastMessage.from === update.role) {
+									messages[messages.length - 1].content = update.text;
+								} else {
+									messages = [
+										...messages,
+										{ from: update.role, id: randomUUID(), content: update.text },
+									];
+								}
+								console.log("messages", messages);
 							} else if (update.type === "stream") {
 								pending = false;
 
@@ -171,10 +221,19 @@
 											convId: $page.params.id,
 										};
 									}
+								} else if (update.status === "error") {
+									$error = update.message ?? "An error has occurred";
 								}
+							} else if (update.type === "error") {
+								error.set(update.message);
+								reader.cancel();
 							}
 						} catch (parseError) {
 							// in case of parsing error we wait for the next message
+
+							if (el === inputs[inputs.length - 1]) {
+								prev_input_chunk.push(el);
+							}
 							return;
 						}
 					});
@@ -231,8 +290,9 @@
 	onMount(async () => {
 		// only used in case of creating new conversations (from the parent POST endpoint)
 		if ($pendingMessage) {
-			await writeMessage($pendingMessage);
-			$pendingMessage = "";
+			files = $pendingMessage.files;
+			await writeMessage($pendingMessage.content);
+			$pendingMessage = undefined;
 		}
 	});
 
@@ -262,7 +322,7 @@
 		}
 	}
 
-	$: $page.params.id, (isAborted = true);
+	$: $page.params.id, (($isAborted = true), (loading = false));
 	$: title = data.conversations.find((conv) => conv.id === $page.params.id)?.title ?? data.title;
 </script>
 
@@ -283,12 +343,12 @@
 	shared={data.shared}
 	preprompt={data.preprompt}
 	bind:webSearchMessages
+	bind:files
 	on:message={onMessage}
 	on:retry={onRetry}
 	on:vote={(event) => voteMessage(event.detail.score, event.detail.id)}
 	on:share={() => shareConversation($page.params.id, data.title)}
-	on:stop={() => (isAborted = true)}
+	on:stop={() => (($isAborted = true), (loading = false))}
 	models={data.models}
 	currentModel={findCurrentModel([...data.models, ...data.oldModels], data.model)}
-	settings={data.settings}
 />
