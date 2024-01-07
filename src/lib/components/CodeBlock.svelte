@@ -25,22 +25,22 @@
 <div class="group relative my-4 rounded-lg">
 	<!-- eslint-disable svelte/no-at-html-tags -->
 	{#if lang === "result"}
-		<div class="rounded-lg bg-gray-800 p-4 text-xs">
+		<div class="rounded-lg bg-gray-800 dark:bg-gray-900 p-2 text-xs">
 			<div class="mb-1 text-gray-400">STDOUT/STDERR</div>
 			<pre
 			bind:this={scrollToBottomElement}
 			class="scrollbar-custom scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20 overflow-auto px-5 max-h-[60vh] bg-gray-800"
-			style="padding-left: 0; padding-right: 0; padding-bottom: 0; padding-top: 0; margin-bottom: 0; font-size: 0.75rem;"
+			style="padding: 0; margin-bottom: 0; font-size: 0.75rem;"
 			><code
 				class="language-console">{@html highlightedCode || code.replaceAll("<", "&lt;")}</code
 			></pre>
 		</div>
 	{:else if lang === "execute"}
-		<div class="rounded-lg bg-gray-800 p-4 text-xs">
+		<div class="rounded-lg bg-gray-800 dark:bg-gray-900 p-2 text-xs">
 			<div class="mb-1 text-gray-400">EXECUTE</div>
 			<pre
-			class="scrollbar-custom scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20 overflow-auto px-5 bg-gray-800"
-			style="padding-left: 0; padding-right: 0; padding-bottom: 0; padding-top: 0; margin-bottom: 0; font-size: 0.75rem;"
+			class="scrollbar-custom scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20 overflow-auto px-5"
+			style="padding: 0; margin-bottom: 0; font-size: 0.75rem;"
 			><code
 				class="language-{lang}">{@html highlightedCode || code.replaceAll("<", "&lt;")}</code
 			></pre>
@@ -51,11 +51,11 @@
 			value={code}
 		/>
 	{:else}
-		<div class="rounded-lg bg-gray-800 p-4 text-xs">
+		<div class="rounded-lg bg-gray-800 dark:bg-gray-900 p-2 text-xs">
 			<div class="mb-1 text-gray-400">CODE</div>
 			<pre
 			class="scrollbar-custom scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20 overflow-auto px-5 bg-gray-800"
-			style="padding-left: 0; padding-right: 0; padding-bottom: 0; padding-top: 0; margin-bottom: 0; font-size: 0.75rem;"
+			style="padding: 0; margin-bottom: 0; font-size: 0.75rem;"
 			><code
 				class="language-{lang}">{@html highlightedCode || code.replaceAll("<", "&lt;")}</code
 			></pre>
