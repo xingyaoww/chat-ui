@@ -360,7 +360,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 				// ===== handle code execution =====
 				if (match) {
 					const substringBetweenExecuteTags = match[1].trim();
-					var execution_output = "";
+					var executionOutput = "";
 					try {
 						const resFromJupyter = await fetch(JUPYTER_API_URL + "/execute", {
 							headers: {
@@ -374,7 +374,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						});
 						if (resFromJupyter.ok) {
 							const data = await resFromJupyter.json();
-							execution_output = data["result"]
+							executionOutput = data["result"]
 							if (data["new_kernel_created"]) {
 								update({
 									type: "status",
@@ -384,18 +384,44 @@ export async function POST({ request, locals, params, getClientAddress }) {
 							}
 						} else {
 							console.error('Request to Jupyter failed with status:', resFromJupyter.status);
-							execution_output = "Request to Code Execution failed with status: " + resFromJupyter.status + ". Please try again."
+							executionOutput = "Request to Code Execution failed with status: " + resFromJupyter.status + ". Please try again."
 						}
 					} catch (error) {
 						console.error('Error making the request:', error);
-						execution_output = "Error making the request: " + error + ". Please try again."
+						executionOutput = "Error making the request: " + error + ". Please try again."
 					}
-					// create a new message with the execution output
+
+					// const imgPattern = /<img[^>]*>/g;
+					// detect markdown image tag ![...](...)
+					const imgPattern = /!\[.*?\]\(.*?\)/g;
+					let displayExecutionResult = "\n```result\n" + executionOutput + "\n```\n";
+					const matchedImgs = displayExecutionResult.match(imgPattern);
+					// let displayExecutionResult = "\n```result\n" + executionOutput + "\n```\n"
+					if (matchedImgs) {
+						for (const matchedImg of matchedImgs) {
+							// close the previous block ``` before <img src="..."> tag
+							// add ```result\n after the <img src="..."> tag (start a new block)
+							displayExecutionResult = displayExecutionResult.replace(
+								matchedImg, "\n```\n" + matchedImg + "\n```result\n"
+							)
+						}
+
+						executionOutput = executionOutput.replace(imgPattern, "\n[An image is already displayed to the user.]\n")
+					}
+					// remove empty result code block
+					displayExecutionResult = displayExecutionResult.replace("```result\n\n```", "")
+
+					// truncate the execution output *for the LLM* if it's too long
+					if (executionOutput.length > 4000) {
+						executionOutput = executionOutput.substring(0, 2000) + "\n... [Output truncated due to length]...\n" + executionOutput.substring(executionOutput.length - 2000)
+					}
+
+					// create a new message with the execution output			
 					messages = [
 						...messages,
 						{
 							from: "user",
-							content: "Execution Output:\n" + execution_output + "\n",
+							content: "Execution Output:\n" + executionOutput + "\n",
 							executionType: "output",
 							webSearch: webSearchResults,
 							updates: updates,
@@ -404,6 +430,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 							updatedAt: new Date(),
 						},
 					];
+
 					await collections.conversations.updateOne(
 						{
 							_id: convId,
@@ -416,7 +443,6 @@ export async function POST({ request, locals, params, getClientAddress }) {
 							},
 						}
 					);
-					let displayExecutionResult = "\n```result\n" + execution_output + "\n```\n"
 					fullContentForDisplay += displayExecutionResult
 					update({
 						type: "stream",
