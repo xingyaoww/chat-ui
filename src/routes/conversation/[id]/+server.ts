@@ -375,6 +375,13 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						if (resFromJupyter.ok) {
 							const data = await resFromJupyter.json();
 							execution_output = data["result"]
+							if (data["new_kernel_created"]) {
+								update({
+									type: "status",
+									status: "error",
+									message: "A new code execution kernel has been created. Previous code execution variables may not be available."
+								});
+							}
 						} else {
 							console.error('Request to Jupyter failed with status:', resFromJupyter.status);
 							execution_output = "Request to Code Execution failed with status: " + resFromJupyter.status + ". Please try again."
