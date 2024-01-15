@@ -20,6 +20,11 @@
 		const language = hljs.getLanguage(lang === "execute" ? "python" : lang);
 
 		highlightedCode = hljs.highlightAuto(code, language?.aliases).value;
+
+		// Scroll to bottom whenever highlightedCode changes
+		if (scrollToBottomElement) {
+			scrollToBottomElement.scrollTop = scrollToBottomElement.scrollHeight;
+		}
 	});
 
 	function isValidJson(jsonString: string) {
