@@ -12,10 +12,12 @@
 	let chartType = "horizontalBar";
 
 	$: highlightedCode = "";
+	let scrollToBottomElement: HTMLPreElement;
 
 	afterUpdate(async () => {
 		const { default: hljs } = await import("highlight.js");
-		const language = hljs.getLanguage(lang);
+		// if lang == execute, get the language `python`
+		const language = hljs.getLanguage(lang === "execute" ? "python" : lang);
 
 		highlightedCode = hljs.highlightAuto(code, language?.aliases).value;
 	});
@@ -124,11 +126,39 @@
 				</div>
 			</div>
 		{/if}
+		<div class="rounded-lg bg-gray-800 p-2 text-xs dark:bg-gray-900">
+			<div class="mb-1 text-gray-400">STDOUT/STDERR</div>
+			<pre
+				bind:this={scrollToBottomElement}
+				class="scrollbar-custom max-h-[60vh] overflow-auto bg-gray-800 px-5 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20"
+				style="padding: 0; margin-bottom: 0; font-size: 0.75rem;"><code class="language-console"
+					>{@html highlightedCode || code.replaceAll("<", "&lt;")}</code
+				></pre>
+		</div>
+	{:else if lang === "execute"}
+		<div class="rounded-lg bg-gray-800 p-2 text-xs dark:bg-gray-900">
+			<div class="mb-1 text-gray-400">EXECUTE</div>
+			<pre
+				class="scrollbar-custom overflow-auto px-5 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20"
+				style="padding: 0; margin-bottom: 0; font-size: 0.75rem;"><code class="language-{lang}"
+					>{@html highlightedCode || code.replaceAll("<", "&lt;")}</code
+				></pre>
+		</div>
+
+		<CopyToClipBoardBtn
+			classNames="absolute top-2 right-2 invisible opacity-0 group-hover:visible group-hover:opacity-100"
+			value={code}
+		/>
 	{:else}
-		<pre
-			class="scrollbar-custom overflow-auto px-5 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20"><code
-				class="language-{lang}">{@html highlightedCode || code.replaceAll("<", "&lt;")}</code
-			></pre>
+		<div class="rounded-lg bg-gray-800 p-2 text-xs dark:bg-gray-900">
+			<div class="mb-1 text-gray-400">CODE</div>
+			<pre
+				class="scrollbar-custom overflow-auto bg-gray-800 px-5 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20"
+				style="padding: 0; margin-bottom: 0; font-size: 0.75rem;"><code class="language-{lang}"
+					>{@html highlightedCode || code.replaceAll("<", "&lt;")}</code
+				></pre>
+		</div>
+
 		<CopyToClipBoardBtn
 			classNames="absolute top-2 right-2 invisible opacity-0 group-hover:visible group-hover:opacity-100"
 			value={code}

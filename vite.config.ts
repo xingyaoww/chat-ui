@@ -16,4 +16,7 @@ export default defineConfig({
 			],
 		}),
 	],
+	optimizeDeps: {
+		include: ["browser-image-resizer"],
+	},
 });

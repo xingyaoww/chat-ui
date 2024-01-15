@@ -22,10 +22,10 @@
 
 	function sanitizeMd(md: string) {
 		let ret = md
-			.replace(/<execute(\s)*(>)?(\s)*/g, "\n```python\n")
+			.replace(/<execute(\s)*(>)?(\s)*/g, "\n```execute\n")
 			.replace(/<\/execute(>)?/g, "\n```")
 			.replace(/<image(\s)*(>)?(\s)*/g, "\n```image\n")
-			.replace(/<\/image(>)?/g, "\n```")
+			.replace(/<\/image(>)?/g, "\n```\n")
 			.replace(/<\|[a-z]*$/, "")
 			.replace(/<\|[a-z]+\|$/, "")
 			.replace(/<$/, "")
@@ -100,7 +100,8 @@
 		})
 	);
 
-	$: tokens = marked.lexer(sanitizeMd(message.content));
+	// if message.displayContent is defined, use that instead of message.content
+	$: tokens = marked.lexer(sanitizeMd(message.displayContent ?? message.content));
 
 	afterUpdate(() => {
 		loadingEl?.$destroy();
@@ -255,63 +256,87 @@
 		{/if}
 	</div>
 {/if}
+
 {#if message.from === "user"}
 	<div class="group relative flex items-start justify-start gap-4 max-sm:text-sm">
-		<div class="mt-5 h-3 w-3 flex-none rounded-full" />
-		<div
-			class="max-w-full whitespace-break-spaces break-words rounded-2xl px-5 py-3.5 text-gray-500 dark:text-gray-400"
-		>
-			{#each marked.lexer(sanitizeMd(message.content.trim())) as token}
-				{#if token.type === "code"}
-					{#if token.lang === "image"}
-						{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
-							{#each JSON.parse(unsanitizeMd(token.text)) as json}
-								<ImageReader {json} />
-							{/each}
+		<div class="flex flex-col">
+			{#if message.files && message.files.length > 0}
+				<div class="mx-auto grid w-fit grid-cols-2 gap-5 px-5">
+					{#each message.files as file}
+						<!-- handle the case where this is a hash that points to an image in the db, hash is always 64 char long -->
+						{#if file.length === 64}
+							<img
+								src={$page.url.pathname + "/output/" + file}
+								alt="input from user"
+								class="my-2 aspect-auto max-h-48 rounded-lg shadow-lg"
+							/>
 						{:else}
-							<ImageReader json={JSON.parse(unsanitizeMd(token.text))} />
+							<!-- handle the case where this is a base64 encoded image -->
+							<img
+								src={"data:image/*;base64," + file}
+								alt="input from user"
+								class="my-2 aspect-auto max-h-48 rounded-lg shadow-lg"
+							/>
+						{/if}
+					{/each}
+				</div>
+			{/if}
+
+			<div
+				class="max-w-full whitespace-break-spaces break-words rounded-2xl px-5 py-3.5 text-gray-500 dark:text-gray-400"
+			>
+				{#each marked.lexer(sanitizeMd(message.content.trim())) as token}
+					{#if token.type === "code"}
+						{#if token.lang === "image"}
+							{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
+								{#each JSON.parse(unsanitizeMd(token.text)) as json}
+									<ImageReader {json} />
+								{/each}
+							{:else}
+								<ImageReader json={JSON.parse(unsanitizeMd(token.text))} />
+							{/if}
+						{:else}
+							<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+						{/if}
+					{:else if token.type === "html"}
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html token.raw}
+					{:else if token.type === "text"}
+						{#if token.text.trim()}
+							<p class="mb-2">{token.text}</p>
 						{/if}
 					{:else}
-						<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
+						<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+						{@html marked.parse(token.raw, options)}
 					{/if}
-				{:else if token.type === "html"}
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{@html token.raw}
-				{:else if token.type === "text"}
-					{#if token.text.trim()}
-						<p class="mb-2">{token.text}</p>
-					{/if}
-				{:else}
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					{@html marked.parse(token.raw, options)}
-				{/if}
-			{/each}
-			<!-- {message.content.trim()} -->
-		</div>
-		{#if !loading}
-			<div class="absolute right-0 top-3.5 flex gap-2 lg:-right-2">
-				{#if downloadLink}
-					<a
-						class="rounded-lg border border-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 dark:border-gray-800 dark:text-gray-400 dark:hover:text-gray-300 md:hidden"
-						title="Download prompt and parameters"
-						type="button"
-						target="_blank"
-						href={downloadLink}
-					>
-						<CarbonDownload />
-					</a>
-				{/if}
-				{#if !readOnly}
-					<button
-						class="cursor-pointer rounded-lg border border-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 dark:border-gray-800 dark:text-gray-400 dark:hover:text-gray-300 md:hidden lg:-right-2"
-						title="Retry"
-						type="button"
-						on:click={() => dispatch("retry", { content: message.content, id: message.id })}
-					>
-						<CarbonRotate360 />
-					</button>
-				{/if}
+				{/each}
+				<!-- {message.content.trim()} -->
 			</div>
-		{/if}
+			{#if !loading}
+				<div class="absolute right-0 top-3.5 flex gap-2 lg:-right-2">
+					{#if downloadLink}
+						<a
+							class="rounded-lg border border-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 dark:border-gray-800 dark:text-gray-400 dark:hover:text-gray-300 md:hidden"
+							title="Download prompt and parameters"
+							type="button"
+							target="_blank"
+							href={downloadLink}
+						>
+							<CarbonDownload />
+						</a>
+					{/if}
+					{#if !readOnly}
+						<button
+							class="cursor-pointer rounded-lg border border-gray-100 p-1 text-xs text-gray-400 group-hover:block hover:text-gray-500 dark:border-gray-800 dark:text-gray-400 dark:hover:text-gray-300 md:hidden lg:-right-2"
+							title="Retry"
+							type="button"
+							on:click={() => dispatch("retry", { content: message.content, id: message.id })}
+						>
+							<CarbonRotate360 />
+						</button>
+					{/if}
+				</div>
+			{/if}
+		</div>
 	</div>
 {/if}

@@ -13,14 +13,14 @@
 	import MobileNav from "$lib/components/MobileNav.svelte";
 	import NavMenu from "$lib/components/NavMenu.svelte";
 	import Toast from "$lib/components/Toast.svelte";
-	import SettingsModal from "$lib/components/SettingsModal.svelte";
 	import { PUBLIC_APP_ASSETS, PUBLIC_APP_NAME } from "$env/static/public";
 	import titleUpdate from "$lib/stores/titleUpdate";
+	import { createSettingsStore } from "$lib/stores/settings";
+	import { browser } from "$app/environment";
 
 	export let data;
 
 	let isNavOpen = false;
-	let isSettingsOpen = false;
 	let errorToastTimeout: ReturnType<typeof setTimeout>;
 	let currentError: string | null;
 
@@ -104,6 +104,15 @@
 
 		$titleUpdate = null;
 	}
+
+	const settings = createSettingsStore(data.settings);
+
+	$: if (browser && $page.url.searchParams.has("model")) {
+		if ($settings.activeModel === $page.url.searchParams.get("model")) {
+			goto(`${base}/?`);
+		}
+		$settings.activeModel = $page.url.searchParams.get("model") ?? $settings.activeModel;
+	}
 </script>
 
 <svelte:head>
@@ -139,7 +148,7 @@
 </svelte:head>
 
 <div
-	class="grid h-full w-screen grid-cols-1 grid-rows-[auto,1fr] overflow-hidden text-smd dark:text-gray-300 md:grid-cols-[280px,1fr] md:grid-rows-[1fr]"
+	class="grid h-full w-screen grid-cols-1 grid-rows-[auto,1fr] overflow-hidden text-smd md:grid-cols-[280px,1fr] md:grid-rows-[1fr] dark:text-gray-300"
 >
 	<MobileNav
 		isOpen={isNavOpen}
@@ -152,7 +161,6 @@
 			canLogin={data.user === undefined && data.loginEnabled}
 			on:shareConversation={(ev) => shareConversation(ev.detail.id, ev.detail.title)}
 			on:deleteConversation={(ev) => deleteConversation(ev.detail)}
-			on:clickSettings={() => (isSettingsOpen = true)}
 			on:editConversationTitle={(ev) => editConversationTitle(ev.detail.id, ev.detail.title)}
 		/>
 	</MobileNav>
@@ -163,19 +171,11 @@
 			canLogin={data.user === undefined && data.loginEnabled}
 			on:shareConversation={(ev) => shareConversation(ev.detail.id, ev.detail.title)}
 			on:deleteConversation={(ev) => deleteConversation(ev.detail)}
-			on:clickSettings={() => (isSettingsOpen = true)}
 			on:editConversationTitle={(ev) => editConversationTitle(ev.detail.id, ev.detail.title)}
 		/>
 	</nav>
 	{#if currentError}
 		<Toast message={currentError} />
-	{/if}
-	{#if isSettingsOpen}
-		<SettingsModal
-			on:close={() => (isSettingsOpen = false)}
-			settings={data.settings}
-			models={data.models}
-		/>
 	{/if}
 	<slot />
 </div>

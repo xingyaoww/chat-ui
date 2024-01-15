@@ -5,6 +5,12 @@ export type FinalAnswer = {
 	text: string;
 };
 
+export type MessageDoneUpdate = {
+	type: "messageDone";
+	role: "assistant" | "user";
+	text: string;
+};
+
 export type TextStreamUpdate = {
 	type: "stream";
 	token: string;
@@ -31,9 +37,17 @@ export type StatusUpdate = {
 	message?: string;
 };
 
+export type ErrorUpdate = {
+	type: "error";
+	message: string;
+	name: string;
+};
+
 export type MessageUpdate =
 	| FinalAnswer
+	| MessageDoneUpdate
 	| TextStreamUpdate
 	| AgentUpdate
 	| WebSearchUpdate
-	| StatusUpdate;
+	| StatusUpdate
+	| ErrorUpdate;
