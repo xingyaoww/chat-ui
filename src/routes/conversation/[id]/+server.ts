@@ -1,4 +1,9 @@
-import { MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL, N_EXECUTION_LIMIT } from "$env/static/private";
+import {
+	MESSAGES_BEFORE_LOGIN,
+	RATE_LIMIT,
+	JUPYTER_API_URL,
+	N_EXECUTION_LIMIT,
+} from "$env/static/private";
 import { authCondition, requiresUser } from "$lib/server/auth";
 import { collections } from "$lib/server/database";
 import { models } from "$lib/server/models";
@@ -185,8 +190,6 @@ export async function POST({ request, locals, params, getClientAddress }) {
 		}
 	);
 
-
-
 	// we now build the stream
 	const stream = new ReadableStream({
 		async start(controller) {
@@ -242,12 +245,11 @@ export async function POST({ request, locals, params, getClientAddress }) {
 
 			messages[messages.length - 1].webSearch = webSearchResults;
 
-
 			await summarizeIfNeeded;
 
 			let execCount = 0;
 			let fullContentForDisplay: string = "";
-			
+
 			while (
 				messages[messages.length - 1].from === "user" &&
 				execCount < parseInt(N_EXECUTION_LIMIT)
@@ -360,35 +362,39 @@ export async function POST({ request, locals, params, getClientAddress }) {
 				// ===== handle code execution =====
 				if (match) {
 					const substringBetweenExecuteTags = match[1].trim();
-					var executionOutput = "";
+					let executionOutput = "";
 					try {
 						const resFromJupyter = await fetch(JUPYTER_API_URL + "/execute", {
 							headers: {
-								'Content-Type': 'application/json',
+								"Content-Type": "application/json",
 							},
 							method: "POST",
 							body: JSON.stringify({
 								convid: convId.toString(),
-								code: substringBetweenExecuteTags
+								code: substringBetweenExecuteTags,
 							}),
 						});
 						if (resFromJupyter.ok) {
 							const data = await resFromJupyter.json();
-							executionOutput = data["result"]
+							executionOutput = data["result"];
 							if (data["new_kernel_created"]) {
-								update({
-									type: "status",
-									status: "error",
-									message: "A new code execution kernel has been created. Previous code execution variables may not be available."
-								});
+								// update({
+								// 	type: "status",
+								// 	status: "error",
+								// 	message:
+								// 		"A new code execution kernel has been created. Previous code execution variables may not be available.",
+								// });
 							}
 						} else {
-							console.error('Request to Jupyter failed with status:', resFromJupyter.status);
-							executionOutput = "Request to Code Execution failed with status: " + resFromJupyter.status + ". Please try again."
+							console.error("Request to Jupyter failed with status:", resFromJupyter.status);
+							executionOutput =
+								"Request to Code Execution failed with status: " +
+								resFromJupyter.status +
+								". Please try again.";
 						}
 					} catch (error) {
-						console.error('Error making the request:', error);
-						executionOutput = "Error making the request: " + error + ". Please try again."
+						console.error("Error making the request:", error);
+						executionOutput = "Error making the request: " + error + ". Please try again.";
 					}
 
 					// const imgPattern = /<img[^>]*>/g;
@@ -402,21 +408,28 @@ export async function POST({ request, locals, params, getClientAddress }) {
 							// close the previous block ``` before <img src="..."> tag
 							// add ```result\n after the <img src="..."> tag (start a new block)
 							displayExecutionResult = displayExecutionResult.replace(
-								matchedImg, "\n```\n" + matchedImg + "\n```result\n"
-							)
+								matchedImg,
+								"\n```\n" + matchedImg + "\n```result\n"
+							);
 						}
 
-						executionOutput = executionOutput.replace(imgPattern, "\n[An image is already displayed to the user.]\n")
+						executionOutput = executionOutput.replace(
+							imgPattern,
+							"\n[An image is already displayed to the user.]\n"
+						);
 					}
 					// remove empty result code block
-					displayExecutionResult = displayExecutionResult.replace("```result\n\n```", "")
+					displayExecutionResult = displayExecutionResult.replace("```result\n\n```", "");
 
 					// truncate the execution output *for the LLM* if it's too long
 					if (executionOutput.length > 4000) {
-						executionOutput = executionOutput.substring(0, 2000) + "\n... [Output truncated due to length]...\n" + executionOutput.substring(executionOutput.length - 2000)
+						executionOutput =
+							executionOutput.substring(0, 2000) +
+							"\n... [Output truncated due to length]...\n" +
+							executionOutput.substring(executionOutput.length - 2000);
 					}
 
-					// create a new message with the execution output			
+					// create a new message with the execution output
 					messages = [
 						...messages,
 						{
@@ -443,17 +456,20 @@ export async function POST({ request, locals, params, getClientAddress }) {
 							},
 						}
 					);
-					fullContentForDisplay += displayExecutionResult
+					fullContentForDisplay += displayExecutionResult;
 					update({
 						type: "stream",
-						token: displayExecutionResult
-					})
+						token: displayExecutionResult,
+					});
 					execCount += 1;
 				}
 			}
 
 			if (execCount >= parseInt(N_EXECUTION_LIMIT)) {
-				let templatedResponse = "I have reached the maximum number of executions specified by the administrator (=" + N_EXECUTION_LIMIT + "). Can you assist me or ask me another question? You can also ask me to continue.";
+				const templatedResponse =
+					"I have reached the maximum number of executions specified by the administrator (=" +
+					N_EXECUTION_LIMIT +
+					"). Can you assist me or ask me another question? You can also ask me to continue.";
 				messages = [
 					...messages,
 					{
@@ -478,10 +494,10 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						},
 					}
 				);
-				fullContentForDisplay += templatedResponse
+				fullContentForDisplay += templatedResponse;
 				update({
 					type: "stream",
-					token: messages[messages.length - 1].content
+					token: messages[messages.length - 1].content,
 				});
 			}
 			update({
@@ -500,7 +516,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 			if (lastMessage.executionType === "triggered") {
 				throw new Error("Last message is a triggered execution");
 			}
-			
+
 			// add the fullContentForDisplay to the last message for front-end display
 			messages = [
 				...messages.slice(0, -1),

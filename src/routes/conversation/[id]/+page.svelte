@@ -73,6 +73,7 @@
 			pending = true;
 
 			// first we check if the messageId already exists, indicating a retry
+			console.log("messages", message);
 
 			let retryMessageIndex = messages.findIndex((msg) => msg.id === messageId);
 			const isRetry = retryMessageIndex !== -1;
@@ -112,6 +113,9 @@
 			files = [];
 
 			const responseId = randomUUID();
+			console.log("responseId", responseId);
+			console.log("message", message);
+
 			const response = await fetch(`${base}/conversation/${$page.params.id}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -121,7 +125,7 @@
 					response_id: responseId,
 					is_retry: isRetry,
 					web_search: $webSearchParameters.useSearch,
-					files: isRetry ? undefined : resizedImages,
+					files: isRetry ? [] : resizedImages,
 				}),
 			});
 
@@ -181,9 +185,9 @@
 								invalidate(UrlDependency.Conversation);
 							} else if (update.type === "messageDone") {
 								pending = false;
-								
+
 								let lastMessage = messages[messages.length - 1];
-								
+
 								if (lastMessage.from === update.role) {
 									messages[messages.length - 1].content = update.text;
 								} else {

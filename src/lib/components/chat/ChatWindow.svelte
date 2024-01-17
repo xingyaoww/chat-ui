@@ -17,7 +17,7 @@
 	import ImageGallery from "./ImageGallery.svelte";
 	import type { Model } from "$lib/types/Model";
 	import WebSearchToggle from "../WebSearchToggle.svelte";
-	// import LoginModal from "../LoginModal.svelte";
+	import LoginModal from "../LoginModal.svelte";
 	import type { WebSearchUpdate } from "$lib/types/MessageUpdate";
 	import { page } from "$app/stores";
 	import DisclaimerModal from "../DisclaimerModal.svelte";
@@ -42,10 +42,10 @@
 	export let webSearchMessages: WebSearchUpdate[] = [];
 	export let preprompt: string | undefined = undefined;
 	export let files: File[] = [];
-	export let currentSelectedImage: ImageJSON | undefined = undefined;
+	export let currentSelectedImages: ImageJSON[] = [];
 
 	$: isReadOnly = !models.some((model) => model.id === currentModel.id);
-	// let loginModalOpen = false;
+	let loginModalOpen = false;
 	let message: string;
 	let timeout: ReturnType<typeof setTimeout>;
 	let isSharedRecently = false;
@@ -65,52 +65,55 @@
 
 	const handleSubmit = () => {
 		if (loading) return;
-		message = currentSelectedImage
-			? `<image>{
-				"url": "${base + "/images/" + currentSelectedImage.id}",
-				"id": "${currentSelectedImage.id}"
-			}</image>
+		let text = "";
 
-${message}`
-			: message;
+		currentSelectedImages.forEach((image) => {
+			text += `<image>{
+				"url": "${base + "/images/" + image.id}",
+				"id": "${image.id}"
+			}</image>\n`;
+		});
+		message = text + "\n" + message;
 		dispatch("message", message);
 		console.log("message", message);
-		currentSelectedImage = undefined;
+		currentSelectedImages = [];
 		message = "";
 	};
 
 	async function handleFileChange(event: Event) {
-		const files = (event.target as HTMLInputElement).files;
+		const new_files = (event.target as HTMLInputElement).files as FileList;
 		if (!files) return;
-		const file = files[0];
-		if (file) {
-			// Convert the ImageJSON file to a URL that can be displayed
-			// const imageUrl = URL.createObjectURL(file);
+		for (let i = 0; i < new_files.length; i++) {
+			const nf = new_files[0];
+			if (nf) {
+				// Convert the ImageJSON file to a URL that can be displayed
+				// const imageUrl = URL.createObjectURL(file);
 
-			// Prepare the file to be sent in a FormData object
-			const formData = new FormData();
-			formData.append("file", file);
-			// POST the ImageJSON file to the server
-			const response = await fetch(`${base}/upload_image`, {
-				method: "POST",
-				headers: {
-					accept: "multipart/form-data",
-				},
-				body: formData,
-			});
+				// Prepare the file to be sent in a FormData object
+				const formData = new FormData();
+				formData.append("file", nf);
+				// POST the ImageJSON file to the server
+				const response = await fetch(`${base}/upload_image`, {
+					method: "POST",
+					headers: {
+						accept: "multipart/form-data",
+					},
+					body: formData,
+				});
 
-			// Handle the response
-			if (response.ok) {
-				// Use the returned URL
-				const result = await response.json();
-				console.log("result", result);
-				const json = { id: result.id, url: result.url };
-				dispatch("imageUpload", json);
-				currentSelectedImage = json;
-				console.log("json", json);
-				if (loading) return;
-			} else {
-				console.error("Upload failed", response);
+				// Handle the response
+				if (response.ok) {
+					// Use the returned URL
+					const result = await response.json();
+					console.log("result", result);
+					const json = { id: result.id, url: result.url };
+					dispatch("imageUpload", json);
+					currentSelectedImages = [...currentSelectedImages, json];
+					console.log("json", json);
+					if (loading) return;
+				} else {
+					console.error("Upload failed", response);
+				}
 			}
 		}
 	}
@@ -123,7 +126,7 @@ ${message}`
 	}
 	function onSelectImage(image: ImageJSON) {
 		dispatch("imageClick", image);
-		currentSelectedImage = image;
+		currentSelectedImages = [...currentSelectedImages, image];
 		console.log("dispatched message over here");
 	}
 	let lastTarget: EventTarget | null = null;
@@ -187,11 +190,11 @@ ${message}`
 		{webSearchMessages}
 		{preprompt}
 		on:message={(ev) => {
-			// if ($page.data.loginRequired) {
-			// 	loginModalOpen = true;
-			// } else {
-			dispatch("message", ev.detail);
-			// }
+			if ($page.data.loginRequired) {
+				loginModalOpen = true;
+			} else {
+				dispatch("message", ev.detail);
+			}
 		}}
 		on:vote
 		on:retry={(ev) => {
@@ -250,7 +253,7 @@ ${message}`
 
 			<!-- Image UI -->
 			{#if imageGaleryOpened}
-				<div class="flex-2 flex items-center">
+				<div class="flex-2 flex w-full items-center border-white">
 					<ImageGallery {images} {onSelectImage} />
 				</div>
 			{/if}
@@ -265,11 +268,12 @@ ${message}`
 						hidden
 					/>
 				</label>
+
 				<button
 					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 					on:click={handleUploadClick}
 				>
-					Upload Image
+					Upload Images
 				</button>
 				<button
 					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
@@ -280,14 +284,16 @@ ${message}`
 			</div>
 			<!-- End Image UI -->
 			<div class="w-full rounded-xl bg-black bg-opacity-20">
-				{#if currentSelectedImage}
-					<div class="op flex w-full items-center justify-start p-4">
-						<ImagePreview
-							json={currentSelectedImage}
-							on:deleteImage={() => {
-								currentSelectedImage = undefined;
-							}}
-						/>
+				{#if currentSelectedImages}
+					<div class="op flex w-full flex-row items-center justify-start p-4">
+						{#each currentSelectedImages as image}
+							<ImagePreview
+								json={image}
+								on:deleteImage={() => {
+									currentSelectedImages = currentSelectedImages.filter((i) => i.id !== image.id);
+								}}
+							/>
+						{/each}
 					</div>
 				{/if}
 				<form
@@ -311,11 +317,11 @@ ${message}`
 									placeholder="Ask anything"
 									bind:value={message}
 									on:submit={handleSubmit}
-									on:keypress={() => {
-										// if ($page.data.loginRequired) {
-										// 	ev.preventDefault();
-										// 	// loginModalOpen = true;
-										// }
+									on:keypress={(ev) => {
+										if ($page.data.loginRequired) {
+											ev.preventDefault();
+											loginModalOpen = true;
+										}
 									}}
 									maxRows={6}
 									disabled={isReadOnly || lastIsError}

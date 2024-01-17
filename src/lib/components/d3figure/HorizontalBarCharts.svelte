@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from "svelte";
 	import * as d3 from "d3";
+	import { v4 as uuid } from "uuid";
 
 	// Sample data
 	export let data = [
@@ -14,10 +15,11 @@
 	export let xAxisLabel = "Reasons";
 	export let yAxisLabel = "Attributes";
 
-	// Set dimensions and margins for the graph
-	const margin = { top: 20, right: 30, bottom: 60, left: 100 };
-	const width = 600 - margin.left - margin.right;
-	const height = 400 - margin.top - margin.bottom;
+	let id = "-" + uuid();
+	let windowWidth = 0;
+	let resizeObserver = null;
+	let element;
+
 	function wrapText(text, width) {
 		text.each(function () {
 			var text = d3.select(this),
@@ -55,15 +57,21 @@
 	function sortData(data) {
 		return data.sort((a, b) => d3.descending(a.value, b.value));
 	}
+	const drawChart = (windowWidth) => {
+		// Set dimensions and margins for the graph
 
-	onMount(() => {
+		const margin = { top: 10, right: 10, bottom: 30, left: 100 };
+		const width = windowWidth - margin.left - margin.right;
+		const height = (windowWidth * 3) / 4 - margin.top - margin.bottom;
 		// Clear existing content
-		d3.select("#bar-chart").selectAll("*").remove();
+		d3.select("#bar-chart" + id)
+			.selectAll("*")
+			.remove();
 		// Sort data
 		data = sortData(data);
 		// Append the svg object to a div or other container
 		const svg = d3
-			.select("#bar-chart")
+			.select("#bar-chart" + id)
 			.append("svg")
 			.attr("width", width + margin.left + margin.right)
 			.attr("height", height + margin.top + margin.bottom)
@@ -86,7 +94,7 @@
 			.append("text")
 			.attr("text-anchor", "end")
 			.attr("x", width)
-			.attr("y", height + margin.bottom - 15)
+			.attr("y", height + margin.bottom - 1)
 			.text(xAxisLabel);
 
 		// Y axis: scale and draw
@@ -118,7 +126,7 @@
 			.attr("height", y.bandwidth())
 			.attr("fill", "#69b3a2");
 
-		const tooltip = d3.select("#bar-chart-tooltip");
+		const tooltip = d3.select("#bar-chart-tooltip" + id);
 
 		// Mouseover event
 		const mouseover = (event, d) => {
@@ -146,11 +154,31 @@
 			.on("mouseout", mouseout);
 		// Apply text wrapping to the Y-axis labels
 		svg.selectAll(".y-axis text").call(wrapText, margin.left - 10);
+	};
+
+	onMount(() => {
+		resizeObserver = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				windowWidth = entry.contentRect.width;
+			}
+		});
+
+		resizeObserver.observe(element);
+
+		return () => {
+			resizeObserver.disconnect();
+		};
 	});
+
+	$: if (windowWidth > 0) {
+		drawChart(windowWidth);
+	}
 </script>
 
-<div id="bar-chart" />
-<div id="bar-chart-tooltip" class="tooltip" style="opacity: 0;" />
+<div class="w-full" bind:this={element}>
+	<div id={"bar-chart" + id} />
+	<div id={"bar-chart-tooltip" + id} class="tooltip" style="opacity: 0;" />
+</div>
 
 <style>
 	.tooltip {

@@ -7,7 +7,9 @@
 	import { v4 as uuid } from "uuid";
 	import {
 		arrayToImageData,
+		ImageDataToArray,
 		imageDataToImage,
+		arrayToMask,
 		compressor,
 		decompressor,
 	} from "$lib/components/SAM_Segmentation/maskUtils";
@@ -80,8 +82,9 @@
 
 		const results = await model.run(feeds);
 		const output = results[model.outputNames[0]];
-		savedOutput = arrayToImageData(output.data, output.dims[2], output.dims[3]);
-		maskImg = imageDataToImage(savedOutput);
+		savedOutput = arrayToMask(output.data, output.dims[2], output.dims[3]);
+		const renderOutput = arrayToImageData(savedOutput.arr, savedOutput.width, savedOutput.height);
+		maskImg = imageDataToImage(renderOutput);
 	}
 
 	// Reactive statement to run the ONNX model when 'clicks' changes
@@ -98,28 +101,47 @@
 	}
 
 	const saveSavedImgMasks = () => {
-		const saveContent = savedMaskImgs.map((img) => {
+		const saveContent = savedMaskImgs.map((savedMaskImg) => {
+			console.log("savedMaskImg arr", savedMaskImg.output.arr);
+			const arr = compressor(savedMaskImg.output.arr);
+			console.log("arr", arr);
 			return {
-				...img,
+				id: savedMaskImg.id,
 				output: {
-					height: img.output.height,
-					width: img.output.width,
-					data: compressor(img.output.data),
+					arr: arr,
+					width: savedMaskImg.output.width,
+					height: savedMaskImg.output.height,
 				},
+				clicks: savedMaskImg.clicks,
+				name: savedMaskImg.name,
+				description: savedMaskImg.description,
 			};
 		});
 		return JSON.stringify(saveContent);
 	};
 
 	const loadSavedMaskImgs = (jsondata) => {
-		savedMaskImgs = jsondata.map((img) => {
+		savedMaskImgs = jsondata.map((savedMaskImg) => {
 			return {
-				...img,
-				output: new ImageData(decompressor(img.output.data), img.output.width, img.output.height),
+				id: savedMaskImg.id,
+				output: {
+					arr: decompressor(savedMaskImg.output.arr),
+					width: savedMaskImg.output.width,
+					height: savedMaskImg.output.height,
+				},
+				clicks: savedMaskImg.clicks,
+				name: savedMaskImg.name,
+				description: savedMaskImg.description,
 			};
 		});
+		console.log("savedMaskImgs", savedMaskImgs);
 		if (savedMaskImgs && savedMaskImgs.length > 0) {
-			maskImg = imageDataToImage(savedMaskImgs[0].output);
+			const renderOutput = arrayToImageData(
+				savedMaskImgs[0].output.arr,
+				savedMaskImgs[0].output.width,
+				savedMaskImgs[0].output.height
+			);
+			maskImg = imageDataToImage(renderOutput);
 			clicks = savedMaskImgs[0].clicks;
 			savedOutput = savedMaskImgs[0].output;
 		}
@@ -195,7 +217,12 @@
 			if (savedMaskImg) {
 				savedOutput = savedMaskImg.output;
 				savedClicks = savedMaskImg.clicks;
-				maskImg = imageDataToImage(savedOutput);
+				const renderOutput = arrayToImageData(
+					savedMaskImg.output.arr,
+					savedMaskImg.output.width,
+					savedMaskImg.output.height
+				);
+				maskImg = imageDataToImage(renderOutput);
 			}
 		} else {
 			savedOutput = null;

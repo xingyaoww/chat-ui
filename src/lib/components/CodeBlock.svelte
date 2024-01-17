@@ -10,6 +10,7 @@
 	export let lang = "";
 	let showReasons = false;
 	let chartType = "horizontalBar";
+	let isListJSON = false;
 
 	$: highlightedCode = "";
 	let scrollToBottomElement: HTMLPreElement;
@@ -34,25 +35,45 @@
 			return false;
 		}
 	}
+	function checkTypes(listToCheck) {
+		const expectedTypes = [
+			"ecole-message",
+			"ecole-image",
+			"ecole-grounding-data",
+			"ecole-json",
+			"ecole-json-reason",
+		];
+		return listToCheck.every((item) => expectedTypes.includes(item.type));
+	}
 
 	// Reactive statement to check and parse JSON
 	$: parsedJson = code && isValidJson(code);
+	$: isListJSON = parsedJson && Array.isArray(parsedJson) && checkTypes(parsedJson);
 
 	// Another reactive statement to determine the content type
 	$: contentType = parsedJson ? parsedJson.type : null;
-	$: console.log("code", code);
+	$: console.log("parsedJson", parsedJson);
+	$: console.log("contentType", contentType);
 </script>
 
 <div class="group relative my-4 rounded-lg">
 	<!-- eslint-disable svelte/no-at-html-tags -->
 	{#if lang === "result"}
-		{#if contentType === "ecole-message"}
-			<p>{parsedJson.data}</p>
+		{#if isListJSON}
+			<div class="grid grid-cols-{parsedJson.length} p-2">
+				{#each parsedJson as json_el}
+					<div class="p-2">
+						<svelte:self code={JSON.stringify(json_el, null, 2)} lang="result" />
+					</div>
+				{/each}
+			</div>
+		{:else if contentType === "ecole-message"}
+			<!-- <p>{parsedJson.data}</p> -->
 		{:else if contentType === "ecole-image"}
 			<img src={parsedJson.data} />
 		{:else if contentType === "ecole-grounding-data"}
 			<div>
-				<p>{parsedJson.data}</p>
+				<!-- <p>{parsedJson.data}</p> -->
 				<ImageAnnotation data={parsedJson} />
 			</div>
 		{:else if contentType === "ecole-json"}
@@ -131,15 +152,6 @@
 				</div>
 			</div>
 		{/if}
-		<div class="rounded-lg bg-gray-800 p-2 text-xs dark:bg-gray-900">
-			<div class="mb-1 text-gray-400">STDOUT/STDERR</div>
-			<pre
-				bind:this={scrollToBottomElement}
-				class="scrollbar-custom max-h-[60vh] overflow-auto bg-gray-800 px-5 scrollbar-thumb-gray-500 hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-white/10 dark:hover:scrollbar-thumb-white/20"
-				style="padding: 0; margin-bottom: 0; font-size: 0.75rem;"><code class="language-console"
-					>{@html highlightedCode || code.replaceAll("<", "&lt;")}</code
-				></pre>
-		</div>
 	{:else if lang === "execute"}
 		<div class="rounded-lg bg-gray-800 p-2 text-xs dark:bg-gray-900">
 			<div class="mb-1 text-gray-400">EXECUTE</div>
@@ -151,7 +163,7 @@
 		</div>
 
 		<CopyToClipBoardBtn
-			classNames="absolute top-2 right-2 invisible opacity-0 group-hover:visible group-hover:opacity-100"
+			classNames="absolute top-2 right-2 invisible opacity-0 group-hover:visible group-hover:opacity-100 text-white "
 			value={code}
 		/>
 	{:else}

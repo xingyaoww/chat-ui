@@ -3,8 +3,21 @@
 
 // This source code is licensed under the license found in the
 // LICENSE file in the root directory of this source tree.
-import { deflate, inflate } from "pako";
 // Convert the onnx model mask prediction to ImageData
+export function arrayToMask(input: any, width: number, height: number) {
+	const arr: Array<number> = [];
+	for (let i = 0; i < input.length; i++) {
+		// Threshold the onnx model mask prediction at 0.0
+		// This is equivalent to thresholding the mask using predictor.model.mask_threshold
+		// in python
+		if (input[i] > 0.0) {
+			arr.push(1);
+		} else {
+			arr.push(0);
+		}
+	}
+	return { arr, width, height };
+}
 export function arrayToImageData(input: any, width: number, height: number) {
 	const [r, g, b, a] = [0, 114, 189, 255]; // the masks's blue color
 	const arr = new Uint8ClampedArray(4 * width * height).fill(0);
@@ -20,6 +33,15 @@ export function arrayToImageData(input: any, width: number, height: number) {
 		}
 	}
 	return new ImageData(arr, height, width);
+}
+export function ImageDataToArray(imageData: ImageData) {
+	const arr = new Uint8ClampedArray(4 * imageData.width * imageData.height).fill(0);
+	for (let i = 0; i < imageData.data.length; i++) {
+		arr[i] = imageData.data[i];
+	}
+	const width = imageData.width;
+	const height = imageData.height;
+	return { arr, width, height };
 }
 
 // Use a Canvas element to produce an image from ImageData
@@ -44,92 +66,42 @@ function imageDataToCanvas(imageData: ImageData) {
 export function onnxMaskToImage(input: any, width: number, height: number) {
 	return imageDataToImage(arrayToImageData(input, width, height));
 }
-function arrayToBase64(byteArray) {
-	let binaryString = "";
-	for (let i = 0; i < byteArray.byteLength; i++) {
-		binaryString += String.fromCharCode(byteArray[i]);
-	}
-	return btoa(binaryString);
-}
 
-function toBase64(compressedData) {
-	return btoa(String.fromCharCode.apply(null, new Uint8Array(compressedData)));
-}
-
-function fromBase64(base64String) {
-	const binaryString = atob(base64String);
-	const bytes = new Uint8Array(binaryString.length);
-	for (let i = 0; i < binaryString.length; i++) {
-		bytes[i] = binaryString.charCodeAt(i);
-	}
-	return bytes;
-}
-
-// Assuming you have the pako library included
-function compressString(str) {
-	return deflate(str);
-}
-function rleCompress(str) {
-	let compressed = "";
+function rleCompress(binaryArr: Array<number>) {
+	const compressed: Array<number> = [];
+	let current = binaryArr[0];
 	let count = 1;
-	for (let i = 0; i < str.length; i++) {
-		if (str[i] === str[i + 1]) {
+	for (let i = 1; i < binaryArr.length; i++) {
+		if (binaryArr[i] === current) {
 			count++;
 		} else {
-			// Use a delimiter (e.g., "|") between the character and the count
-			compressed += str[i] + "|" + count + "|";
+			compressed.push(current);
+			compressed.push(count);
+			current = binaryArr[i];
 			count = 1;
 		}
 	}
+	compressed.push(current);
+	compressed.push(count);
 	return compressed;
 }
 
 export function compressor(byteArray) {
 	// Apply RLE Compression
-	const base64String = arrayToBase64(byteArray);
-	const rleCompressed = rleCompress(base64String);
-	const compressed = compressString(rleCompressed);
-	const base64Compressed = toBase64(compressed);
-	return base64Compressed;
+	const compressed = rleCompress(byteArray);
+	return compressed;
 }
 
-function rleDecompress(compressed) {
-	let decompressed = "";
-	// Split the compressed string at the delimiters
-	const parts = compressed.split("|");
-
-	// Iterate through the parts array in steps of 2 (character, count)
-	for (let i = 0; i < parts.length - 1; i += 2) {
-		const character = parts[i];
-		const count = parseInt(parts[i + 1], 10);
-		decompressed += character.repeat(count);
+function rleDecompress(compresseArr: Array<number>) {
+	const decompressed: Array<number> = [];
+	for (let i = 0; i < compresseArr.length; i += 2) {
+		decompressed.push(...Array(compresseArr[i + 1]).fill(compresseArr[i]));
 	}
-
 	return decompressed;
 }
 
-function decompressString(str) {
-	const buffer = base64ToArray(str);
-	return inflate(buffer, { to: "string" });
-}
-// Converts a Base64 string back to a Uint8ClampedArray
-function base64ToArray(base64String) {
-	const binaryString = atob(base64String);
-	const length = binaryString.length;
-	const bytes = new Uint8ClampedArray(length);
-	for (let i = 0; i < length; i++) {
-		bytes[i] = binaryString.charCodeAt(i);
-	}
-	return bytes;
-}
+export function decompressor(array) {
+	// // Decompress the Base64 String
 
-export function decompressor(base64Compressed) {
-	// Decompress the Base64 String
-	const rleCompressed = decompressString(base64Compressed);
-	// Apply RLE Decompression
-	const base64String = rleDecompress(rleCompressed);
-	// Convert from Base64 to ByteArray
-	const byteArray = base64ToArray(base64String);
-
-	return byteArray;
+	return rleDecompress(array);
 }

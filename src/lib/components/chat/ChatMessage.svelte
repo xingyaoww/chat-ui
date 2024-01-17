@@ -34,7 +34,6 @@
 			.replaceAll(/<br\s?\/?>/gi, "\n")
 			.replaceAll("<", "&lt;")
 			.trim();
-		console.log("ret", ret);
 
 		for (const stop of [...(model.parameters?.stop ?? []), "<|endoftext|>"]) {
 			if (ret.endsWith(stop)) {

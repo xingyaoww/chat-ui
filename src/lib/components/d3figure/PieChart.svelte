@@ -1,6 +1,12 @@
 <script>
 	import { onMount } from "svelte";
 	import * as d3 from "d3";
+	import { v4 as uuid } from "uuid";
+	import { draw } from "svelte/transition";
+	let element;
+	let windowWidth = 0;
+	let resizeObserver = null;
+	const id = "pie-chart-" + uuid();
 
 	// Define your data here
 	export let data = [
@@ -55,12 +61,25 @@
 		});
 	}
 	onMount(() => {
-		const width = 450;
-		const height = 450;
+		resizeObserver = new ResizeObserver((entries) => {
+			for (let entry of entries) {
+				windowWidth = entry.contentRect.width;
+			}
+		});
+
+		resizeObserver.observe(element);
+
+		return () => {
+			resizeObserver.disconnect();
+		};
+	});
+	const drawChart = (inputWidth) => {
+		const width = inputWidth - 10;
+		const height = width;
 		const radius = Math.min(width, height) / 2;
 
 		const svg = d3
-			.select("#pie-chart")
+			.select("#" + id)
 			.append("svg")
 			.attr("width", width)
 			.attr("height", height)
@@ -75,7 +94,7 @@
 			.innerRadius(radius / 2)
 			.outerRadius(radius);
 
-		const tooltip = d3.select("#pie-chart-tooltip");
+		const tooltip = d3.select("#pie-chart-tooltip" + id);
 
 		svg
 			.selectAll("path")
@@ -107,11 +126,17 @@
 			.style("fill", "white")
 			.text(formatLabel)
 			.call(wrap, radius / 2); // Adjust width as needed
-	});
+	};
+	$: if (windowWidth != 0) {
+		console.log("width", windowWidth);
+		drawChart(windowWidth);
+	}
 </script>
 
-<div id="pie-chart" />
-<div id="pie-chart-tooltip" class="tooltip" style="opacity: 0;" />
+<div class="w-full" bind:this={element}>
+	<div {id} />
+	<div id={"pie-chart-tooltip" + id} class="tooltip" style="opacity: 0;" />
+</div>
 
 <style>
 	.tooltip {

@@ -78,12 +78,12 @@
 			Download
 		</div>
 
-		<!-- <div class="button-group">
-		<button on:click={handleUpload} class="flex items-center justify-center bg-yellow-500">
-			<CarbonUpload />
-		</button>
-		Upload
-	</div> -->
+		<div class="button-group">
+			<button on:click={handleUpload} class="flex items-center justify-center bg-yellow-500">
+				<CarbonUpload />
+			</button>
+			Upload
+		</div>
 	</div>
 	<div />
 </div>
