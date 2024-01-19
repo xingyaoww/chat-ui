@@ -5,6 +5,7 @@
 	import JSON5 from "json5";
 	import PieChart from "./d3figure/PieChart.svelte";
 	import ImageAnnotation from "./ImageAnnotation.svelte";
+	import { json } from "@sveltejs/kit";
 
 	export let code = "";
 	export let lang = "";
@@ -30,6 +31,9 @@
 
 	function isValidJson(jsonString: string) {
 		try {
+			if (jsonString.indexOf("\n{") !== -1) {
+				return JSON5.parse("[" + jsonString.replace("\n{", ",{") + "]");
+			}
 			return JSON5.parse(jsonString);
 		} catch (e) {
 			return false;

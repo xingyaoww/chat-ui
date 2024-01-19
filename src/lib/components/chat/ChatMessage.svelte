@@ -179,10 +179,10 @@
 						{#if (token.lang === "image" || token.lang === "{.image}") && isJSON(unsanitizeMd(token.text))}
 							{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
 								{#each JSON.parse(unsanitizeMd(token.text)) as json}
-									<ImageReader {json} />
+									<ImageReader on:segmentImageUpload {json} />
 								{/each}
 							{:else}
-								<ImageReader json={JSON.parse(unsanitizeMd(token.text))} />
+								<ImageReader on:segmentImageUpload json={JSON.parse(unsanitizeMd(token.text))} />
 							{/if}
 						{:else}
 							<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
@@ -289,10 +289,10 @@
 						{#if token.lang === "image"}
 							{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
 								{#each JSON.parse(unsanitizeMd(token.text)) as json}
-									<ImageReader {json} />
+									<ImageReader on:segmentImageUpload {json} />
 								{/each}
 							{:else}
-								<ImageReader json={JSON.parse(unsanitizeMd(token.text))} />
+								<ImageReader on:segmentImageUpload json={JSON.parse(unsanitizeMd(token.text))} />
 							{/if}
 						{:else}
 							<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />

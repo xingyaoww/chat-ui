@@ -79,7 +79,6 @@
 		currentSelectedImages = [];
 		message = "";
 	};
-
 	async function handleFileChange(event: Event) {
 		const new_files = (event.target as HTMLInputElement).files as FileList;
 		if (!files) return;
@@ -199,6 +198,10 @@
 		on:vote
 		on:retry={(ev) => {
 			if (!loading) dispatch("retry", ev.detail);
+		}}
+		on:segmentImageUpload={(ev) => {
+			dispatch("imageUpload", ev.detail);
+			currentSelectedImages = [...currentSelectedImages, ev.detail];
 		}}
 	/>
 

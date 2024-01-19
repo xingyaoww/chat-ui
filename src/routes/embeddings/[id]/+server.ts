@@ -10,7 +10,23 @@ export const GET: RequestHandler = async ({ params }) => {
 		const response = await fetch(`${imageUrl}/embeddings/${pathname}`);
 
 		if (!response.ok) {
-			return new Response("Embeddings not found", { status: response.status });
+			const response_2 = await fetch(`${imageUrl}/images/${pathname}`);
+			if (!response_2.ok) throw new Error(response.statusText);
+			const imageBuffer = await response_2.arrayBuffer();
+			const formData = new FormData();
+			formData.append("file", imageBuffer);
+			const response_3 = await fetch(`${imageUrl}/embeddings/`, {
+				method: "POST",
+				body: formData,
+			});
+			if (!response_3.ok) throw new Error(response.statusText);
+			const responseData = await response_3.arrayBuffer();
+			return new Response(responseData, {
+				status: 200,
+				headers: {
+					"Content-Type": response_3.headers.get("Content-Type") || "application/octet-stream", // Set the correct Content-Type for the image
+				},
+			});
 		}
 
 		const imageBuffer = await response.arrayBuffer();

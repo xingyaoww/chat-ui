@@ -12,11 +12,11 @@
 	export let modelScale = null;
 	let ratio = 1;
 	$: ratio = shouldFitToWidth ? window.innerWidth / image.width : window.innerHeight / image.height;
-	$: console.log("ratio", ratio);
 	let shouldFitToWidth = true;
 	let imageClasses = "";
 	let maskImageClasses =
 		"absolute top-0 left-0 z-10 opacity-40 border-3 border-red-500 pointer-events-none";
+	$: console.log("savedClicks", savedClicks);
 
 	const fitToPage = () => {
 		if (!image) return;
@@ -41,12 +41,6 @@
 		const element = document.getElementById("img-div");
 		if (element) {
 			const styles = getComputedStyle(element);
-			const marginTop = styles.marginTop;
-			const marginRight = styles.marginRight;
-			const marginBottom = styles.marginBottom;
-			const marginLeft = styles.marginLeft;
-
-			console.log({ marginTop, marginRight, marginBottom, marginLeft });
 		}
 		return () => {
 			resizeObserver.unobserve(bodyEl);

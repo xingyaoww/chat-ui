@@ -1,0 +1,426 @@
+{
+    "userMessageToken": "<|im_start|>user\n",
+    "userMessageEndToken": "<|im_end|>",
+    "assistantMessageToken": "<|im_start|>assistant\n",
+    "assistantMessageEndToken": "<|im_end|>",
+    "prepromptMessageToken": "<|im_start|>system\n",
+    "prepromptMessageEndToken": "<|im_end|>",
+    "system_description": "You are a helpful assistant. \nYou can answer questions in natural language, display images through <image> tags (e.g., <image> [image_id] </image>), and execute Python code through <execute> tags (e.g., <execute> print(“hello world”) </execute>). Do this in sequence. After you get the output from a tool, interpret the result, and then, if it is needed, find the appropriate tool to execute next. If there are multiple image inputs, put the execution outputs inside a Python list. For instance, [grounding_object_in_image('12345abcde', 'horses', 'horse'), grounding_object_in_image('394583', 'cat', 'cat')]",
+    "tools": [
+        {
+            "name": "what_is_object(image_id: str) -> dict",
+            "description": "Identifies the primary subject or feature in the image.",
+            "example_question": [
+                "What is in the image?",
+                "What is this?",
+                "What is in the picture?",
+                "What is in the photo?",
+                "What are in those images?",
+                "What are in those pictures?",
+                "What are in those photos?"
+            ],
+            "variables": [
+                {
+                    "name": "image_id",
+                    "description": "The image id."
+                }
+            ],
+            "example_code": [
+                "<execute> what_is_object('12345abcde') </execute>"
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "<image>{\n 'id': '657eafdeef3d6763710dffa2', \n'url': '/images/657eafdeef3d6763710dffa2'}\n </image>\nwhat is this?"
+                    },
+                    {
+                        "role": "code",
+                        "message": "what_is_object('657eafdeef3d6763710dffa2')"
+                    },
+                    {
+                        "role": "output",
+                        "message": "{'data': 'This is a 'coyote'', 'type': 'ecole-message'}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": " There is a 'coyote' inside the image. "
+                    }
+                ],
+                [
+                    {
+                        "role": "user",
+                        "message": "<image>{\n'id': '657eafdeef3d6763710dffa2',\n'url': '/images/657eafdeef3d6763710dffa2'\n}{\n'id': '657eafdeef3d6763710dffb3',\n'url': '/images/657eafdeef3d6763710dffb3'\n}\n</image>\nWhat is the objects inside those images?"
+                    },
+                    {
+                        "role": "code",
+                        "message": "image_id_1 = '657eafdeef3d6763710dffa2' \nimage_id_2 = '657eafdeef3d6763710dffb3' \n[what_is_it(image_id_1), what_is_it(image_id_2)\n]"
+                    },
+                    {
+                        "role": "output",
+                        "message": "[{'type': 'ecole-message', 'data': 'This is a 'cat''}, {'type': 'ecole-message', 'data': 'This is a 'dog''}] "
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "A 'cat' is inside the first image, whereas a 'dog' is inside the second image."
+                    }
+                ]
+            ]
+        },
+        {
+            "name": "explain_concept(image_id: str) -> dict",
+            "description": "Explains the context or reason behind the primary subject or feature in the image.",
+            "example_question": [
+                "Why is [object name] in the image?",
+                "Why is it?",
+                "Why is this?",
+                "What are your reasoning behind those?",
+                "What is your reasoning behind this?"
+            ],
+            "variables": [
+                {
+                    "name": "image_id",
+                    "description": "The image id."
+                }
+            ],
+            "example_code": [
+                "<execute> explain_concept('12345abcde') </execute>"
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "<image>{\n 'id': '657eafdeef3d6763710dffa2', \n'url': '/images/657eafdeef3d6763710dffa2'}\n </image>\nwWhy is this?"
+                    },
+                    {
+                        "role": "code",
+                        "message": "explain_concept('657eafdeef3d6763710dffa2')"
+                    },
+                    {
+                        "role": "output",
+                        "message": "{'reasons': {'descriptions': ['four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth'], 'scores': ['0.32', '0.33', '0.32', '0.31', '0.31', '0.31'], 'text': 'This is a 'coyote' because: \n'four-legged mammal': 0.32\n'brown, grey, or black fur': 0.33\n'pointy ears': 0.32\n'a bushy tail': 0.31\n'a long snout': 0.31\n'sharp teeth': 0.31'}, 'type': 'ecole-json-reason'}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The explanation for the image is:\n\nThis is a 'coyote' because:\n- It is a 'four-legged mammal': 0.32\n- It has 'brown, grey, or black fur': 0.33\n- It has 'pointy ears': 0.32\n- It has 'a bushy tail': 0.31\n- It has 'a long snout': 0.31\n- It has 'sharp teeth': 0.31\n\nThis is the reasoning behind the classification of the image as a 'coyote'. "
+                    }
+                ]
+            ]
+        },
+        {
+            "name": "add_attributes(image_id: str, classname: str, attributes: list) -> dict",
+            "description": " Adds specified attributes to a given class (concept) in the image.",
+            "example_question": [
+                "Can you add [attribute name] to [object name] class?",
+                "Can you add [attribute name] to [object name] concept?",
+                "Add [attribute name] to [object name]",
+                "Add [attribute name] to [object name] class",
+                "Add [attribute name] to [object name] concept",
+                "Add [attribute name] to [object name] category"
+            ],
+            "variables": [
+                {
+                    "name": "image_id",
+                    "description": "The unique identifier of the image;"
+                },
+                {
+                    "name": "classname",
+                    "description": "The class name."
+                },
+                {
+                    "name": "attributes",
+                    "description": "A list of attributes to be added to the class."
+                }
+            ],
+            "example_code": [
+                "<execute> add_attributes('12345abcde', 'coyote', ['four-legged mammal', 'brown, grey, or black fur']) </execute>"
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "Can you add 'four-legged mammal' and 'brown, grey, or black fur' to 'coyote' class?"
+                    },
+                    {
+                        "role": "code",
+                        "message": "add_attributes('12345abcde', 'coyote', ['four-legged mammal', 'brown, grey, or black fur'])"
+                    },
+                    {
+                        "role": "output",
+                        "message": "{'type': 'ecole-message', 'data': 'The attributes were added to the class.'}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The attributes were added to the class."
+                    }
+                ]
+            ]
+        },
+        {
+            "name": "remove_attributes(image_id: str, classname: str, attributes: list) -> dict",
+            "description": "Removes specified attributes from a given class (concept) in the image.",
+            "example_question": [
+                "Can you remove [attribute name] from [object name] class?",
+                "Can you remove [attribute name] from [object name] concept?",
+                "Remove [attribute name] from [object name]",
+                "Remove [attribute name] from [object name] class",
+                "Remove [attribute name] from [object name] concept",
+                "Remove [attribute name] from [object name] category",
+                "Delete [attribute name] from [object name]",
+                "Delete [attribute name] from [object name] class"
+            ],
+            "variables": [
+                {
+                    "name": "image_id",
+                    "description": "The unique identifier of the image;"
+                },
+                {
+                    "name": "classname",
+                    "description": "The class name."
+                },
+                {
+                    "name": "attributes",
+                    "description": "A list of attributes to be removed from the class."
+                }
+            ],
+            "example_code": [
+                "<execute> remove_attributes('12345abcde', 'coyote', ['four-legged mammal', 'brown, grey, or black fur']) </execute>"
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "Can you remove 'four-legged mammal' and 'brown, grey, or black fur' from 'coyote' class?"
+                    },
+                    {
+                        "role": "code",
+                        "message": "remove_attributes('12345abcde', 'coyote', ['four-legged mammal', 'brown, grey, or black fur'])"
+                    },
+                    {
+                        "role": "output",
+                        "message": "{'type': 'ecole-message', 'data': 'The attributes were removed from the class.'}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The attributes were removed from the class."
+                    }
+                ]
+            ]
+        },
+        {
+            "name": "add_new_concept(image_id: str, classname: str, old_classname: str) -> dict",
+            "description": "Replace an old class with a new class in the image. ",
+            "example_question": [
+                "No, this is not a [new class name]. This is a [old class name].",
+                "This is a [new class name]",
+                "no this is a [new class name] not a [old class name]"
+            ],
+            "variables": [
+                {
+                    "name": "image_id",
+                    "description": "The unique identifier of the image;"
+                },
+                {
+                    "name": "classname",
+                    "description": "The new class name."
+                },
+                {
+                    "name": "old_classname",
+                    "description": "The old class name."
+                }
+            ],
+            "example_code": [
+                "<execute> add_new_concept('12345abcde', 'coyote', 'dog') </execute>"
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "No, this is not a 'dog'. This is a 'coyote'."
+                    },
+                    {
+                        "role": "code",
+                        "message": "add_new_concept('12345abcde', 'coyote', 'dog')"
+                    },
+                    {
+                        "role": "output",
+                        "message": "{'data': 'I cannot find 'kayak' in my knowledge base. It is now added. The new classification is 'grey wolf', 'label': 'grey wolf', 'reasons': {'descriptions': ['grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat', 'has pointed ears', 'has a long snout', 'has sharp teeth', 'has four legs', 'has a tail', 'has a wild and alert expression', 'has a distinct body shape and size compared to a kayak', 'has pointed ears', 'has a long snout', 'has sharp teeth', 'has four legs', 'has a tail', 'has a wild and alert expression', 'has a distinct body shape and size compared to a kayak'], 'scores': ['0.3', '0.32', '0.32', '0.3', '0.31', '0.3', '0.31', '0.32', '0.3', '0.32', '0.31', '0.3', '0.32', '0.31', '0.32', '0.3', '0.32', '0.31', '0.3', '0.32', '0.31'], 'text': 'This is a 'grey wolf' because: \n'grey or black fur': 0.3\n'pointed ears': 0.32\n'sharp teeth': 0.32\n'bushy tail': 0.3\n'muscular body': 0.31\n'yellow or amber eyes': 0.3\n'distinctive facial markings, such as a dark mask or white patches on the chest and throat': 0.31\n'has pointed ears': 0.32\n'has a long snout': 0.3\n'has sharp teeth': 0.32\n'has four legs': 0.31\n'has a tail': 0.3\n'has a wild and alert expression': 0.32\n'has a distinct body shape and size compared to a kayak': 0.31\n'has pointed ears': 0.32\n'has a long snout': 0.3\n'has sharp teeth': 0.32\n'has four legs': 0.31\n'has a tail': 0.3\n'has a wild and alert expression': 0.32\n'has a distinct body shape and size compared to a kayak': 0.31'}, 'superclass': 'wolf', 'type': 'ecole-json'}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "'I cannot find 'kayak' in my knowledge base. It is now added. The new classification is 'grey wolf'"
+                    }
+                ]
+            ]
+        },
+        {
+            "name": "grounding_object_in_image(image_id: str, object_name: str, object_type: str) -> dict",
+            "description": "This function identifies and marks specific objects in an image based on the provided description.",
+            "example_question": [
+                "Where is the [object name] in the image?",
+                "Where is the [object name] in the picture?",
+                "Where is the [object name] in the photo?",
+                "Where are the [object name] in the images?",
+                "Where are the [object name] in the pictures?",
+                "Where are the [object name] in the photos?",
+                "Can you get the [object name] inside the image?",
+                "Can you ground [object name] inside the image?",
+                "Can you find [object name] inside the picture?"
+            ],
+            "variables": [
+                {
+                    "name": "image_id",
+                    "description": "he unique identifier of the image"
+                },
+                {
+                    "name": "object_name",
+                    "description": "A textual description of the scene or objects in the image."
+                },
+                {
+                    "name": "object_type",
+                    "description": "A comma-separated list of objects to be identified and marked in the image"
+                }
+            ],
+            "example_code": [
+                "<execute> grounding_object_in_image('12345abcde', 'horses', 'horse') </execute>"
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "<image>{\n 'id': '657eafdeef3d6763710dffa2', \n'url': '/images/657eafdeef3d6763710dffa2'}\n </image>\nCan you ground the according object inside the image?"
+                    },
+                    {
+                        "role": "code",
+                        "message": "grounding_object_in_image('657eafdeef3d6763710dffa2', 'coyote', 'coyote')"
+                    },
+                    {
+                        "role": "output",
+                        "message": "'{'type': 'ecole-grounding-data', 'image_id': '65a8432492a12b00c631dfc0', 'objects': [{'label': 6, 'score': 0.6709597110748291, 'bounding-box': [536.8339233398438, 420.549560546875, 1368.544921875, 1178.9544677734375]}], 'data': '1 objects was found in the image.'}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "There is 1 object is grounded inside the image with the bounding box of [536.8339233398438, 420.549560546875, 1368.544921875, 1178.9544677734375]."
+                    }
+                ]
+            ]
+        },
+        {
+            "name": "reset_server() -> dict",
+            "description": "This function resets the server.",
+            "variables": [],
+            "example_question": [
+                "Reset the server.",
+                "Reset the system.",
+                "Reset the program.",
+                "Reset the tool.",
+                "Reset the assistant."
+            ],
+            "example_code": [
+                "<execute> reset_server() </execute>"
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "Reset the server."
+                    },
+                    {
+                        "role": "code",
+                        "message": "reset_server()"
+                    },
+                    {
+                        "role": "output",
+                        "message": "{'type': 'ecole-message', 'data': 'The server is reset.'}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The server is reset."
+                    }
+                ]
+            ]
+        },
+        {
+            "name": "get_attributes(classname: str) -> dict",
+            "description": "Retrieves attributes associated with a given classname.",
+            "example_question": [
+                "Show me the attributes of [class name]",
+                "Show me the attributes of [class name 1], [class name 2], and [class name 3]",
+                "Get the similar attributes of [class name 1] and [class name 2]",
+                "Get the different attributes of [class name 1] and [class name 2]"
+            ],
+            "example_code": [
+                "<execute> get_attributes('coyote') </execute>"
+            ],
+            "variables": [
+                {
+                    "name": "classname",
+                    "description": "The class name."
+                }
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "Show me the attributes of 'coyote'"
+                    },
+                    {
+                        "role": "code",
+                        "message": "get_attributes('coyote')"
+                    },
+                    {
+                        "role": "output",
+                        "message": "{'type': 'ecole-message', 'data': 'The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth''}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth'"
+                    }
+                ]
+            ]
+        },
+        {
+            "name": "find_activity(image_id: str) -> dict",
+            "description": "This function identifies and marks specific activities in an image based on the provided description.",
+            "example_question": [
+                "What is happening in the image?",
+                "What is happening in the picture?",
+                "What is happening in the photo?",
+                "What are happening in the images?",
+                "What are happening in the pictures?",
+                "What are happening in the photos?",
+                "Can you get the activities inside the image?",
+                "Can you find activities inside the picture?"
+            ],
+            "variables": [
+                {
+                    "name": "image_id",
+                    "description": "The unique identifier of the image"
+                }
+            ],
+            "example_code": [
+                "<execute> find_activity('12345abcde') </execute>"
+            ],
+            "example_conversation_prompt": [
+                [
+                    {
+                        "role": "user",
+                        "message": "What is happening in the image?"
+                    },
+                    {
+                        "role": "code",
+                        "message": "find_activity('12345abcde')"
+                    },
+                    {
+                        "role": "output",
+                        "message": "{'type': 'ecole-message', 'data': 'The activity in the image is 'a person riding a horse''}"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The activity in the image is 'a person riding a horse'"
+                    }
+                ]
+            ]
+        }
+    ]
+}

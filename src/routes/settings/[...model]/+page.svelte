@@ -7,8 +7,75 @@
 	import CopyToClipBoardBtn from "$lib/components/CopyToClipBoardBtn.svelte";
 	import CarbonArrowUpRight from "~icons/carbon/arrow-up-right";
 	import CarbonLink from "~icons/carbon/link";
+	import defaultCurriculum from "./curriculum2.json";
 
 	const settings = useSettingsStore();
+	let mode: string = "System Prompt";
+	let curriculum: any = defaultCurriculum;
+
+	const translateCurriculumToPreprompt = (curriculum: any) => {
+		const userMessageToken = curriculum["userMessageToken"];
+		const assistantMessageToken = curriculum["assistantMessageToken"];
+		const prepromptMessageToken = curriculum["prepromptMessageToken"];
+		const userMessageEndToken = curriculum["userMessageEndToken"];
+		const assistantMessageEndToken = curriculum["assistantMessageEndToken"];
+		const prepromptMessageEndToken = curriculum["prepromptMessageEndToken"];
+		const system_description = curriculum["system_description"];
+		const tools = curriculum["tools"];
+		console.log("tools", tools);
+		const toolList = tools
+			.map(
+				(tool, index) => `[${index}] ${tool["name"]}
+Description: ${tool["description"]}. 
+Example Questions: 
+${tool["example_question"].map((question) => "- '" + question + "'").join("\n- ")}
+Parameters: ${tool["variables"]
+					.map((param) => param["name"] + ": " + param["description"])
+					.join("; ")}
+Example: ${tool["example_code"]}`
+			)
+			.join("\n\n");
+
+		const exampleConversations = tools
+			.map((tool) => tool["example_conversation_prompt"])
+			.flat()
+			.flat()
+			.map((message) => {
+				if (message["role"] === "user") {
+					return `${userMessageToken}
+${message["message"]}
+${userMessageEndToken}`;
+				} else if (message["role"] === "code") {
+					return `${assistantMessageToken}
+<execute>${message["message"]}</execute>
+${assistantMessageEndToken}`;
+				} else if (message["role"] === "output") {
+					return `${userMessageToken}
+Execution Output:
+${message["message"]}
+${userMessageEndToken}`;
+				} else {
+					return `${assistantMessageToken}
+${message["message"]}
+${assistantMessageEndToken}`;
+				}
+			})
+			.join("\n");
+		const newPreprompt = `${prepromptMessageToken}
+${system_description}
+ 
+You have access to the following tools (pre-imported Python functions):
+ 
+${toolList}
+${prepromptMessageEndToken}
+${exampleConversations}
+${userMessageToken}
+Remember you have access to these tools:
+ 
+${tools.map((tool, index) => "[" + index + "]" + tool["name"]).join("\n")}
+`;
+		return newPreprompt;
+	};
 
 	$: if ($settings.customPrompts[$page.params.model] === undefined) {
 		$settings.customPrompts = {
@@ -25,6 +92,19 @@
 	$: isActive = $settings.activeModel === $page.params.model;
 
 	$: model = $page.data.models.find((el: BackendModel) => el.id === $page.params.model);
+	$: if (mode === "System Curriculum") {
+		if ($page.data.models.find((el: BackendModel) => el.id === $page.params.model)?.curriculum) {
+			curriculum = $page.data.models.find(
+				(el: BackendModel) => el.id === $page.params.model
+			)?.curriculum;
+		} else {
+			curriculum = defaultCurriculum;
+		}
+	}
+	$: if (curriculum && mode === "System Curriculum") {
+		$settings.customPrompts[$page.params.model] = translateCurriculumToPreprompt(curriculum);
+	}
+	$: console.log("curriculum", curriculum);
 </script>
 
 <div class="flex flex-col items-start">
@@ -99,7 +179,25 @@
 
 	<div class="flex w-full flex-col gap-2">
 		<div class="flex w-full flex-row content-between">
-			<h3 class="mb-1.5 text-lg font-semibold text-gray-800">System Prompt</h3>
+			<h3
+				class={`mb-1.5 text-lg font-semibold text-gray-${mode === "System Prompt" ? "800" : "300"}`}
+				on:click={() => {
+					mode = "System Prompt";
+				}}
+			>
+				System Prompt
+			</h3>
+			<div class="border-black-600 m-3 w-1 border-l-2" />
+			<h3
+				class={`mb-1.5 text-lg font-semibold text-gray-${
+					mode === "System Curriculum" ? "800" : "300"
+				}`}
+				on:click={() => {
+					mode = "System Curriculum";
+				}}
+			>
+				System Curriculum
+			</h3>
 			{#if hasCustomPreprompt}
 				<button
 					class="ml-auto underline decoration-gray-300 hover:decoration-gray-700"
@@ -115,5 +213,14 @@
 			class="w-full resize-none rounded-md border-2 bg-gray-100 p-2"
 			bind:value={$settings.customPrompts[$page.params.model]}
 		/>
+		<!-- {#if mode === "System Prompt"}
+			
+		{:else if mode === "System Curriculum"}
+			<textarea
+				rows="10"
+				class="w-full resize-none rounded-md border-2 bg-gray-100 p-2"
+				bind:value={$settings.customPrompts[$page.params.model]}
+			/>
+		{/if} -->
 	</div>
 </div>

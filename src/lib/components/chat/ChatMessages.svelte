@@ -33,7 +33,6 @@
 	$: if (browser && messages[messages.length - 1]?.from === "user") {
 		scrollToBottom();
 	}
-
 </script>
 
 <div
@@ -57,6 +56,7 @@
 					webSearchMessages={i === messages.length - 1 ? webSearchMessages : []}
 					on:retry
 					on:vote
+					on:segmentImageUpload
 				/>
 			{/if}
 		{:else}

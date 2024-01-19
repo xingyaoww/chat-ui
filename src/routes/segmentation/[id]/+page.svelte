@@ -1,21 +1,20 @@
 <script lang="js">
 	// @ts-nocheck
-	import CarbonClose from "~icons/carbon/close";
-	import { onMount } from "svelte";
-	import { InferenceSession, env } from "onnxruntime-web";
+	import Modal from "$lib/components/Modal.svelte";
 	import Stage from "$lib/components/SAM_Segmentation/Stage.svelte";
-	import { v4 as uuid } from "uuid";
 	import {
 		arrayToImageData,
-		ImageDataToArray,
-		imageDataToImage,
 		arrayToMask,
 		compressor,
 		decompressor,
+		imageDataToImage,
 	} from "$lib/components/SAM_Segmentation/maskUtils";
-	import { handleImageScale } from "$lib/components/SAM_Segmentation/scaleHelper";
 	import { modelData } from "$lib/components/SAM_Segmentation/onnxModelAPI";
-	import Modal from "$lib/components/Modal.svelte";
+	import { handleImageScale } from "$lib/components/SAM_Segmentation/scaleHelper";
+	import { InferenceSession, env } from "onnxruntime-web";
+	import { onMount } from "svelte";
+	import { v4 as uuid } from "uuid";
+	import CarbonClose from "~icons/carbon/close";
 
 	export let MODEL_DIR = new URL(
 		"$lib/components/SAM_Segmentation/model/sam_onnx_quantized.onnx",
