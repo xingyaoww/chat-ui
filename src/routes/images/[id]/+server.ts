@@ -26,10 +26,10 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 };
 
-export const DELETE = async ({ url }) => {
+export const DELETE = async ({ params }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
-		const pathname = url.pathname.split("/")[2];
+		const pathname = params.id;
 		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/images/${pathname}`, {
