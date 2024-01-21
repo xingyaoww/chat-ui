@@ -287,11 +287,11 @@
 				{#each marked.lexer(sanitizeMd(message.content.trim())) as token}
 					{#if token.type === "code"}
 						{#if token.lang === "image"}
-							{#if JSON.parse(unsanitizeMd(token.text)) instanceof Array}
+							{#if isJSON(unsanitizeMd(token.text)) instanceof Array}
 								{#each JSON.parse(unsanitizeMd(token.text)) as json}
 									<ImageReader on:segmentImageUpload {json} />
 								{/each}
-							{:else}
+							{:else if isJSON(unsanitizeMd(token.text))}
 								<ImageReader on:segmentImageUpload json={JSON.parse(unsanitizeMd(token.text))} />
 							{/if}
 						{:else}

@@ -422,12 +422,12 @@ export async function POST({ request, locals, params, getClientAddress }) {
 					displayExecutionResult = displayExecutionResult.replace("```result\n\n```", "");
 
 					// truncate the execution output *for the LLM* if it's too long
-					if (executionOutput.length > 4000) {
-						executionOutput =
-							executionOutput.substring(0, 2000) +
-							"\n... [Output truncated due to length]...\n" +
-							executionOutput.substring(executionOutput.length - 2000);
-					}
+					// if (executionOutput.length > 4000) {
+					// 	executionOutput =
+					// 		executionOutput.substring(0, 2000) +
+					// 		"\n... [Output truncated due to length]...\n" +
+					// 		executionOutput.substring(executionOutput.length - 2000);
+					// }
 
 					// create a new message with the execution output
 					messages = [

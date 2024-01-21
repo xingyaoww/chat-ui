@@ -56,8 +56,6 @@
 
 	// Another reactive statement to determine the content type
 	$: contentType = parsedJson ? parsedJson.type : null;
-	$: console.log("parsedJson", parsedJson);
-	$: console.log("contentType", contentType);
 </script>
 
 <div class="group relative my-4 rounded-lg">
