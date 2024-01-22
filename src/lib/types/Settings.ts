@@ -18,6 +18,8 @@ export interface Settings extends Timestamps {
 
 	// model name and system prompts
 	customPrompts?: Record<string, string>;
+	// curriculum
+	curriculum?: Record<string, string>;
 }
 
 // TODO: move this to a constant file along with other constants

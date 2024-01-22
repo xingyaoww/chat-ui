@@ -41,6 +41,7 @@
 	export let models: Model[];
 	export let webSearchMessages: WebSearchUpdate[] = [];
 	export let preprompt: string | undefined = undefined;
+	export let curriculum: Record<string, string> = {};
 	export let files: File[] = [];
 	export let currentSelectedImages: ImageJSON[] = [];
 
@@ -188,6 +189,7 @@
 		isAuthor={!shared}
 		{webSearchMessages}
 		{preprompt}
+		{curriculum}
 		on:message={(ev) => {
 			if ($page.data.loginRequired) {
 				loginModalOpen = true;

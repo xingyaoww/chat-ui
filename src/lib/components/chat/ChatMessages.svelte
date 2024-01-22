@@ -18,6 +18,7 @@
 	export let currentModel: Model;
 	export let models: Model[];
 	export let preprompt: string | undefined;
+	export let curriculum: Record<string, string> | undefined;
 	export let readOnly: boolean;
 
 	let chatContainer: HTMLElement;
