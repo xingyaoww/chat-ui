@@ -25,7 +25,6 @@
 				body: JSON.stringify({
 					model: $settings.activeModel,
 					preprompt: $settings.customPrompts[$settings.activeModel],
-					curriculum: $settings.curriculum[$settings.activeModel],
 				}),
 			});
 

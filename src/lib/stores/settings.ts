@@ -11,7 +11,6 @@ type SettingsStore = {
 	activeModel: string;
 	customPrompts: Record<string, string>;
 	recentlySaved: boolean;
-	curriculum: Record<string, string>;
 };
 export function useSettingsStore() {
 	return getContext<Writable<SettingsStore>>("settings");

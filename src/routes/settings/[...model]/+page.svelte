@@ -1,22 +1,81 @@
 <script lang="ts">
-	import { base } from "$app/paths";
 	import { page } from "$app/stores";
+	import { base } from "$app/paths";
 	import { PUBLIC_ORIGIN } from "$env/static/public";
-	import CopyToClipBoardBtn from "$lib/components/CopyToClipBoardBtn.svelte";
-	import DragAndDropList from "$lib/components/DragAndDropList.svelte";
-	import defaultCurriculum from "$lib/curriculum/curriculum.json";
 	import type { BackendModel } from "$lib/server/models";
 	import { useSettingsStore } from "$lib/stores/settings";
-	import { onDestroy } from "svelte";
-	import { writable, type Writable } from "svelte/store";
+	import CopyToClipBoardBtn from "$lib/components/CopyToClipBoardBtn.svelte";
 	import CarbonArrowUpRight from "~icons/carbon/arrow-up-right";
 	import CarbonLink from "~icons/carbon/link";
+	import defaultCurriculum from "./curriculum2.json";
 
 	const settings = useSettingsStore();
 	let mode: string = "System Prompt";
-	let curriculum: Record<string, any> = null;
-	let toolList: string[] = [];
-	let ruleList: Writable<string[]> = writable([]);
+	let curriculum: any = defaultCurriculum;
+
+	const translateCurriculumToPreprompt = (curriculum: any) => {
+		const userMessageToken = curriculum["userMessageToken"];
+		const assistantMessageToken = curriculum["assistantMessageToken"];
+		const prepromptMessageToken = curriculum["prepromptMessageToken"];
+		const userMessageEndToken = curriculum["userMessageEndToken"];
+		const assistantMessageEndToken = curriculum["assistantMessageEndToken"];
+		const prepromptMessageEndToken = curriculum["prepromptMessageEndToken"];
+		const system_description = curriculum["system_description"];
+		const tools = curriculum["tools"];
+		console.log("tools", tools);
+		const toolList = tools
+			.map(
+				(tool, index) => `[${index}] ${tool["name"]}
+Description: ${tool["description"]}. 
+Example Questions: 
+${tool["example_question"].map((question) => "- '" + question + "'").join("\n- ")}
+Parameters: ${tool["variables"]
+					.map((param) => param["name"] + ": " + param["description"])
+					.join("; ")}
+Example: ${tool["example_code"]}`
+			)
+			.join("\n\n");
+
+		const exampleConversations = tools
+			.map((tool) => tool["example_conversation_prompt"])
+			.flat()
+			.flat()
+			.map((message) => {
+				if (message["role"] === "user") {
+					return `${userMessageToken}
+${message["message"]}
+${userMessageEndToken}`;
+				} else if (message["role"] === "code") {
+					return `${assistantMessageToken}
+<execute>${message["message"]}</execute>
+${assistantMessageEndToken}`;
+				} else if (message["role"] === "output") {
+					return `${userMessageToken}
+Execution Output:
+${message["message"]}
+${userMessageEndToken}`;
+				} else {
+					return `${assistantMessageToken}
+${message["message"]}
+${assistantMessageEndToken}`;
+				}
+			})
+			.join("\n");
+		const newPreprompt = `${prepromptMessageToken}
+${system_description}
+ 
+You have access to the following tools (pre-imported Python functions):
+ 
+${toolList}
+${prepromptMessageEndToken}
+${exampleConversations}
+${userMessageToken}
+Remember you have access to these tools:
+ 
+${tools.map((tool, index) => "[" + index + "]" + tool["name"]).join("\n")}
+`;
+		return newPreprompt;
+	};
 
 	$: if ($settings.customPrompts[$page.params.model] === undefined) {
 		$settings.customPrompts = {
@@ -24,14 +83,6 @@
 			[$page.params.model]:
 				$page.data.models.find((el: BackendModel) => el.id === $page.params.model)?.preprompt || "",
 		};
-	}
-
-	$: if ($settings.curriculum[$page.params.model] === undefined) {
-		$settings.curriculum = {
-			...$settings.curriculum,
-			[$page.params.model]: JSON.stringify(defaultCurriculum),
-		};
-		curriculum = JSON.parse($settings.curriculum[$page.params.model]);
 	}
 
 	$: hasCustomPreprompt =
@@ -50,24 +101,10 @@
 			curriculum = defaultCurriculum;
 		}
 	}
-	$: if (curriculum) {
-		toolList = curriculum.tools;
-		ruleList.set(curriculum.rules);
+	$: if (curriculum && mode === "System Curriculum") {
+		$settings.customPrompts[$page.params.model] = translateCurriculumToPreprompt(curriculum);
 	}
-	// Update curriculum when ruleList changes
-	$: if (ruleList && curriculum) {
-		const unsubscribe = ruleList.subscribe((value) => {
-			console.log("value", value);
-			curriculum.rules = value;
-			// Use store's update method to modify $settings.curriculum
-			$settings.curriculum[$page.params.model] = JSON.stringify(curriculum);
-			$page.data.models.curriculum[$page.params.model] = JSON.stringify(curriculum);
-			console.log("curriculum", curriculum);
-		});
-
-		// Cleanup the subscription when the component is destroyed
-		onDestroy(unsubscribe);
-	}
+	$: console.log("curriculum", curriculum);
 </script>
 
 <div class="flex flex-col items-start">
@@ -171,16 +208,19 @@
 				</button>
 			{/if}
 		</div>
-		{#if mode === "System Prompt"}
+		<textarea
+			rows="10"
+			class="w-full resize-none rounded-md border-2 bg-gray-100 p-2"
+			bind:value={$settings.customPrompts[$page.params.model]}
+		/>
+		<!-- {#if mode === "System Prompt"}
+			
+		{:else if mode === "System Curriculum"}
 			<textarea
 				rows="10"
 				class="w-full resize-none rounded-md border-2 bg-gray-100 p-2"
 				bind:value={$settings.customPrompts[$page.params.model]}
 			/>
-		{:else if mode === "System Curriculum"}
-			{#if ruleList}
-				<DragAndDropList name="Rules" list={ruleList} />
-			{/if}
-		{/if}
+		{/if} -->
 	</div>
 </div>

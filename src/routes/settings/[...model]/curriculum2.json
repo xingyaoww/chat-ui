@@ -54,7 +54,7 @@
                     },
                     {
                         "role": "code",
-                        "message": "image_id_1 = '657eafdeef3d6763710dffa2' \nimage_id_2 = '657eafdeef3d6763710dffb3' \n[what_is_object(image_id_1), what_is_object(image_id_2)\n]"
+                        "message": "image_id_1 = '657eafdeef3d6763710dffa2' \nimage_id_2 = '657eafdeef3d6763710dffb3' \n[what_is_it(image_id_1), what_is_it(image_id_2)\n]"
                     },
                     {
                         "role": "output",
@@ -103,6 +103,24 @@
                     {
                         "role": "assistant",
                         "message": "The explanation for the image is:\n\nThis is a 'coyote' because:\n- It is a 'four-legged mammal': 0.32\n- It has 'brown, grey, or black fur': 0.33\n- It has 'pointy ears': 0.32\n- It has 'a bushy tail': 0.31\n- It has 'a long snout': 0.31\n- It has 'sharp teeth': 0.31\n\nThis is the reasoning behind the classification of the image as a 'coyote'. "
+                    }
+                ],
+                [
+                    {
+                        "role": "user",
+                        "message": "<image>{\n'id': '657eafdeef3d6763710dffa2',\n'url': '/images/657eafdeef3d6763710dffa2'\n}{\n'id': '657eafdeef3d6763710dffb3',\n'url': '/images/657eafdeef3d6763710dffb3'\n}\n</image>\nWhat is the objects inside those images?"
+                    },
+                    {
+                        "role": "code",
+                        "message": "image_id_1 = '657eafdeef3d6763710dffa2' \nimage_id_2 = '657eafdeef3d6763710dffb3' \n[explain_concept(image_id_1), explain_concept(image_id_2)\n]"
+                    },
+                    {
+                        "role": "output",
+                        "message": "[{'type': 'ecole-json-reason', 'reasons': {'descriptions': ['A person holding a small dog', 'A person holding a large dog'], 'scores': ['0.31', '0.29'], 'text': 'This is a person holding a small dog because:\nperson': 0.31\n'small dog': 0.31\nperson holding a large dog': 0.29\nperson: 0.29\nlarge dog: 0.29'}, 'type': 'ecole-json-reason'}, {'type': 'ecole-json-reason', 'reasons': {'descriptions': ['A person holding a small cat', 'A person holding a large cat'], 'scores': ['0.3', '0.28'], 'text': 'This is a person holding a small cat because:\nperson': 0.3\n'small cat': 0.3\nperson holding a large cat': 0.28\nperson: 0.28\nlarge cat: 0.28'}, 'type': 'ecole-json-reason'}]"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The explanation for the first image is:\n\nThis is a person holding a small dog because:\n- It is a 'person': 0.31\n- It is a 'small dog': 0.31\n- It is a 'person holding a large dog': 0.29\n- It is a 'person': 0.29\n- It is a 'large dog': 0.29\n\nThis is the reasoning behind the classification of the image as a 'person holding a small dog'. \n\nThe explanation for the second image is:\n\nThis is a person holding a small cat because:\n- It is a 'person': 0.3\n- It is a 'small cat': 0.3\n- It is a 'person holding a large cat': 0.28\n- It is a 'person': 0.28\n- It is a 'large cat': 0.28\n\nThis is the reasoning behind the classification of the image as a 'person holding a small cat'. "
                     }
                 ]
             ]
@@ -375,6 +393,60 @@
                     {
                         "role": "assistant",
                         "message": "The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth'"
+                    }
+                ],
+                [
+                    {
+                        "role": "user",
+                        "message": "Show me the attributes of 'coyote' and 'grey wolf'"
+                    },
+                    {
+                        "role": "code",
+                        "message": "[get_attributes('coyote'), get_attributes('grey wolf')]"
+                    },
+                    {
+                        "role": "output",
+                        "message": "[{'type': 'ecole-message', 'data': 'The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth''}, {'type': 'ecole-message', 'data': 'The attributes of 'grey wolf' are 'grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat''}]"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth'. The attributes of 'grey wolf' are 'grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat'"
+                    }
+                ],
+                [
+                    {
+                        "role": "user",
+                        "message": "Get the similar attributes of 'coyote' and 'grey wolf'"
+                    },
+                    {
+                        "role": "code",
+                        "message": "[get_attributes('coyote'), get_attributes('grey wolf')]"
+                    },
+                    {
+                        "role": "output",
+                        "message": "[{'type': 'ecole-message', 'data': 'The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth''}, {'type': 'ecole-message', 'data': 'The attributes of 'grey wolf' are 'grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat''}]"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "The similar attributes of 'coyote' and 'grey wolf' are 'four-legged mammal', 'pointy ears', 'a bushy tail', 'sharp teeth'"
+                    }
+                ],
+                [
+                    {
+                        "role": "user",
+                        "message": "Get the different attributes of 'coyote' and 'grey wolf'"
+                    },
+                    {
+                        "role": "code",
+                        "message": "[get_attributes('coyote'), get_attributes('grey wolf')]"
+                    },
+                    {
+                        "role": "output",
+                        "message": "[{'type': 'ecole-message', 'data': 'The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth''}, {'type': 'ecole-message', 'data': 'The attributes of 'grey wolf' are 'grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat''}]"
+                    },
+                    {
+                        "role": "assistant",
+                        "message": "'Coyote' has 'brown, grey, or black fur', 'a long snout', whereas 'grey wolf' has 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat'"
                     }
                 ]
             ]
