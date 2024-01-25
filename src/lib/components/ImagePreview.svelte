@@ -39,7 +39,7 @@
 
 <div class="border-grey-300 relative m-4 inline-block rounded-lg border hover:border-red-400">
 	<img
-		class="h-24 w-24 rounded-xl object-cover"
+		class="h-24 w-24 min-w-24 max-w-24 rounded-xl object-cover"
 		src={base + "/images/" + json.id}
 		alt="Image"
 		on:click={clickHandler}

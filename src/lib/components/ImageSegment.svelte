@@ -67,9 +67,9 @@
 		ctx.drawImage(mask, 0, 0, canvas.width, canvas.height);
 
 		// Set the composite operation to 'destination-over' to fill the rest with white
-		// ctx.globalCompositeOperation = "destination-over";
-		// ctx.fillStyle = "white";
-		// ctx.fillRect(0, 0, canvas.width, canvas.height);
+		ctx.globalCompositeOperation = "destination-over";
+		ctx.fillStyle = "white";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 		// Prepare the file to be sent in a FormData object
 		const formData = new FormData();

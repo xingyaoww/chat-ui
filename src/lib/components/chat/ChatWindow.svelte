@@ -345,7 +345,7 @@
 							{:else}
 								<button
 									class="btn mx-1 my-1 h-[2.4rem] self-end rounded-lg bg-transparent p-1 px-[0.7rem] text-gray-400 disabled:opacity-60 enabled:hover:text-gray-700 dark:disabled:opacity-40 enabled:dark:hover:text-gray-100"
-									disabled={!message || isReadOnly}
+									disabled={currentSelectedImages.length === 0 && (!message || isReadOnly)}
 									type="submit"
 								>
 									<CarbonSendAltFilled />

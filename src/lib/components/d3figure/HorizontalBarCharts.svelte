@@ -19,21 +19,20 @@
 	let windowWidth = 0;
 	let resizeObserver = null;
 	let element;
-
 	function wrapText(text, width) {
 		text.each(function () {
-			var text = d3.select(this),
-				words = text.text().split(/\s+/).reverse(),
+			var new_text = d3.select(this),
+				words = new_text.text().split(/\s+/).reverse(),
 				word,
 				line = [],
 				lineNumber = 0,
 				lineHeight = 1.1, // ems
-				y = text.attr("y"),
+				y = new_text.attr("y"),
 				dy = parseFloat(text.attr("dy")),
-				tspan = text
+				tspan = new_text
 					.text(null)
 					.append("tspan")
-					.attr("x", 0)
+					.attr("x", -10)
 					.attr("y", y)
 					.attr("dy", dy + "em");
 
@@ -44,14 +43,18 @@
 					line.pop();
 					tspan.text(line.join(" "));
 					line = [word];
-					tspan = text
+					lineNumber++;
+					tspan = new_text
 						.append("tspan")
-						.attr("x", 0)
+						.attr("x", -10)
 						.attr("y", y)
-						.attr("dy", ++lineNumber * lineHeight + dy + "em")
+						.attr("dy", lineNumber * lineHeight + dy + "em")
 						.text(word);
 				}
 			}
+
+			//move the text to the center of the bar
+			new_text.attr("transform", "translate(0," + -lineNumber * lineHeight + ")");
 		});
 	}
 	function sortData(data) {
@@ -60,9 +63,9 @@
 	const drawChart = (windowWidth) => {
 		// Set dimensions and margins for the graph
 
-		const margin = { top: 10, right: 10, bottom: 30, left: 100 };
+		const margin = { top: 10, right: 10, bottom: 30, left: 150 };
 		const width = windowWidth - margin.left - margin.right;
-		const height = (windowWidth * 3) / 4 - margin.top - margin.bottom;
+		const height = Math.max((windowWidth * 3) / 4 - margin.top - margin.bottom, data.length * 50);
 		// Clear existing content
 		d3.select("#bar-chart" + id)
 			.selectAll("*")
@@ -104,7 +107,10 @@
 			.domain(data.map((d) => d.name))
 			.padding(0.1);
 
-		svg.append("g").call(d3.axisLeft(y));
+		const yAxis = svg.append("g").call(d3.axisLeft(y));
+
+		// Apply the wrapText function to the Y-axis labels
+		yAxis.selectAll("text").call(wrapText, margin.left - 5);
 
 		// Add Y axis label
 		svg

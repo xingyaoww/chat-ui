@@ -22,6 +22,14 @@ export async function buildPrompt({
 	preprompt,
 	id,
 }: buildPromptOptions): Promise<string> {
+	if (messages.length > 10) {
+		const lastMsg = messages.slice(-1)[0];
+		if (lastMsg.from === "user" && messages.slice(-9)[0].content.startsWith("Execution Output:")) {
+			messages = messages.slice(-11, -1);
+		} else {
+			messages = messages.slice(-9);
+		}
+	}
 	if (webSearch && webSearch.context) {
 		const lastMsg = messages.slice(-1)[0];
 		const messagesWithoutLastUsrMsg = messages.slice(0, -1);
