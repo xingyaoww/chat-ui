@@ -75,7 +75,6 @@
 		});
 		message = text + "\n" + message;
 		dispatch("message", message);
-		console.log("message", message);
 		currentSelectedImages = [];
 		message = "";
 	};
@@ -104,11 +103,9 @@
 				if (response.ok) {
 					// Use the returned URL
 					const result = await response.json();
-					console.log("result", result);
 					const json = { id: result.id, url: result.url };
 					dispatch("imageUpload", json);
 					currentSelectedImages = [...currentSelectedImages, json];
-					console.log("json", json);
 					if (loading) return;
 				} else {
 					console.error("Upload failed", response);
@@ -120,13 +117,11 @@
 		fileInput.click();
 	}
 	function handleImageGaleryClick(): void {
-		console.log("clicked");
 		imageGaleryOpened = !imageGaleryOpened;
 	}
 	function onSelectImage(image: ImageJSON) {
 		dispatch("imageClick", image);
 		currentSelectedImages = [...currentSelectedImages, image];
-		console.log("dispatched message over here");
 	}
 	let lastTarget: EventTarget | null = null;
 
@@ -379,7 +374,7 @@
 							<CarbonCheckmark class="text-[.6rem] sm:mr-1.5 sm:text-green-600" />
 							<div class="text-green-600 max-sm:hidden">Link copied to clipboard</div>
 						{:else}
-							<CarbonExport class="text-[.6rem] sm:mr-1.5 sm:text-primary-500" />
+							<CarbonExport class="sm:text-primary-500 text-[.6rem] sm:mr-1.5" />
 							<div class="max-sm:hidden">Share this conversation</div>
 						{/if}
 					</button>

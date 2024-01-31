@@ -5,13 +5,12 @@ export const GET: RequestHandler = async ({ params }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		const pathname = params.id;
-		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/images/${pathname}`);
 
 		if (!response.ok) throw new Error(response.statusText);
 		const arrayBuffer = await response.arrayBuffer();
-		console.log("response", response);
+
 		return new Response(arrayBuffer, {
 			status: 200,
 			headers: {
@@ -30,7 +29,6 @@ export const DELETE = async ({ params }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		const pathname = params.id;
-		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/images/${pathname}`, {
 			method: "DELETE",

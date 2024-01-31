@@ -5,7 +5,6 @@ export const GET: RequestHandler = async ({ params }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		const pathname = params.id;
-		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/embeddings/${pathname}`);
 
@@ -48,7 +47,6 @@ export const DELETE = async ({ url }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		const pathname = url.pathname.split("/")[2];
-		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/embeddings/${pathname}`, {
 			method: "DELETE",

@@ -22,7 +22,6 @@
 		const prepromptMessageEndToken = curriculum["prepromptMessageEndToken"];
 		const system_description = curriculum["system_description"];
 		const tools = curriculum["tools"];
-		console.log("tools", tools);
 		const toolList = tools
 			.map(
 				(tool, index) => `[${index}] ${tool["name"]}
@@ -104,7 +103,6 @@ ${tools.map((tool, index) => "[" + index + "]" + tool["name"]).join("\n")}
 	$: if (curriculum && mode === "System Curriculum") {
 		$settings.customPrompts[$page.params.model] = translateCurriculumToPreprompt(curriculum);
 	}
-	$: console.log("curriculum", curriculum);
 </script>
 
 <div class="flex flex-col items-start">

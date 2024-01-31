@@ -4,9 +4,7 @@ import { IMAGE_SERVER_URL } from "$env/static/private";
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
-		console.log("imageUrl", imageUrl);
 		const requestBody = await request.formData();
-		console.log("requestBody", requestBody);
 		let user_id = "";
 		if (locals.user?._id) {
 			user_id = String(locals.user._id);
@@ -21,9 +19,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			body: formData,
 		});
 
-		console.log("response", response);
 		const responseData = await response.json();
-		console.log("responseData", responseData);
 		return new Response(JSON.stringify(responseData), {
 			status: 200,
 			headers: {

@@ -216,7 +216,8 @@ export async function POST({ request, locals, params, getClientAddress }) {
 			const summarizeIfNeeded = (async () => {
 				if (conv.title === "New Chat" && messages.length === 1) {
 					try {
-						conv.title = (await summarize(newPrompt)) ?? conv.title;
+						conv.title = "New Chat";
+						// conv.title = (await summarize(newPrompt)) ?? conv.title;
 						update({ type: "status", status: "title", message: conv.title });
 					} catch (e) {
 						console.error(e);
@@ -258,7 +259,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 				try {
 					const endpoint = await model.getEndpoint();
 					conv.messages = messages;
-					// console.log("conv.messages (for inference): " + conv.messages)
+
 					for await (const output of await endpoint({ conversation: conv })) {
 						// if not generated_text is here it means the generation is not done
 						if (!output.generated_text) {
@@ -326,10 +327,10 @@ export async function POST({ request, locals, params, getClientAddress }) {
 				if (lastMessage.from !== "assistant") {
 					throw new Error("Last message is not from the assistant");
 				}
-				
+
 				// if lastMessage.content ends with '</execute', complete the closing tag
 				if (lastMessage.content.endsWith("</execute")) {
-					lastMessage.content += ">"
+					lastMessage.content += ">";
 				}
 
 				const pattern = /<execute>([\s\S]*?)<\/execute>/;

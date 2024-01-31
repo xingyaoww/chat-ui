@@ -20,7 +20,6 @@
 		url: "https://via.placeholder.com/400x400",
 		id: "1234",
 	};
-	$: console.log("json", json);
 
 	export let MODEL_DIR = new URL(
 		"$lib/components/SAM_Segmentation/model/sam_onnx_quantized.onnx",
@@ -34,8 +33,6 @@
 		const npArray = await npLoader.load(tensorFile);
 		return new ort.Tensor(dType, npArray.data, npArray.shape);
 	}
-
-	console.log("data", data);
 
 	let model;
 	let tensor;
@@ -91,7 +88,6 @@
 		if (response.ok) {
 			// Use the returned URL
 			const result = await response.json();
-			console.log("result", result);
 			const reponsejson = { id: result.id, url: result.url };
 			dispatch("segmentImageUpload", reponsejson);
 		} else {
@@ -108,7 +104,6 @@
 			try {
 				env.wasm.wasmPaths = "/onnxruntime-web/";
 				model = await InferenceSession.create(MODEL_DIR, { executionProviders: ["wasm"] });
-				console.log("model instantiated", model);
 			} catch (e) {
 				console.error("cannot instantiate", e);
 			}
@@ -132,8 +127,6 @@
 		}
 		const embeddingResponse = await tensor_response.arrayBuffer();
 		tensor = await loadNpyTensor(embeddingResponse, "float32");
-		console.log("image", image);
-		console.log("tensor", tensor);
 		isLoading = false; // Set loading state to false when the image is loaded
 	});
 

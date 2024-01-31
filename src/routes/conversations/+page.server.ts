@@ -7,7 +7,6 @@ export const actions = {
 	delete: async function ({ locals }) {
 		// double check we have a user to delete conversations for
 		if (locals.user?._id || locals.sessionId) {
-			console.log("locals: ", locals);
 			await collections.conversations.deleteMany({
 				...authCondition(locals),
 			});

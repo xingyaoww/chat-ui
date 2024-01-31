@@ -18,13 +18,13 @@ export const GET: RequestHandler = async ({ fetch, locals }) => {
 				"Content-Type": "application/json",
 			},
 		});
-		console.log("response", response);
+
 		if (!response.ok) {
 			throw new Error(`Error from image server: ${response.statusText}`);
 		}
 
 		const imageData = await response.json();
-		console.log("imageData", imageData);
+
 		return new Response(JSON.stringify(imageData), {
 			headers: { "Content-Type": "application/json" },
 		});

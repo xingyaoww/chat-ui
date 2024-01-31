@@ -17,14 +17,12 @@
 	let selectedImage: Image | null = null;
 
 	async function fetchAllOriginalImages() {
-		console.log("fetching images");
 		const responseFetch = await fetch(`${base}/all_images`, {
 			method: "GET",
 			headers: {
 				accept: "application/json",
 			},
 		});
-		console.log("response", responseFetch);
 
 		if (responseFetch.ok) {
 			const result = await responseFetch.json();

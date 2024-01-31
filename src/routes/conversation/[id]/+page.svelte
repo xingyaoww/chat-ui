@@ -72,9 +72,6 @@
 			loading = true;
 			pending = true;
 
-			// first we check if the messageId already exists, indicating a retry
-			console.log("messages", message);
-
 			let retryMessageIndex = messages.findIndex((msg) => msg.id === messageId);
 			const isRetry = retryMessageIndex !== -1;
 			// if it's not a retry we just use the whole array
@@ -113,8 +110,6 @@
 			files = [];
 
 			const responseId = randomUUID();
-			console.log("responseId", responseId);
-			console.log("message", message);
 
 			const response = await fetch(`${base}/conversation/${$page.params.id}`, {
 				method: "POST",

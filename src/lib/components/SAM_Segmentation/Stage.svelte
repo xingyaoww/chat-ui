@@ -92,11 +92,9 @@
 	<Toolbar
 		handleAdd={() => {
 			clickType = 1;
-			console.log("clickType", clickType);
 		}}
 		handleMinus={() => {
 			clickType = 0;
-			console.log("clickType", clickType);
 		}}
 		handleSave={() => {
 			dispatch("save", {

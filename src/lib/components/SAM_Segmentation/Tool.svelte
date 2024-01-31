@@ -16,7 +16,6 @@
 	let imageClasses = "";
 	let maskImageClasses =
 		"absolute top-0 left-0 z-10 opacity-40 border-3 border-red-500 pointer-events-none";
-	$: console.log("savedClicks", savedClicks);
 
 	const fitToPage = () => {
 		if (!image) return;

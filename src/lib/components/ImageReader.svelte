@@ -8,9 +8,7 @@
 		id: "1234",
 	};
 	let segmentMode = false;
-	$: console.log("json", json);
 	const handleAnnotationClick = () => {
-		console.log("Edit Image", json.id);
 		goto(`${base}/segmentation/${json.id}`);
 	};
 

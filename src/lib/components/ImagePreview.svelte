@@ -11,12 +11,10 @@
 	};
 	export let mode = 0;
 	export let clickHandler: (image: Image) => void = () => {};
-	$: console.log("json", json);
 	const dispatch = createEventDispatcher<{ deleteImage: void }>();
 
 	function deleteImage() {
 		// Implement the logic for deleting the image
-		console.log("Delete Image", json.id);
 		fetch(`${base}/images/${json.id}`, {
 			method: "DELETE",
 			headers: {
@@ -32,7 +30,6 @@
 
 	function editImage() {
 		// Implement the logic for editing the image
-		console.log("Edit Image", json.id);
 		goto(`${base}/segmentation/${json.id}`);
 	}
 </script>

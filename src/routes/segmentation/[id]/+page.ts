@@ -18,7 +18,6 @@ export async function load({ params, fetch }) {
 	}
 
 	try {
-		console.log("IMAGE_URL", IMAGE_URL);
 		// Load image and embedding
 		const [imageResponse, embeddingResponse] = await Promise.all([
 			fetch(IMAGE_URL),

@@ -23,8 +23,6 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	console.log("data", data);
-
 	let model;
 	let tensor;
 	let modelScale;
@@ -46,7 +44,6 @@
 			try {
 				env.wasm.wasmPaths = "/onnxruntime-web/";
 				model = await InferenceSession.create(MODEL_DIR, { executionProviders: ["wasm"] });
-				console.log("model instantiated", model);
 			} catch (e) {
 				console.error("cannot instantiate", e);
 			}
@@ -95,15 +92,9 @@
 		}
 	}
 
-	$: if (savedMaskImgs) {
-		console.log("savedMaskImgs", savedMaskImgs);
-	}
-
 	const saveSavedImgMasks = () => {
 		const saveContent = savedMaskImgs.map((savedMaskImg) => {
-			console.log("savedMaskImg arr", savedMaskImg.output.arr);
 			const arr = compressor(savedMaskImg.output.arr);
-			console.log("arr", arr);
 			return {
 				id: savedMaskImg.id,
 				output: {
@@ -133,7 +124,7 @@
 				description: savedMaskImg.description,
 			};
 		});
-		console.log("savedMaskImgs", savedMaskImgs);
+
 		if (savedMaskImgs && savedMaskImgs.length > 0) {
 			const renderOutput = arrayToImageData(
 				savedMaskImgs[0].output.arr,
@@ -163,10 +154,7 @@
 		clicks = [...savedClicks.map((detail) => detail.click)];
 	};
 	const handleSave = async (event) => {
-		console.log("handleSave", event.detail);
-
 		if (event.detail.id && event.detail.id !== "") {
-			console.log("go here", event.detail.id);
 			savedMaskImgs = [
 				...savedMaskImgs.filter((img) => img.id !== event.detail.id),
 				{
@@ -194,7 +182,6 @@
 		savedClicks = [];
 		clicks = [];
 		const jsonString = saveSavedImgMasks();
-		console.log("jsonString", jsonString);
 		const response = await fetch(`/annotations/${data.props.id}`, {
 			method: "PUT",
 			headers: {
@@ -210,7 +197,6 @@
 		}
 	};
 	const handleSelect = (event) => {
-		console.log("handleSelect", event.detail);
 		if (event.detail && savedMaskImgs && savedMaskImgs.length > 0) {
 			const savedMaskImg = savedMaskImgs.find((savedMaskImg) => savedMaskImg.id === event.detail);
 			if (savedMaskImg) {
@@ -265,7 +251,6 @@
 					const jsondata = JSON.parse(jsonContent);
 					// Process your data here
 					loadSavedMaskImgs(jsondata);
-					console.log(jsondata);
 				} catch (e) {
 					console.error("Error parsing JSON:", e);
 				}

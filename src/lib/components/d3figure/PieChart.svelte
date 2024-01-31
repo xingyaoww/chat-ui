@@ -128,7 +128,6 @@
 			.call(wrap, radius / 2); // Adjust width as needed
 	};
 	$: if (windowWidth != 0) {
-		console.log("width", windowWidth);
 		drawChart(windowWidth);
 	}
 </script>

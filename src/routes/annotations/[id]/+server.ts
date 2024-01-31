@@ -10,7 +10,7 @@ export const GET: RequestHandler = async ({ params }) => {
 
 		if (!response.ok) throw new Error(response.statusText);
 		const arrayBuffer = await response.arrayBuffer();
-		console.log("response", response);
+
 		return new Response(arrayBuffer, {
 			status: 200,
 			headers: {
@@ -33,7 +33,6 @@ export const POST: RequestHandler = async ({ params }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		const pathname = params.id;
-		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/annotations/${pathname}`, {
 			method: "POST",
@@ -74,7 +73,6 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 			});
 		}
 
-		console.log("body to upload", body);
 		const response = await fetch(`${imageUrl}/annotations/${pathname}`, {
 			method: "PUT",
 			body: JSON.stringify(body),
@@ -106,7 +104,6 @@ export const DELETE = async ({ url }) => {
 	try {
 		const imageUrl = IMAGE_SERVER_URL;
 		const pathname = url.pathname.split("/")[2];
-		console.log("pathname", pathname);
 
 		const response = await fetch(`${imageUrl}/annotations/${pathname}`, {
 			method: "DELETE",

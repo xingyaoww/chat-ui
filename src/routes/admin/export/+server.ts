@@ -49,7 +49,6 @@ export async function POST({ request }) {
 	const writer = await parquet.ParquetWriter.openFile(schema, fileName);
 
 	let count = 0;
-	console.log("Exporting conversations for model", model);
 
 	for await (const conversation of collections.settings.aggregate<{
 		title: string;

@@ -18,7 +18,6 @@
 		],
 	};
 	const handleAnnotationClick = () => {
-		console.log("Edit Image", data.image_id);
 		goto(`${base}/segmentation/${data.image_id}`);
 	};
 	const onLoadImage = (event) => {
@@ -28,11 +27,6 @@
 		width = img.width;
 		height = img.height;
 		scale = width / naturalWidth;
-		console.log("naturalWidth", naturalWidth);
-		console.log("naturalHeight", naturalHeight);
-		console.log("width", width);
-		console.log("height", height);
-		console.log("scale", scale);
 	};
 </script>
 
