@@ -258,6 +258,7 @@
 				<label for="imageUpload" class="custom-file-upload">
 					<input
 						type="file"
+						multiple={true}
 						bind:this={fileInput}
 						id="imageUpload"
 						accept="image/*"

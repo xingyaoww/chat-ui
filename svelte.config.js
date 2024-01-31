@@ -6,6 +6,7 @@ dotenv.config({ path: "./.env.local" });
 dotenv.config({ path: "./.env" });
 
 process.env.PUBLIC_VERSION = process.env.npm_package_version;
+process.env.BODY_SIZE_LIMIT = 0;
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
