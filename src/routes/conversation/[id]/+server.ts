@@ -326,6 +326,12 @@ export async function POST({ request, locals, params, getClientAddress }) {
 				if (lastMessage.from !== "assistant") {
 					throw new Error("Last message is not from the assistant");
 				}
+				
+				// if lastMessage.content ends with '</execute', complete the closing tag
+				if (lastMessage.content.endsWith("</execute")) {
+					lastMessage.content += ">"
+				}
+
 				const pattern = /<execute>([\s\S]*?)<\/execute>/;
 				const match = lastMessage.content.match(pattern);
 
@@ -341,6 +347,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						},
 					];
 				}
+
 				await collections.conversations.updateOne(
 					{
 						_id: convId,
