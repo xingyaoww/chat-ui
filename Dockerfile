@@ -24,9 +24,13 @@ RUN --mount=type=secret,id=DOTENV_LOCAL,dst=.env.local \
 FROM node:20-slim
 
 RUN npm install -g pm2
+# RUN pm2 install pm2-logrotate
+
 
 COPY --from=builder-production /app/node_modules /app/node_modules
 COPY --link --chown=1000 package.json /app/package.json
 COPY --from=builder /app/build /app/build
+COPY --link --chown=1000 .env /.env
 
-CMD pm2 start /app/build/index.js -i $CPU_CORES --no-daemon
+
+CMD BODY_SIZE_LIMIT=20000000000000 pm2 start /app/build/index.js -i $CPU_CORES --no-daemon

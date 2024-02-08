@@ -82,7 +82,7 @@
 		const new_files = (event.target as HTMLInputElement).files as FileList;
 		if (!files) return;
 		for (let i = 0; i < new_files.length; i++) {
-			const nf = new_files[0];
+			const nf = new_files[i];
 			if (nf) {
 				// Convert the ImageJSON file to a URL that can be displayed
 				// const imageUrl = URL.createObjectURL(file);

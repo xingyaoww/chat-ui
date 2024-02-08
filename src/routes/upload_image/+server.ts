@@ -11,13 +11,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		} else if (locals.sessionId) {
 			user_id = String(locals.sessionId);
 		}
+		console.log("user_id", user_id);
 		const formData = new FormData();
-		formData.append("file", requestBody.get("file") as Blob);
+		const blob = requestBody.get("file") as Blob;
+		formData.append("file", blob);
 		formData.append("user_id", user_id as string);
+		console.log("formData", formData);
 		const response = await fetch(`${imageUrl}/images/`, {
 			method: "POST",
 			body: formData,
 		});
+		console.log("response", response);
 
 		const responseData = await response.json();
 		return new Response(JSON.stringify(responseData), {
