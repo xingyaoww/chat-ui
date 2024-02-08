@@ -1,0 +1,90 @@
+{
+    "name": "get_attributes(classname: str) -> dict",
+    "example_code": [
+        "<execute> get_attributes('coyote') </execute>"
+    ],
+    "variables": [
+        {
+            "name": "classname",
+            "description": "The class name."
+        }
+    ],
+    "example_conversation_prompt": [
+        [
+            {
+                "role": "user",
+                "content": "Show me the attributes of 'coyote'"
+            },
+            {
+                "role": "task",
+                "content": "Context: classname = 'coyote'\nTask: Get The Attributes\nQuestion: Show me the attributes of 'coyote'"
+            },
+            {
+                "role": "code",
+                "content": "get_attributes('coyote')"
+            },
+            {
+                "role": "output",
+                "content": "{'type': 'ecole-message', 'data': 'The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth''}"
+            },
+            {
+                "role": "assistant",
+                "content": "The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth'"
+            }
+        ],
+        [
+            {
+                "role": "user",
+                "content": "Show me the attributes of 'coyote' and 'grey wolf'"
+            },
+            {
+                "role": "code",
+                "content": "[get_attributes('coyote'), get_attributes('grey wolf')]"
+            },
+            {
+                "role": "output",
+                "content": "[{'type': 'ecole-message', 'data': 'The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth''}, {'type': 'ecole-message', 'data': 'The attributes of 'grey wolf' are 'grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat''}]"
+            },
+            {
+                "role": "assistant",
+                "content": "The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth'. The attributes of 'grey wolf' are 'grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat'"
+            }
+        ],
+        [
+            {
+                "role": "user",
+                "content": "Get the similar attributes of 'coyote' and 'grey wolf'"
+            },
+            {
+                "role": "code",
+                "content": "[get_attributes('coyote'), get_attributes('grey wolf')]"
+            },
+            {
+                "role": "output",
+                "content": "[{'type': 'ecole-message', 'data': 'The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth''}, {'type': 'ecole-message', 'data': 'The attributes of 'grey wolf' are 'grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat''}]"
+            },
+            {
+                "role": "assistant",
+                "content": "The similar attributes of 'coyote' and 'grey wolf' are 'four-legged mammal', 'pointy ears', 'a bushy tail', 'sharp teeth'"
+            }
+        ],
+        [
+            {
+                "role": "user",
+                "content": "Get the different attributes of 'coyote' and 'grey wolf'"
+            },
+            {
+                "role": "code",
+                "content": "[get_attributes('coyote'), get_attributes('grey wolf')]"
+            },
+            {
+                "role": "output",
+                "content": "[{'type': 'ecole-message', 'data': 'The attributes of 'coyote' are 'four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth''}, {'type': 'ecole-message', 'data': 'The attributes of 'grey wolf' are 'grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat''}]"
+            },
+            {
+                "role": "assistant",
+                "content": "'Coyote' has 'brown, grey, or black fur', 'a long snout', whereas 'grey wolf' has 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat'"
+            }
+        ]
+    ]
+}

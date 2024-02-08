@@ -1,0 +1,58 @@
+{
+    "name": "explain_concept(image_id:str) -> dict",
+    "variables": [
+        {
+            "name": "image_id",
+            "description": "The image id."
+        }
+    ],
+    "example_code": [
+        "<execute> explain_concept('12345abcde') </execute>"
+    ],
+    "example_conversation_prompt": [
+        [
+            {
+                "role": "user",
+                "content": "<image>{\n 'id': '657eafdeef3d6763710dffa2', \n'url': '/images/657eafdeef3d6763710dffa2'}\n </image>\nwWhy is this?"
+            },
+            {
+                "role": "task",
+                "content": "Context:\n id='657eafdeef3d6763710dffa2'\n url='/images/657eafdeef3d6763710dffa2'\nTask: Explain the concept of the image. \nQuestion: Why is this?"
+            },
+            {
+                "role": "code",
+                "content": "explain_concept('657eafdeef3d6763710dffa2')"
+            },
+            {
+                "role": "output",
+                "content": "{'reasons': {'descriptions': ['four-legged mammal', 'brown, grey, or black fur', 'pointy ears', 'a bushy tail', 'a long snout', 'sharp teeth'], 'scores': ['0.32', '0.33', '0.32', '0.31', '0.31', '0.31'], 'text': 'This is a 'coyote' because: \n'four-legged mammal': 0.32\n'brown, grey, or black fur': 0.33\n'pointy ears': 0.32\n'a bushy tail': 0.31\n'a long snout': 0.31\n'sharp teeth': 0.31'}, 'type': 'ecole-json-reason'}"
+            },
+            {
+                "role": "assistant",
+                "content": "The explanation for the image is:\n\nThis is a 'coyote' because:\n- It is a 'four-legged mammal': 0.32\n- It has 'brown, grey, or black fur': 0.33\n- It has 'pointy ears': 0.32\n- It has 'a bushy tail': 0.31\n- It has 'a long snout': 0.31\n- It has 'sharp teeth': 0.31\n\nThis is the reasoning behind the classification of the image as a 'coyote'. "
+            }
+        ],
+        [
+            {
+                "role": "user",
+                "content": "<image>{\n'id': '657eafdeef3d6763710dffa2',\n'url': '/images/657eafdeef3d6763710dffa2'\n}{\n'id': '657eafdeef3d6763710dffb3',\n'url': '/images/657eafdeef3d6763710dffb3'\n}\n</image>\nWhat is the objects inside those images?"
+            },
+            {
+                "role": "task",
+                "content": "Context:\nimage_id_1 = '657eafdeef3d6763710dffa2' \nimage_id_2 = '657eafdeef3d6763710dffb3'\n Task: Explain the concept of the image. \nQuestion: What is the objects inside those images?"
+            },
+            {
+                "role": "code",
+                "content": "image_id_1 = '657eafdeef3d6763710dffa2' \nimage_id_2 = '657eafdeef3d6763710dffb3' \n[explain_concept(image_id_1), explain_concept(image_id_2)\n]"
+            },
+            {
+                "role": "output",
+                "content": "[{'type': 'ecole-json-reason', 'reasons': {'descriptions': ['A person holding a small dog', 'A person holding a large dog'], 'scores': ['0.31', '0.29'], 'text': 'This is a person holding a small dog because:\nperson': 0.31\n'small dog': 0.31\nperson holding a large dog': 0.29\nperson: 0.29\nlarge dog: 0.29'}, 'type': 'ecole-json-reason'}, {'type': 'ecole-json-reason', 'reasons': {'descriptions': ['A person holding a small cat', 'A person holding a large cat'], 'scores': ['0.3', '0.28'], 'text': 'This is a person holding a small cat because:\nperson': 0.3\n'small cat': 0.3\nperson holding a large cat': 0.28\nperson: 0.28\nlarge cat: 0.28'}, 'type': 'ecole-json-reason'}]"
+            },
+            {
+                "role": "assistant",
+                "content": "The explanation for the first image is:\n\nThis is a person holding a small dog because:\n- It is a 'person': 0.31\n- It is a 'small dog': 0.31\n- It is a 'person holding a large dog': 0.29\n- It is a 'person': 0.29\n- It is a 'large dog': 0.29\n\nThis is the reasoning behind the classification of the image as a 'person holding a small dog'. \n\nThe explanation for the second image is:\n\nThis is a person holding a small cat because:\n- It is a 'person': 0.3\n- It is a 'small cat': 0.3\n- It is a 'person holding a large cat': 0.28\n- It is a 'person': 0.28\n- It is a 'large cat': 0.28\n\nThis is the reasoning behind the classification of the image as a 'person holding a small cat'. "
+            }
+        ]
+    ]
+}

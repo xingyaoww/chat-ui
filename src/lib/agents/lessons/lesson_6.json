@@ -1,0 +1,32 @@
+{
+    "name": "Reset the server",
+    "function_list": [
+        "reset_server() -> dict"
+    ],
+    "description": "This function resets the server.",
+    "variables": [],
+    "example_questions": [
+        "Reset the server.",
+        "Reset the system.",
+        "Reset the program.",
+        "Reset the tool.",
+        "Reset the assistant."
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "reset_server() -> dict"
+            ],
+            "content": "Generate the code to reset the server."
+        },
+        {
+            "role": "code_executor",
+            "content": "Reset the server."
+        },
+        {
+            "role": "assistant",
+            "content": "Check if the server has been reset."
+        }
+    ]
+}

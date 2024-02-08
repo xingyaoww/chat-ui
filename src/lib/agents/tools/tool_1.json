@@ -1,0 +1,58 @@
+{
+    "name": "what_is_object(image_id: str) -> dict",
+    "variables": [
+        {
+            "name": "image_id",
+            "description": "The image id."
+        }
+    ],
+    "example_code": [
+        "<execute> what_is_object('12345abcde') </execute>"
+    ],
+    "example_conversation_prompt": [
+        [
+            {
+                "role": "user",
+                "content": "<image>{\n 'id': '657eafdeef3d6763710dffa2', \n'url': '/images/657eafdeef3d6763710dffa2'}\n </image>\nwhat is this?"
+            },
+            {
+                "role": "task",
+                "content": "Context:\n id='657eafdeef3d6763710dffa2'\n url='/images/657eafdeef3d6763710dffa2'\nTask:  Simple Object Detection\nQuestion: What is this?"
+            },
+            {
+                "role": "code",
+                "content": "id='657eafdeef3d6763710dffa2'\nwhat_is_object('657eafdeef3d6763710dffa2')"
+            },
+            {
+                "role": "output",
+                "content": "{'data': 'This is a 'coyote'', 'type': 'ecole-message'}"
+            },
+            {
+                "role": "assistant",
+                "content": " There is a 'coyote' inside the image. "
+            }
+        ],
+        [
+            {
+                "role": "user",
+                "content": "<image>{\n'id': '657eafdeef3d6763710dffa2',\n'url': '/images/657eafdeef3d6763710dffa2'\n}{\n'id': '657eafdeef3d6763710dffb3',\n'url': '/images/657eafdeef3d6763710dffb3'\n}\n</image>\nWhat is the objects inside those images?"
+            },
+            {
+                "role": "task",
+                "content": "Context:\n image_id_1 = '657eafdeef3d6763710dffa2' \nimage_id_2 = '657eafdeef3d6763710dffb3' \n Simple Object Detection\nQuestion: What is the objects inside those images?"
+            },
+            {
+                "role": "code",
+                "content": "image_id_1 = '657eafdeef3d6763710dffa2' \nimage_id_2 = '657eafdeef3d6763710dffb3' \n[what_is_object(image_id_1), what_is_object(image_id_2)\n]"
+            },
+            {
+                "role": "output",
+                "content": "[{'type': 'ecole-message', 'data': 'This is a 'cat''}, {'type': 'ecole-message', 'data': 'This is a 'dog''}] "
+            },
+            {
+                "role": "assistant",
+                "content": "A 'cat' is inside the first image, whereas a 'dog' is inside the second image."
+            }
+        ]
+    ]
+}

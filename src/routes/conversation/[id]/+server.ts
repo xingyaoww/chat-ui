@@ -19,11 +19,15 @@ import { abortedGenerations } from "$lib/server/abortedGenerations";
 import { summarize } from "$lib/server/summarize";
 import { uploadFile } from "$lib/server/files/uploadFile";
 import sizeof from "image-size";
+import { Coordinator } from "$lib/agents/Coordinator.js";
+import { TasksAgent } from "$lib/agents/TasksAgent.js";
 
 export async function POST({ request, locals, params, getClientAddress }) {
+	const tasksAgent = new TasksAgent();
 	const id = z.string().parse(params.id);
 	const convId = new ObjectId(id);
 	const promptedAt = new Date();
+	const coordinator = new Coordinator(convId);
 
 	const userId = locals.user?._id ?? locals.sessionId;
 
@@ -177,6 +181,16 @@ export async function POST({ request, locals, params, getClientAddress }) {
 		];
 	})() satisfies Message[];
 
+	if (newPrompt && !newPrompt.startsWith("Execution Output:")) {
+		// identify the task
+		const task = await tasksAgent.performAction({
+			messages: [{ from: "user", content: newPrompt }],
+		});
+		console.log("Tasks over here: ", task);
+
+		coordinator.performTask({ from: "user", content: newPrompt }, conv.messages);
+	}
+
 	await collections.conversations.updateOne(
 		{
 			_id: convId,
@@ -217,7 +231,9 @@ export async function POST({ request, locals, params, getClientAddress }) {
 				if (conv.title === "New Chat" && messages.length === 1) {
 					try {
 						conv.title = "New Chat";
-						// conv.title = (await summarize(newPrompt)) ?? conv.title;
+						const task = coordinator.currentTask;
+						conv.title =
+							task && task !== "Do Nothing" ? task : (await summarize(newPrompt)) ?? "New Chat";
 						update({ type: "status", status: "title", message: conv.title });
 					} catch (e) {
 						console.error(e);

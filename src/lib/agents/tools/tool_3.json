@@ -1,0 +1,44 @@
+{
+    "name": "remove_attributes(image_id: str, classname: str, attributes: list) -> dict",
+    "variables": [
+        {
+            "name": "image_id",
+            "description": "The unique identifier of the image;"
+        },
+        {
+            "name": "classname",
+            "description": "The class name."
+        },
+        {
+            "name": "attributes",
+            "description": "A list of attributes to be removed from the class."
+        }
+    ],
+    "example_code": [
+        "<execute> remove_attributes('12345abcde', 'coyote', ['four-legged mammal', 'brown, grey, or black fur']) </execute>"
+    ],
+    "example_conversation_prompt": [
+        [
+            {
+                "role": "user",
+                "content": "Can you remove 'four-legged mammal' and 'brown, grey, or black fur' from 'coyote' class?"
+            },
+            {
+                "role": "task",
+                "content": "Context:\n class='coyote' \n removal_attributes=['four-legged mammal', 'brown, grey, or black fur']\nTask: Remove the attributes from the class.\nQuestion: Can you remove 'four-legged mammal' and 'brown, grey, or black fur' from 'coyote' class?"
+            },
+            {
+                "role": "code",
+                "content": "remove_attributes('12345abcde', 'coyote', ['four-legged mammal', 'brown, grey, or black fur'])"
+            },
+            {
+                "role": "output",
+                "content": "{'type': 'ecole-message', 'data': 'The attributes were removed from the class.'}"
+            },
+            {
+                "role": "assistant",
+                "content": "The attributes were removed from the class."
+            }
+        ]
+    ]
+}

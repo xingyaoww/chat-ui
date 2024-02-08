@@ -1,0 +1,34 @@
+{
+    "name": "Find the activity in an image",
+    "function_list": [
+        "find_activity(image_id: str) -> dict"
+    ],
+    "description": "This function identifies and marks specific activities in an image based on the provided description.",
+    "example_questions": [
+        "What is happening in the image?",
+        "What is happening in the picture?",
+        "What is happening in the photo?",
+        "What are happening in the images?",
+        "What are happening in the pictures?",
+        "What are happening in the photos?",
+        "Can you get the activities inside the image?",
+        "Can you find activities inside the picture?"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "find_activity(image_id: str) -> dict"
+            ],
+            "content": "Generate the code to find the activity in the image."
+        },
+        {
+            "role": "code_executor",
+            "content": "Find the activity in the image."
+        },
+        {
+            "role": "assistant",
+            "content": "From the results, what is the activity in the image?"
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+    "name": "Complex Object Detection",
+    "complexity": "simple",
+    "description": "Identifies the details objects or features in the image.",
+    "example_questions": [
+        "What is animals inside the image?",
+        "What is tools inside this?",
+        "What is red part in the picture?",
+        "What is utensils in the photo?",
+        "What is species of birds in the image?"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "what_is_object(image_id: str) -> dict"
+            ],
+            "content": "Generate the code to identify the primary subject or feature in the image."
+        },
+        {
+            "role": "code_executor",
+            "content": "Execute the code to identify the primary subject or feature in the image."
+        },
+        {
+            "role": "assistant",
+            "content": "From the results, interpret what is inside the image?"
+        }
+    ]
+}

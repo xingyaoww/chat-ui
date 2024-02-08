@@ -1,0 +1,30 @@
+{
+    "name": "Get the attribute of a concept",
+    "function_list": [
+        "get_attributes(classname: str) -> dict"
+    ],
+    "description": "Retrieves attributes associated with a given classname.",
+    "example_questions": [
+        "Show me the attributes of [class name]",
+        "Show me the attributes of [class name 1], [class name 2], and [class name 3]",
+        "Get the similar attributes of [class name 1] and [class name 2]",
+        "Get the different attributes of [class name 1] and [class name 2]"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "get_attributes(classname: str) -> dict"
+            ],
+            "content": "Using the implemented function of get_attributes, create the code to get the attributes of [class name]"
+        },
+        {
+            "role": "code_executor",
+            "content": "Execute the code to get the attributes of [class name]"
+        },
+        {
+            "role": "assistant",
+            "content": "From the results, what are the attributes of [class name]?"
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "name": "Do Nothing",
+    "complexity": "simple",
+    "description": "Do Nothing due to the questions are out of scope.",
+    "example_questions": [
+        "What can you do?",
+        "What is your purpose?",
+        "The day is beautiful, isn't it?",
+        "What is the meaning of life?",
+        "What is the purpose of life?",
+        "What is the purpose of your existence?",
+        "What is the purpose of your creation?"
+    ],
+    "action_list": [
+        {
+            "role": "assistant",
+            "content": "Answer the question with a simple response."
+        }
+    ]
+}

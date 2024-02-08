@@ -1,0 +1,31 @@
+{
+    "name": "reset_server() -> dict",
+    "variables": [],
+    "example_code": [
+        "<execute> reset_server() </execute>"
+    ],
+    "example_conversation_prompt": [
+        [
+            {
+                "role": "user",
+                "content": "Reset the server."
+            },
+            {
+                "role": "task",
+                "content": "Context:\nTask: reset_server\nTask: Reset The Server\nQuestion: Reset the server"
+            },
+            {
+                "role": "code",
+                "content": "reset_server()"
+            },
+            {
+                "role": "output",
+                "content": "{'type': 'ecole-message', 'data': 'The server is reset.'}"
+            },
+            {
+                "role": "assistant",
+                "content": "The server is reset."
+            }
+        ]
+    ]
+}

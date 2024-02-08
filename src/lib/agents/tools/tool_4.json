@@ -1,0 +1,44 @@
+{
+    "name": "add_new_concept(image_id: str, classname: str, old_classname: str) -> dict",
+    "variables": [
+        {
+            "name": "image_id",
+            "description": "The unique identifier of the image;"
+        },
+        {
+            "name": "classname",
+            "description": "The new class name."
+        },
+        {
+            "name": "old_classname",
+            "description": "The old class name."
+        }
+    ],
+    "example_code": [
+        "<execute> add_new_concept('12345abcde', 'coyote', 'dog') </execute>"
+    ],
+    "example_conversation_prompt": [
+        [
+            {
+                "role": "user",
+                "content": "No, this is not a 'dog'. This is a 'coyote'."
+            },
+            {
+                "role": "task",
+                "content": "Context:\n image_id='12345abcde'\n classname='coyote'\n old_classname='dog'\nTask: Add a new concept to the knowledge base.\nQuestion: No, this is not a 'dog'. This is a 'coyote'."
+            },
+            {
+                "role": "code",
+                "content": "add_new_concept('12345abcde', 'coyote', 'dog')"
+            },
+            {
+                "role": "output",
+                "content": "{'data': 'I cannot find 'kayak' in my knowledge base. It is now added. The new classification is 'grey wolf', 'label': 'grey wolf', 'reasons': {'descriptions': ['grey or black fur', 'pointed ears', 'sharp teeth', 'bushy tail', 'muscular body', 'yellow or amber eyes', 'distinctive facial markings, such as a dark mask or white patches on the chest and throat', 'has pointed ears', 'has a long snout', 'has sharp teeth', 'has four legs', 'has a tail', 'has a wild and alert expression', 'has a distinct body shape and size compared to a kayak', 'has pointed ears', 'has a long snout', 'has sharp teeth', 'has four legs', 'has a tail', 'has a wild and alert expression', 'has a distinct body shape and size compared to a kayak'], 'scores': ['0.3', '0.32', '0.32', '0.3', '0.31', '0.3', '0.31', '0.32', '0.3', '0.32', '0.31', '0.3', '0.32', '0.31', '0.32', '0.3', '0.32', '0.31', '0.3', '0.32', '0.31'], 'text': 'This is a 'grey wolf' because: \n'grey or black fur': 0.3\n'pointed ears': 0.32\n'sharp teeth': 0.32\n'bushy tail': 0.3\n'muscular body': 0.31\n'yellow or amber eyes': 0.3\n'distinctive facial markings, such as a dark mask or white patches on the chest and throat': 0.31\n'has pointed ears': 0.32\n'has a long snout': 0.3\n'has sharp teeth': 0.32\n'has four legs': 0.31\n'has a tail': 0.3\n'has a wild and alert expression': 0.32\n'has a distinct body shape and size compared to a kayak': 0.31\n'has pointed ears': 0.32\n'has a long snout': 0.3\n'has sharp teeth': 0.32\n'has four legs': 0.31\n'has a tail': 0.3\n'has a wild and alert expression': 0.32\n'has a distinct body shape and size compared to a kayak': 0.31'}, 'superclass': 'wolf', 'type': 'ecole-json'}"
+            },
+            {
+                "role": "assistant",
+                "content": "'I cannot find 'kayak' in my knowledge base. It is now added. The new classification is 'grey wolf'"
+            }
+        ]
+    ]
+}

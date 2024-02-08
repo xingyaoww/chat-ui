@@ -1,0 +1,35 @@
+{
+    "name": "Remove An Attribute",
+    "complexity": "simple",
+    "function_list": [
+        "remove_attributes(image_id: str, classname: str, attributes: list) -> dict"
+    ],
+    "description": "Removes specified attributes from a given class (concept) in the image.",
+    "example_questions": [
+        "Can you remove [attribute name] from [object name] class?",
+        "Can you remove [attribute name] from [object name] concept?",
+        "Remove [attribute name] from [object name]",
+        "Remove [attribute name] from [object name] class",
+        "Remove [attribute name] from [object name] concept",
+        "Remove [attribute name] from [object name] category",
+        "Delete [attribute name] from [object name]",
+        "Delete [attribute name] from [object name] class"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "remove_attributes(image_id: str, classname: str, attributes: list) -> dict"
+            ],
+            "content": "Generate the code to remove the attribute from the object"
+        },
+        {
+            "role": "code_executor",
+            "content": "Execute the code"
+        },
+        {
+            "role": "assistant",
+            "content": "From the results, check if the attribute has been removed from the object"
+        }
+    ]
+}

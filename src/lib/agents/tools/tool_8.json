@@ -1,0 +1,36 @@
+{
+    "name": "find_activity(image_id: str) -> dict",
+    "variables": [
+        {
+            "name": "image_id",
+            "description": "The unique identifier of the image"
+        }
+    ],
+    "example_code": [
+        "<execute> find_activity('12345abcde') </execute>"
+    ],
+    "example_conversation_prompt": [
+        [
+            {
+                "role": "user",
+                "content": "What is happening in the image?"
+            },
+            {
+                "role": "task",
+                "content": "Context:\n image_id = '12345abcde'\n Task: Find the activity in the image\n Question: What is happening in the image?"
+            },
+            {
+                "role": "code",
+                "content": "find_activity('12345abcde')"
+            },
+            {
+                "role": "output",
+                "content": "{'type': 'ecole-message', 'data': 'The activity in the image is 'a person riding a horse''}"
+            },
+            {
+                "role": "assistant",
+                "content": "The activity in the image is 'a person riding a horse'"
+            }
+        ]
+    ]
+}

@@ -1,0 +1,32 @@
+{
+    "name": "Explain a concept",
+    "complexity": "simple",
+    "description": "Explains the context or reason behind the primary subject or feature in the image.",
+    "example_questions": [
+        "Why is [object name] in the image?",
+        "Why is it?",
+        "Why is this?",
+        "What are your reasoning behind those?",
+        "What is your reasoning behind this?",
+        "Why did you make such a decision?",
+        "What is the reason behind this?",
+        "Why did you make such prediction?"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "explain_concept(image_id:str) -> dict"
+            ],
+            "content": "Generate the code using the tools provided to explain the concept of the image."
+        },
+        {
+            "role": "code_executor",
+            "content": "Execute the code to explain the concept of the image."
+        },
+        {
+            "role": "interpreter",
+            "content": "From the results, interpret the attributes that help identify the concept of the image."
+        }
+    ]
+}

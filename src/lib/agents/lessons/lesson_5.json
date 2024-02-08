@@ -1,0 +1,36 @@
+{
+    "name": "Ground the object inside the image",
+    "complexity": "simple",
+    "function_list": [
+        "grounding_object_in_image(image_id: str, object_name: str, object_type: str) -> dict"
+    ],
+    "description": "This function identifies and marks specific objects in an image based on the provided description.",
+    "example_questions": [
+        "Where is the [object name] in the image?",
+        "Where is the [object name] in the picture?",
+        "Where is the [object name] in the photo?",
+        "Where are the [object name] in the images?",
+        "Where are the [object name] in the pictures?",
+        "Where are the [object name] in the photos?",
+        "Can you get the [object name] inside the image?",
+        "Can you ground [object name] inside the image?",
+        "Can you find [object name] inside the picture?"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "grounding_object_in_image(image_id: str, object_name: str, object_type: str) -> dict"
+            ],
+            "content": "Generate the code to ground the object inside the image."
+        },
+        {
+            "role": "code_executor",
+            "content": "Execute the code to ground the object inside the image."
+        },
+        {
+            "role": "assistant",
+            "content": "From the results, how many objects found in the image and what are their bounding boxes?"
+        }
+    ]
+}

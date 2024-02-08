@@ -1,0 +1,30 @@
+{
+    "name": "Add a new concept",
+    "complexity": "simple",
+    "function_list": [
+        "add_new_concept(image_id: str, classname: str, old_classname: str) -> dict"
+    ],
+    "description": "Replace an old class with a new class in the image. ",
+    "example_questions": [
+        "No, this is not a [new class name]. This is a [old class name].",
+        "This is a [new class name]",
+        "no this is a [new class name] not a [old class name]"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "add_new_concept(image_id: str, classname: str, old_classname: str) -> dict"
+            ],
+            "content": "Generate the code to replace the old class with the new class in the image."
+        },
+        {
+            "role": "code_executor",
+            "content": "Execute the code to replace the old class with the new class in the image."
+        },
+        {
+            "role": "assistant",
+            "content": "From the results, ask the user if the new class is correct. If not, ask for the correct class name."
+        }
+    ]
+}

@@ -1,0 +1,44 @@
+{
+    "name": "grounding_object_in_image(image_id: str, object_name: str, object_type: str) -> dict",
+    "variables": [
+        {
+            "name": "image_id",
+            "description": "he unique identifier of the image"
+        },
+        {
+            "name": "object_name",
+            "description": "A textual description of the scene or objects in the image."
+        },
+        {
+            "name": "object_type",
+            "description": "A comma-separated list of objects to be identified and marked in the image"
+        }
+    ],
+    "example_code": [
+        "<execute> grounding_object_in_image('12345abcde', 'horses', 'horse') </execute>"
+    ],
+    "example_conversation_prompt": [
+        [
+            {
+                "role": "user",
+                "content": "<image>{\n 'id': '657eafdeef3d6763710dffa2', \n'url': '/images/657eafdeef3d6763710dffa2'}\n </image>\nCan you ground the according object inside the image?"
+            },
+            {
+                "role": "task",
+                "content": "Context:\nimage_id='657eafdeef3d6763710dffa2'\n object_name='coyote'\nobject_type='coyote'\nTask: Grounding the object inside the image.\nQuestion: Can you ground the according object inside the image?"
+            },
+            {
+                "role": "code",
+                "content": "grounding_object_in_image('657eafdeef3d6763710dffa2', 'coyote', 'coyote')"
+            },
+            {
+                "role": "output",
+                "content": "'{'type': 'ecole-grounding-data', 'image_id': '65a8432492a12b00c631dfc0', 'objects': [{'label': 6, 'score': 0.6709597110748291, 'bounding-box': [536.8339233398438, 420.549560546875, 1368.544921875, 1178.9544677734375]}], 'data': '1 objects was found in the image.'}"
+            },
+            {
+                "role": "assistant",
+                "content": "There is 1 object is grounded inside the image with the bounding box of [536.8339233398438, 420.549560546875, 1368.544921875, 1178.9544677734375]."
+            }
+        ]
+    ]
+}

@@ -1,0 +1,33 @@
+{
+    "name": "Add An Attribute",
+    "complexity": "simple",
+    "function_list": [
+        "add_attributes(image_id: str, classname: str, attributes: list) -> dict"
+    ],
+    "description": " Adds specified attributes to a given class (concept) in the image.",
+    "example_questions": [
+        "Can you add [attribute name] to [object name] class?",
+        "Can you add [attribute name] to [object name] concept?",
+        "Add [attribute name] to [object name]",
+        "Add [attribute name] to [object name] class",
+        "Add [attribute name] to [object name] concept",
+        "Add [attribute name] to [object name] category"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "add_attributes(image_id: str, classname: str, attributes: list) -> dict"
+            ],
+            "content": "Generate the code to add an attribute to a class in an image"
+        },
+        {
+            "role": "code_executor",
+            "content": "Execute the code to add an attribute to a class in an image"
+        },
+        {
+            "role": "assistant",
+            "content": "From the results, check if the attribute has been added to the class in the image"
+        }
+    ]
+}

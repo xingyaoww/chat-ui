@@ -1,0 +1,35 @@
+{
+    "name": "Find different attributes",
+    "function_list": [
+        "get_attributes(classname: str) -> dict"
+    ],
+    "description": "Find different attributes between different concepts",
+    "example_questions": [
+        "What are the different attributes between a car and a truck?",
+        "What are the different attributes between a car and a bicycle?",
+        "What are the different attributes between a car and a motorcycle?",
+        "What are the different attributes between a car and a bus?",
+        "What are the different attributes between a car and a train?",
+        "What are the difference between a car and a boat?",
+        "What are the different attributes between a car and a plane?",
+        "What are the different attributes between a car and a helicopter?",
+        "What are the different attributes between a car and a rocket?"
+    ],
+    "action_list": [
+        {
+            "role": "code_generator",
+            "tools": [
+                "get_attributes(classname: str) -> dict"
+            ],
+            "content": "Generate the code following the logic: Get all attributes for each concepts and put them in the same list. For instance, <execute> [get_attributes('concept_A'), get_attributes('concept_B')] </execute>."
+        },
+        {
+            "role": "code_executor",
+            "content": "Execute the code"
+        },
+        {
+            "role": "assistant",
+            "content": "From the results, answer the question what are the different attributes between those?"
+        }
+    ]
+}
