@@ -6,6 +6,8 @@
 	import PieChart from "./d3figure/PieChart.svelte";
 	import ImageAnnotation from "./ImageAnnotation.svelte";
 	import { json } from "@sveltejs/kit";
+	import ImageReader from "./ImageReader.svelte";
+	import VideoReader from "./VideoReader.svelte";
 
 	export let code = "";
 	export let lang = "";
@@ -46,6 +48,8 @@
 			"ecole-grounding-data",
 			"ecole-json",
 			"ecole-json-reason",
+			"ecole-video-activity",
+			"ecole-similar-videos",
 		];
 		return listToCheck.every((item) => expectedTypes.includes(item.type));
 	}
@@ -145,6 +149,53 @@
 						}))}
 					/>
 				{/if}
+			{/if}
+		{:else if contentType === "ecole-video-activity"}
+			<button
+				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+				on:click={() => {
+					showReasons = !showReasons;
+				}}
+			>
+				{showReasons ? "Hide Reasons" : "Show Reasons"}
+			</button>
+
+			{#if showReasons}
+				<p>{parsedJson.data}</p>
+				<button
+					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+					on:click={() => {
+						chartType = chartType === "horizontalBar" ? "pie" : "horizontalBar";
+					}}
+				>
+					{chartType === "horizontalBar" ? "Show Pie Chart" : "Show Horizontal Bar Chart"}
+				</button>
+				{#if chartType === "pie"}
+					<PieChart
+						data={Object.keys(parsedJson.sims).map((key) => ({
+							name: key,
+							value: parsedJson.sims[key],
+						}))}
+					/>
+				{:else}
+					<HorizontalBarCharts
+						data={Object.keys(parsedJson.sims).map((key) => ({
+							name: key,
+							value: parsedJson.sims[key],
+						}))}
+					/>
+				{/if}
+
+				{#if parsedJson.merged_image}
+					<p>Image Frames</p>
+					<ImageReader json={parsedJson.merged_image} />
+				{/if}
+			{/if}
+		{:else if contentType === "ecole-similar-videos"}
+			{#if parsedJson.top_k_video_ids}
+				{#each parsedJson.top_k_video_ids as videoId}
+					<VideoReader json={{ id: videoId, url: "/videos/" + videoId }} />
+				{/each}
 			{/if}
 		{:else}
 			<div class="rounded-lg bg-gray-700 p-4 text-xs">

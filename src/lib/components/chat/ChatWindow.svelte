@@ -60,6 +60,7 @@
 		stop: void;
 		retry: { id: Message["id"]; content: string };
 		imageUpload: ImageJSON;
+		videoUpload: ImageJSON;
 		imageClick: ImageJSON;
 	}>();
 
@@ -68,10 +69,17 @@
 		let text = "";
 
 		currentSelectedImages.forEach((image) => {
-			text += `<image>{
-				"url": "${base + "/images/" + image.id}",
-				"id": "${image.id}"
-			}</image>\n`;
+			if (image.url.startsWith("/video")) {
+				text += `<video>{
+					"url": "${base + image.url}",
+					"id": "${image.id}"
+				}</video>\n`;
+			} else {
+				text += `<image>{
+					"url": "${base + image.url}",
+					"id": "${image.id}"
+				}</image>\n`;
+			}
 		});
 		message = text + "\n" + message;
 		dispatch("message", message);
@@ -87,28 +95,56 @@
 				// Convert the ImageJSON file to a URL that can be displayed
 				// const imageUrl = URL.createObjectURL(file);
 
-				// Prepare the file to be sent in a FormData object
-				const formData = new FormData();
-				formData.append("file", nf);
-				// POST the ImageJSON file to the server
-				const response = await fetch(`${base}/upload_image`, {
-					method: "POST",
-					headers: {
-						accept: "multipart/form-data",
-					},
-					body: formData,
-				});
+				if (nf.type.startsWith("image")) {
+					// Prepare the file to be sent in a FormData object
+					const formData = new FormData();
+					formData.append("file", nf);
+					// POST the ImageJSON file to the server
+					const response = await fetch(`${base}/upload_image`, {
+						method: "POST",
+						headers: {
+							accept: "multipart/form-data",
+						},
+						body: formData,
+					});
 
-				// Handle the response
-				if (response.ok) {
-					// Use the returned URL
-					const result = await response.json();
-					const json = { id: result.id, url: result.url };
-					dispatch("imageUpload", json);
-					currentSelectedImages = [...currentSelectedImages, json];
-					if (loading) return;
+					// Handle the response
+					if (response.ok) {
+						// Use the returned URL
+						const result = await response.json();
+						const json = { id: result.id, url: result.url };
+						dispatch("imageUpload", json);
+						currentSelectedImages = [...currentSelectedImages, json];
+						if (loading) return;
+					} else {
+						console.error("Upload failed", response);
+					}
+				} else if (nf.type.startsWith("video")) {
+					// Prepare the file to be sent in a FormData object
+					const formData = new FormData();
+					formData.append("file", nf);
+					// POST the ImageJSON file to the server
+					const response = await fetch(`${base}/upload_video`, {
+						method: "POST",
+						headers: {
+							accept: "multipart/form-data",
+						},
+						body: formData,
+					});
+
+					// Handle the response
+					if (response.ok) {
+						// Use the returned URL
+						const result = await response.json();
+						const json = { id: result.id, url: result.url };
+						dispatch("videoUpload", json);
+						currentSelectedImages = [...currentSelectedImages, json];
+						if (loading) return;
+					} else {
+						console.error("Upload failed", response);
+					}
 				} else {
-					console.error("Upload failed", response);
+					console.error("Unsupported file type");
 				}
 			}
 		}
@@ -261,7 +297,7 @@
 						multiple={true}
 						bind:this={fileInput}
 						id="imageUpload"
-						accept="image/*"
+						accept="image/*,video/*"
 						on:change={handleFileChange}
 						hidden
 					/>

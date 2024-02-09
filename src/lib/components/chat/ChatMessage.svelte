@@ -19,13 +19,16 @@
 
 	import OpenWebSearchResults from "../OpenWebSearchResults.svelte";
 	import type { WebSearchUpdate } from "$lib/types/MessageUpdate";
+	import VideoReader from "../VideoReader.svelte";
 
 	function sanitizeMd(md: string) {
 		let ret = md
 			.replace(/<execute(\s)*(>)?(\s)*/g, "\n```execute\n")
 			.replace(/<\/execute(>)?/g, "\n```")
 			.replace(/<image(\s)*(>)?(\s)*/g, "\n```image\n")
+			.replace(/<video(\s)*(>)?(\s)*/g, "\n```video\n")
 			.replace(/<\/image(>)?/g, "\n```\n")
+			.replace(/<\/video(>)?/g, "\n```\n")
 			.replace(/<\|[a-z]*$/, "")
 			.replace(/<\|[a-z]+\|$/, "")
 			.replace(/<$/, "")
@@ -184,6 +187,8 @@
 							{:else}
 								<ImageReader on:segmentImageUpload json={JSON.parse(unsanitizeMd(token.text))} />
 							{/if}
+						{:else if token.lang === "video" && isJSON(unsanitizeMd(token.text))}
+							<VideoReader json={JSON.parse(unsanitizeMd(token.text))} />
 						{:else}
 							<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
 						{/if}
@@ -294,6 +299,8 @@
 							{:else if isJSON(unsanitizeMd(token.text))}
 								<ImageReader on:segmentImageUpload json={JSON.parse(unsanitizeMd(token.text))} />
 							{/if}
+						{:else if token.lang === "video" && isJSON(unsanitizeMd(token.text))}
+							<VideoReader json={JSON.parse(unsanitizeMd(token.text))} />
 						{:else}
 							<CodeBlock lang={token.lang} code={unsanitizeMd(token.text)} />
 						{/if}

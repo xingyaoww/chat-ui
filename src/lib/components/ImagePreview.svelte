@@ -9,13 +9,13 @@
 		url: "https://via.placeholder.com/400x400",
 		id: "1234",
 	};
-	export let mode = 0;
+	export let mode = "0";
 	export let clickHandler: (image: Image) => void = () => {};
 	const dispatch = createEventDispatcher<{ deleteImage: void }>();
 
 	function deleteImage() {
 		// Implement the logic for deleting the image
-		fetch(`${base}/images/${json.id}`, {
+		fetch(`${base + json.url}`, {
 			method: "DELETE",
 			headers: {
 				accept: "application/json",
@@ -37,7 +37,7 @@
 <div class="border-grey-300 relative m-4 inline-block rounded-lg border hover:border-red-400">
 	<img
 		class="h-24 w-24 min-w-24 max-w-24 rounded-xl object-cover"
-		src={base + "/images/" + json.id}
+		src={base + json.url}
 		alt="Image"
 		on:click={clickHandler}
 	/>

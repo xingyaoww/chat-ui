@@ -26,10 +26,25 @@
 
 		if (responseFetch.ok) {
 			const result = await responseFetch.json();
-			images = result;
+			images = images.concat(result);
 		} else {
 			console.log("Could not fetch all images URLs");
 			images = [];
+		}
+	}
+	async function fetchAllVideos() {
+		const responseFetch = await fetch(`${base}/all_videos`, {
+			method: "GET",
+			headers: {
+				accept: "application/json",
+			},
+		});
+
+		if (responseFetch.ok) {
+			const result = await responseFetch.json();
+			images = images.concat(result);
+		} else {
+			console.log("Could not fetch all videos URLs");
 		}
 	}
 
@@ -38,6 +53,7 @@
 		onSelectImage(image);
 	}
 	onMount(async () => {
+		await fetchAllVideos();
 		await fetchAllOriginalImages();
 	});
 </script>
@@ -48,8 +64,10 @@
 	{#each images as image}
 		<ImagePreview
 			json={image}
-			on:deleteImage={() => {
-				fetchAllOriginalImages();
+			on:deleteImage={async () => {
+				images = [];
+				await fetchAllOriginalImages();
+				await fetchAllVideos();
 			}}
 			mode={"1"}
 			clickHandler={() => selectImage(image)}
