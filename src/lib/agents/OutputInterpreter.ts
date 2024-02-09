@@ -9,7 +9,7 @@ export class OutputInterpreter extends DefaultLLMAgent {
 		super();
 		this.context = {
 			exampleConversations: [],
-			preprompt: `You are a LLM interpreter. Your goal is to help people understand the prompt better.`,
+			preprompt: `You are a helpful assistant. Your goal is to answer the user's question in natural language.`,
 		};
 	}
 	print(): void {
@@ -30,7 +30,7 @@ export class OutputInterpreter extends DefaultLLMAgent {
 					from: value.role === "output" ? "user" : "assistant",
 					content: value.content,
 				})),
-			preprompt: `You are a LLM interpreter. Your goal is to help people understand the json better`,
+			preprompt: `You are a LLM interpreter. Your goal is to interpret the input in natural language.`,
 		};
 	}
 	update(inputs: InputType): void {

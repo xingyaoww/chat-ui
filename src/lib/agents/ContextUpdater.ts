@@ -78,7 +78,7 @@ export class ContextUpdater extends DefaultLLMAgent {
 				},
 			],
 			preprompt:
-				"You are a context updater assistant. You can help update the context of a conversation. Assign all possibles values to the python type variables. If user say reset, reset the context to empty. If user uploads new images, reset the context to empty and add the new image info. If the question does not have new context, you just use the old context.\n",
+				"You are a context updater assistant. You can help update the context of a conversation. Assign all possibles values to the python type variables. If user say free context, reset the context to empty. If user uploads new images, reset the context to empty and add the new image info. If the question does not have new context, you just use the old context.\n",
 		};
 	}
 

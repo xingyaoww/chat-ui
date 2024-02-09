@@ -70,14 +70,14 @@ export class Coordinator {
 			.map((message) => message.content)
 			.join("\n");
 
-		this.context = await this.contextUpdater.performAction({
-			messages: [
-				{
-					from: "user",
-					content: userEndConversation,
-				},
-			],
-		});
+		// this.context = await this.contextUpdater.performAction({
+		// 	messages: [
+		// 		{
+		// 			from: "user",
+		// 			content: userEndConversation,
+		// 		},
+		// 	],
+		// });
 
 		let tools: string[] = [];
 		for (const t of this.taskList) {
@@ -86,22 +86,25 @@ export class Coordinator {
 				this.codeGenerator.addTools(t.tools || []);
 				this.code = await this.codeGenerator.performAction({
 					messages: [
+						...conversations,
 						{
 							from: "user",
-							content: `Context:\n ${this.context}.\nTask: ${t.content}\nQuestion: ${newPrompt.content}`,
+							content: `\nTask: ${t.content}\nQuestion: ${newPrompt.content}`,
 						},
 					],
 				});
 				this.code = this.code.trim();
+
+				// format the </execute to correct format
 				if (this.code.endsWith("</execute")) {
 					this.code = this.code.replace("</execute", "</execute>");
 				}
 			} else if (t.role === "code_executor") {
 				console.log("execution code: ", this.code);
 				this.output = await this.codeExecutor.performAction(this.code);
-				console.log("output: ", this.output);
 			} else if (t.role === "assistant") {
 				this.outputInterpreter.addTools(tools);
+				console.log("output: ", this.output);
 				const message = await this.outputInterpreter.performAction({
 					messages: [
 						{
