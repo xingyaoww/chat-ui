@@ -51,7 +51,6 @@
 				[maskTensor, shape] = encodedTensorToTensor(data["segmentations"]["part_masks"]);
 				render_data = data;
 				render_data["segmentations"] = undefined;
-				console.log(render_data);
 				maskURLs = tensorToMasksCanvas(maskTensor, shape);
 			});
 	});
@@ -101,7 +100,7 @@
 				/>
 			{:else if "total_score" in render_data && mode === "total_score"}
 				<HorizontalBarChartsExplain
-					name="Trained Attributes: Image"
+					name="Total Scores"
 					data={render_data["total_score"]}
 					windowWidth={500}
 				/>
