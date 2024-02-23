@@ -5,9 +5,9 @@
 	import JSON5 from "json5";
 	import PieChart from "./d3figure/PieChart.svelte";
 	import ImageAnnotation from "./ImageAnnotation.svelte";
-	import { json } from "@sveltejs/kit";
-	import ImageReader from "./ImageReader.svelte";
 	import VideoReader from "./VideoReader.svelte";
+	import GifReader from "./GifReader.svelte";
+	import ExplainBlock from "./ExplainBlock.svelte";
 
 	export let code = "";
 	export let lang = "";
@@ -124,32 +124,7 @@
 				{/if}
 			{/if}
 		{:else if contentType === "ecole-json-reason"}
-			{#if parsedJson.reasons}
-				<p>{parsedJson.reasons.text}</p>
-				<button
-					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-					on:click={() => {
-						chartType = chartType === "horizontalBar" ? "pie" : "horizontalBar";
-					}}
-				>
-					{chartType === "horizontalBar" ? "Show Pie Chart" : "Show Horizontal Bar Chart"}
-				</button>
-				{#if chartType === "pie"}
-					<PieChart
-						data={parsedJson.reasons.descriptions.map((desc, index) => ({
-							name: desc,
-							value: parseFloat(parsedJson.reasons.scores[index]),
-						}))}
-					/>
-				{:else}
-					<HorizontalBarCharts
-						data={parsedJson.reasons.descriptions.map((desc, index) => ({
-							name: desc,
-							value: parseFloat(parsedJson.reasons.scores[index]),
-						}))}
-					/>
-				{/if}
-			{/if}
+			<ExplainBlock json_data={parsedJson} />
 		{:else if contentType === "ecole-video-activity"}
 			<button
 				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
@@ -187,8 +162,8 @@
 				{/if}
 
 				{#if parsedJson.merged_image}
-					<p>Image Frames</p>
-					<ImageReader json={parsedJson.merged_image} />
+					<p>Model Attentions</p>
+					<GifReader image_lists={parsedJson.blended_imgs} />
 				{/if}
 			{/if}
 		{:else if contentType === "ecole-similar-videos"}

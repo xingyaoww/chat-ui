@@ -71,12 +71,12 @@
 		currentSelectedImages.forEach((image) => {
 			if (image.url.startsWith("/video")) {
 				text += `<video>{
-					"url": "${base + image.url}",
+					"url": "${base + "/videos/" + image.id}",
 					"id": "${image.id}"
 				}</video>\n`;
 			} else {
 				text += `<image>{
-					"url": "${base + image.url}",
+					"url": "${base + "/images/" + image.id}",
 					"id": "${image.id}"
 				}</image>\n`;
 			}
