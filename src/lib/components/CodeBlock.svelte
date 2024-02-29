@@ -8,6 +8,8 @@
 	import VideoReader from "./VideoReader.svelte";
 	import GifReader from "./GifReader.svelte";
 	import ExplainBlock from "./ExplainBlock.svelte";
+	import DifferenceBlock from "./DifferenceBlock.svelte";
+	import { json } from "@sveltejs/kit";
 
 	export let code = "";
 	export let lang = "";
@@ -123,9 +125,12 @@
 					{/if}
 				{/if}
 			{/if}
+		{:else if contentType === "ecole-difference-concepts"}
+			<DifferenceBlock json_data={parsedJson} />
 		{:else if contentType === "ecole-json-reason"}
 			<ExplainBlock json_data={parsedJson} />
 		{:else if contentType === "ecole-video-activity"}
+			<p>{parsedJson.data}</p>
 			<button
 				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 				on:click={() => {
@@ -136,7 +141,6 @@
 			</button>
 
 			{#if showReasons}
-				<p>{parsedJson.data}</p>
 				<button
 					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 					on:click={() => {
@@ -161,9 +165,9 @@
 					/>
 				{/if}
 
-				{#if parsedJson.merged_image}
-					<p>Model Attentions</p>
-					<GifReader image_lists={parsedJson.blended_imgs} />
+				{#if parsedJson["blended_imgs"]}
+					<p>Visual Activity Tracker</p>
+					<GifReader image_lists={parsedJson["blended_imgs"]} />
 				{/if}
 			{/if}
 		{:else if contentType === "ecole-similar-videos"}

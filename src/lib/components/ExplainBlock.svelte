@@ -19,6 +19,7 @@
 	let selectedMaskIndexes: number[] = [];
 	let mode = "predicted_top_k";
 	let scale = 1;
+	let showExplanation = false;
 	$: if (imgElement) {
 		scale = imgElement.width / imgElement.naturalWidth;
 	}
@@ -56,10 +57,19 @@
 	});
 </script>
 
-<div class="flex flex-col">
-	<div class="flex w-full flex-row">
-		<div
-			class="
+<div>
+	<div>{render_data["interpretation"]}</div>
+	<button
+		on:click={() => (showExplanation = !showExplanation)}
+		class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+		>{showExplanation ? "Hide explaination" : "Show explaination"}</button
+	>
+</div>
+{#if showExplanation}
+	<div class="flex flex-col">
+		<div class="flex w-full flex-row">
+			<div
+				class="
             border-5
             relative
             w-full
@@ -67,108 +77,109 @@
             border-gray-300
             shadow-lg
     "
-		>
-			<img
-				bind:this={imgElement}
-				src={`/images/${json_data.image_id}`}
-				alt="image"
-				on:mousemove={handleMouseMove}
-				on:click={handleMouseClick}
-				on:mouseleave={handleMouseOut}
-				class="border-3 w-full border-blue-500"
-			/>
-			{#each maskURLs as maskURL}
+			>
 				<img
-					src={maskURL.src}
-					class="border-3 pointer-events-none absolute left-0 top-0 z-10 w-full opacity-30"
+					bind:this={imgElement}
+					src={`/images/${json_data.image_id}`}
+					alt="image"
+					on:mousemove={handleMouseMove}
+					on:click={handleMouseClick}
+					on:mouseleave={handleMouseOut}
+					class="border-3 w-full border-blue-500"
 				/>
-			{/each}
-			{#each hoverMaskIndexes as index}
-				<img
-					src={maskURLs[index].src}
-					class="border-3 pointer-events-none absolute left-0 top-0 z-10 w-full opacity-60"
-				/>
-			{/each}
-		</div>
-		<div class="flex w-full flex-col items-center justify-center">
-			{#if "predicted_top_k" in render_data && mode === "predicted_top_k"}
-				<HorizontalBarChartsExplain
-					name="Top 5 Predicted Classes"
-					yAxisLabel="Concept"
-					lineValue={0.1}
-					data={render_data["predicted_top_k"]}
-				/>
-			{:else if "total_score" in render_data && mode === "total_score"}
-				<HorizontalBarChartsExplain
-					name="Total Scores"
-					data={render_data["total_score"]}
-					windowWidth={500}
-				/>
-			{/if}
-			<div>
-				<button
-					on:click={() => (mode = "predicted_top_k")}
-					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-					>Top 5 Predicted Classes</button
-				>
-				<button
-					on:click={() => (mode = "total_score")}
-					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-					>Attributed Scores</button
-				>
+				{#each maskURLs as maskURL}
+					<img
+						src={maskURL.src}
+						class="border-3 pointer-events-none absolute left-0 top-0 z-10 w-full opacity-30"
+					/>
+				{/each}
+				{#each hoverMaskIndexes as index}
+					<img
+						src={maskURLs[index].src}
+						class="border-3 pointer-events-none absolute left-0 top-0 z-10 w-full opacity-60"
+					/>
+				{/each}
+			</div>
+			<div class="flex w-full flex-col items-center justify-center">
+				{#if "predicted_top_k" in render_data && mode === "predicted_top_k"}
+					<HorizontalBarChartsExplain
+						name="Top 5 Predicted Classes"
+						yAxisLabel="Concept"
+						lineValue={0.1}
+						data={render_data["predicted_top_k"]}
+					/>
+				{:else if "total_score" in render_data && mode === "total_score"}
+					<HorizontalBarChartsExplain
+						name="Total Scores"
+						data={render_data["total_score"]}
+						windowWidth={500}
+					/>
+				{/if}
+				<div>
+					<button
+						on:click={() => (mode = "predicted_top_k")}
+						class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+						>Top 5 Predicted Classes</button
+					>
+					<button
+						on:click={() => (mode = "total_score")}
+						class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+						>Attributed Scores</button
+					>
+				</div>
 			</div>
 		</div>
-	</div>
-	{#if "trained_attr_img_scores" in render_data && "zs_attr_img_scores" in render_data}
-		<div class="relative flex w-full w-full flex-row py-2">
-			<HorizontalBarChartsExplain
-				name="Trained Attributes: Image"
-				data={render_data["trained_attr_img_scores"].slice(
-					0,
-					Math.min(5, render_data["trained_attr_img_scores"].length)
-				)}
-			/>
-			<HorizontalBarChartsExplain
-				name="Zero-shot Attributes: Image"
-				data={render_data["zs_attr_img_scores"].slice(
-					0,
-					Math.min(5, render_data["zs_attr_img_scores"].length)
-				)}
-			/>
-		</div>
-	{/if}
-	<div class="relative">
-		{#if selectedMaskIndexes.length > 0}
-			<div class="w-full text-center">
-				<h1>Selected Regions</h1>
+		{#if "trained_attr_img_scores" in render_data && "zs_attr_img_scores" in render_data}
+			<div class="relative flex w-full w-full flex-row py-2">
+				<HorizontalBarChartsExplain
+					name="Trained Attributes: Image"
+					data={render_data["trained_attr_img_scores"].slice(
+						0,
+						Math.min(5, render_data["trained_attr_img_scores"].length)
+					)}
+				/>
+				<HorizontalBarChartsExplain
+					name="Zero-shot Attributes: Image"
+					data={render_data["zs_attr_img_scores"].slice(
+						0,
+						Math.min(5, render_data["zs_attr_img_scores"].length)
+					)}
+				/>
 			</div>
-			{#each selectedMaskIndexes as index}
-				<div
-					class="
+		{/if}
+		<div class="relative">
+			{#if selectedMaskIndexes.length > 0}
+				<div class="w-full text-center">
+					<h1>Selected Regions</h1>
+				</div>
+				{#each selectedMaskIndexes as index}
+					<div
+						class="
             flex
             flex-col items-center
             justify-center border-gray-300 shadow-lg"
-				>
-					<img src={maskingImage(imgElement, maskURLs[index])} class="w-[200px]" />
-					<h3>Region Matching Score: {render_data["region_scores"][index]}</h3>
-				</div>
-				<div class="relative flex w-full w-full flex-row py-2">
-					<HorizontalBarChartsExplain
-						name="Trained Attributes: Regions"
-						data={render_data["trained_attr_region_scores"][index].slice(
-							0,
-							Math.min(5, render_data["trained_attr_region_scores"][index].length)
-						)}
-					/>
-					<HorizontalBarChartsExplain
-						name="Zero-shot Attributes: Region"
-						data={render_data["zs_attr_region_scores"][index].slice(
-							0,
-							Math.min(5, render_data["zs_attr_region_scores"][index].length)
-						)}
-					/>
-				</div>
-			{/each}
-		{/if}
+					>
+						<img src={maskingImage(imgElement, maskURLs[index])} class="w-[200px]" />
+						<h3>Region Matching Score: {render_data["region_scores"][index]}</h3>
+					</div>
+					<div class="relative flex w-full w-full flex-row py-2">
+						<HorizontalBarChartsExplain
+							name="Trained Attributes: Regions"
+							data={render_data["trained_attr_region_scores"][index].slice(
+								0,
+								Math.min(5, render_data["trained_attr_region_scores"][index].length)
+							)}
+						/>
+						<HorizontalBarChartsExplain
+							name="Zero-shot Attributes: Region"
+							data={render_data["zs_attr_region_scores"][index].slice(
+								0,
+								Math.min(5, render_data["zs_attr_region_scores"][index].length)
+							)}
+						/>
+					</div>
+				{/each}
+			{/if}
+		</div>
 	</div>
-</div>
+{/if}

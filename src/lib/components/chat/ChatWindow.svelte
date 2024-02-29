@@ -321,6 +321,8 @@
 				{#if currentSelectedImages && currentSelectedImages.length}
 					<div class="op flex w-full flex-row items-center justify-start p-4">
 						{#each currentSelectedImages as image}
+							<!-- check if images greater than 10 produces infinite scroll -->
+
 							<ImagePreview
 								json={image}
 								on:deleteImage={() => {

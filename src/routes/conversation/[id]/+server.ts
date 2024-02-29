@@ -248,13 +248,10 @@ export async function POST({ request, locals, params, getClientAddress }) {
 
 			await summarizeIfNeeded;
 
-			let execCount = 0;
+			const execCount = 0;
 			let fullContentForDisplay: string = "";
 
-			while (
-				messages[messages.length - 1].from === "user" &&
-				execCount < parseInt(N_EXECUTION_LIMIT)
-			) {
+			while (messages[messages.length - 1].from === "user" && execCount < parseInt(1)) {
 				// ===== handle user message =====
 				try {
 					const endpoint = await model.getEndpoint();
@@ -343,7 +340,7 @@ export async function POST({ request, locals, params, getClientAddress }) {
 						{
 							...messages[messages.length - 1],
 							// triggersExecution: true,
-							executionType: "triggered",
+							// executionType: "triggered",
 							updatedAt: new Date(),
 						},
 					];
@@ -438,92 +435,100 @@ export async function POST({ request, locals, params, getClientAddress }) {
 					// }
 
 					// create a new message with the execution output
-					messages = [
-						...messages,
-						{
-							from: "user",
-							content: "Execution Output:\n" + executionOutput + "\n",
-							executionType: "output",
-							webSearch: webSearchResults,
-							updates: updates,
-							id: (responseId as Message["id"]) || crypto.randomUUID(),
-							createdAt: new Date(),
-							updatedAt: new Date(),
-						},
-					];
+					// messages = [
+					// 	...messages.slice(0, -1),
+					// 	// {
+					// 	// 	from: "user",
+					// 	// 	content: "Execution Output:\n" + executionOutput + "\n",
+					// 	// 	executionType: "output",
+					// 	// 	webSearch: webSearchResults,
+					// 	// 	updates: updates,
+					// 	// 	id: (responseId as Message["id"]) || crypto.randomUUID(),
+					// 	// 	createdAt: new Date(),
+					// 	// 	updatedAt: new Date(),
+					// 	// },
+					// 	{
+					// 		...messages[messages.length - 1],
+					// 		from: "assistant",
+					// 		content: messages[messages.length - 1].content + displayExecutionResult,
+					// 		executionType: "output",
+					// 		webSearch: webSearchResults,
+					// 		updates: updates,
+					// 		id: (responseId as Message["id"]) || crypto.randomUUID(),
+					// 		createdAt: new Date(),
+					// 		updatedAt: new Date(),
+					// 	},
+					// ];
 
-					await collections.conversations.updateOne(
-						{
-							_id: convId,
-						},
-						{
-							$set: {
-								messages,
-								title: conv?.title,
-								updatedAt: new Date(),
-							},
-						}
-					);
+					// await collections.conversations.updateOne(
+					// 	{
+					// 		_id: convId,
+					// 	},
+					// 	{
+					// 		$set: {
+					// 			messages,
+					// 			title: conv?.title,
+					// 			updatedAt: new Date(),
+					// 		},
+					// 	}
+					// );
 					fullContentForDisplay += displayExecutionResult;
 					update({
 						type: "stream",
 						token: displayExecutionResult,
 					});
-					execCount += 1;
+					// execCount += 1;
 				}
 			}
 
-			if (execCount >= parseInt(N_EXECUTION_LIMIT)) {
-				const templatedResponse =
-					"I have reached the maximum number of executions specified by the administrator (=" +
-					N_EXECUTION_LIMIT +
-					"). Can you assist me or ask me another question? You can also ask me to continue.";
-				messages = [
-					...messages,
-					{
-						from: "assistant",
-						content: templatedResponse,
-						webSearch: webSearchResults,
-						updates: updates,
-						id: (responseId as Message["id"]) || crypto.randomUUID(),
-						createdAt: new Date(),
-						updatedAt: new Date(),
-					},
-				];
-				await collections.conversations.updateOne(
-					{
-						_id: convId,
-					},
-					{
-						$set: {
-							messages,
-							title: conv?.title,
-							updatedAt: new Date(),
-						},
-					}
-				);
-				fullContentForDisplay += templatedResponse;
-				update({
-					type: "stream",
-					token: messages[messages.length - 1].content,
-				});
-			}
+			// if (execCount >= parseInt(1)) {
+			// 	const templatedResponse = "";
+			// 	messages = [
+			// 		...messages,
+			// 		{
+			// 			from: "assistant",
+			// 			content: templatedResponse,
+			// 			webSearch: webSearchResults,
+			// 			updates: updates,
+			// 			id: (responseId as Message["id"]) || crypto.randomUUID(),
+			// 			createdAt: new Date(),
+			// 			updatedAt: new Date(),
+			// 		},
+			// 	];
+			// 	await collections.conversations.updateOne(
+			// 		{
+			// 			_id: convId,
+			// 		},
+			// 		{
+			// 			$set: {
+			// 				messages,
+			// 				title: conv?.title,
+			// 				updatedAt: new Date(),
+			// 			},
+			// 		}
+			// 	);
+			// 	fullContentForDisplay += templatedResponse;
+			// 	update({
+			// 		type: "stream",
+			// 		token: messages[messages.length - 1].content,
+			// 	});
+			// }
 			update({
 				type: "finalAnswer",
 				text: fullContentForDisplay,
 			});
 
 			// Assert the last message is from the assistant that did NOT triggers an execution
-			const lastMessage = messages[messages.length - 1];
-			if (lastMessage.from !== "assistant") {
-				throw new Error("Last message is not from the assistant");
-			}
-			if (lastMessage.executionType === "output") {
-				throw new Error("Last message is an execution output");
-			}
-			if (lastMessage.executionType === "triggered") {
-				throw new Error("Last message is a triggered execution");
-			}
+			// const lastMessage = messages[messages.length - 1];
+			// if (lastMessage.from !== "assistant") {
+			// 	throw new Error("Last message is not from the assistant");
+			// }
+			// if (lastMessage.executionType === "output") {
+			// 	throw new Error("Last message is an execution output");
+			// }
+			// if (lastMessage.executionType === "triggered") {
+			// 	throw new Error("Last message is a triggered execution");
+			// }
 
 			// add the fullContentForDisplay to the last message for front-end display
 			messages = [

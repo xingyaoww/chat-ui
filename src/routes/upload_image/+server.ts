@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const blob = requestBody.get("file") as Blob;
 		formData.append("file", blob);
 		formData.append("user_id", user_id as string);
-		console.log("formData", formData);
+		// console.log("formData", formData);
 		const response = await fetch(`${imageUrl}/images/`, {
 			method: "POST",
 			body: formData,
