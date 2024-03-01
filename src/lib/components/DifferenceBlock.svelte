@@ -5,7 +5,7 @@
 
 	export let json_data = {};
 	let color_1 = "#69b3a2";
-	let color_2 = "#ffab00";
+	let color_2 = "#ff0000";
 </script>
 
 <div class="flex flex-col">
@@ -14,7 +14,8 @@
 			<div class="flex w-full items-center justify-center">
 				<img
 					src={"/images/" + json_data.image_1}
-					class={`h-fit w-fit border-4 border-solid border-[${color_1}] p-4`}
+					class={`h-fit w-fit border-4 border-solid`}
+					style="border-color: #69b3a2"
 				/>
 			</div>
 		{/if}
@@ -22,7 +23,8 @@
 			<div class="flex w-full items-center justify-center">
 				<img
 					src={"/images/" + json_data.image_2}
-					class={`h-fit w-fit border-4 border-solid border-[${color_2}] p-4`}
+					class={`h-fit w-fit border-4 border-solid`}
+					style="border-color: #ff0000"
 				/>
 			</div>
 		{/if}

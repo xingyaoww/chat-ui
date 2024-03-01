@@ -26,7 +26,7 @@
 
 	// Axis labels
 	export let color_1 = "#69b3a2";
-	export let color_2 = "#ffab00";
+	export let color_2 = "#ff0000";
 	export let xAxisLabel = "";
 	export let yAxisLabel = "Attributes";
 	export let name = "Graph Name";

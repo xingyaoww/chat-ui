@@ -132,14 +132,14 @@
 		{#if "trained_attr_img_scores" in render_data && "zs_attr_img_scores" in render_data}
 			<div class="relative flex w-full w-full flex-row py-2">
 				<HorizontalBarChartsExplain
-					name="Trained Attributes: Image"
+					name="General Attributes: Image"
 					data={render_data["trained_attr_img_scores"].slice(
 						0,
 						Math.min(5, render_data["trained_attr_img_scores"].length)
 					)}
 				/>
 				<HorizontalBarChartsExplain
-					name="Zero-shot Attributes: Image"
+					name="Concept Specific Attributes: Image"
 					data={render_data["zs_attr_img_scores"].slice(
 						0,
 						Math.min(5, render_data["zs_attr_img_scores"].length)
@@ -164,14 +164,14 @@
 					</div>
 					<div class="relative flex w-full w-full flex-row py-2">
 						<HorizontalBarChartsExplain
-							name="Trained Attributes: Regions"
+							name="General Attributes: Regions"
 							data={render_data["trained_attr_region_scores"][index].slice(
 								0,
 								Math.min(5, render_data["trained_attr_region_scores"][index].length)
 							)}
 						/>
 						<HorizontalBarChartsExplain
-							name="Zero-shot Attributes: Region"
+							name="Concept Specific Attributes: Region"
 							data={render_data["zs_attr_region_scores"][index].slice(
 								0,
 								Math.min(5, render_data["zs_attr_region_scores"][index].length)

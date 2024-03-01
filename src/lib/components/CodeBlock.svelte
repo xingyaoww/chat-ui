@@ -76,7 +76,7 @@
 				{/each}
 			</div>
 		{:else if contentType === "ecole-message"}
-			<!-- <p>{parsedJson.data}</p> -->
+			<p>{parsedJson.data}</p>
 		{:else if contentType === "ecole-image"}
 			<img src={parsedJson.data} />
 		{:else if contentType === "ecole-grounding-data"}
