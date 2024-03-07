@@ -15,6 +15,9 @@
 	onMount(() => {
 		images = image_lists.map((image) => "/images/" + image.id);
 		localURLs = [];
+		if (images.length > 5) {
+			images = images.slice(0, 2).concat(images.slice(-3));
+		}
 		images.forEach((imageURL) => {
 			fetch(imageURL)
 				.then((response) => response.blob())
@@ -87,12 +90,12 @@
 							<div class={`flex flex-col`}>
 								<h2>Objects</h2>
 								<table class="">
-									<tr class="bg-gray-100 capitalize">
-										{#each Object.keys(tracked_states["frames"][currentIndex]["objects"][0]) as key}
-											<th>{key}</th>
-										{/each}
-									</tr>
 									{#each tracked_states["frames"][currentIndex]["objects"] as obj}
+										<tr class="bg-gray-100 capitalize">
+											{#each Object.keys(obj) as key}
+												<th>{key}</th>
+											{/each}
+										</tr>
 										<tr>
 											{#each Object.keys(obj) as key}
 												<td>{obj[key]}</td>
@@ -104,7 +107,7 @@
 						{/if}
 						{#if tracked_states["frames"][currentIndex] && tracked_states["frames"][currentIndex]["relations"] && tracked_states["frames"][currentIndex]["relations"].length > 0}
 							<div class={`flex flex-col`}>
-								<h2>Relations</h2>
+								<h2 class="bg-gray-100 capitalize">Relations</h2>
 								<table>
 									<tr>
 										{#each Object.keys(tracked_states["frames"][currentIndex]["relations"][0]) as key}
@@ -126,7 +129,7 @@
 			</div>
 		{/if}
 		{#if tracked_states["explanation"]}
-			<h2>Explainations</h2>
+			<h2>Explanation</h2>
 			<p>{tracked_states["explanation"]}</p>
 		{/if}
 	{/if}

@@ -125,6 +125,8 @@
 					{/if}
 				{/if}
 			{/if}
+		{:else if contentType === "ecole-difference-images"}
+			<DifferenceBlock json_data={parsedJson.diff} />
 		{:else if contentType === "ecole-difference-concepts"}
 			<DifferenceBlock json_data={parsedJson} />
 		{:else if contentType === "ecole-json-reason"}
@@ -166,7 +168,7 @@
 				{/if}
 
 				{#if parsedJson["blended_imgs"]}
-					<p>Visual Activity Tracker</p>
+					<p2>Visual Attribute Tracking</p2>
 					<GifReader
 						image_lists={parsedJson["blended_imgs"]}
 						tracked_states={parsedJson["state_tracking"]}
