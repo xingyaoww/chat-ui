@@ -2,45 +2,132 @@
 	import { onMount, onDestroy } from "svelte";
 
 	export let image_lists: Record<string, string>[] = [];
+	export let tracked_states: Record<string, any>[] = [];
+
+	let ifAnimated = false;
 	let images: string[] = [];
 	// download the images from the image_lists
-	$: if (image_lists.length > 0) {
-		images = image_lists.map((image) => "/images/" + image.id);
-	}
 
 	let currentIndex = 0;
 	let interval: NodeJS.Timeout;
-	let localURLs: string[] = [];
-	$: if (images.length > 0) {
-		images.forEach((imageURL) => {
-			const img = new Image();
-			img.src = imageURL;
-			img.onload = () => {
-				const canvas = document.createElement("canvas");
-				canvas.width = img.width;
-				canvas.height = img.height;
-				const ctx = canvas.getContext("2d");
-				ctx.drawImage(img, 0, 0);
-				localURLs.push(canvas.toDataURL());
-			};
-		});
-	}
-
+	let localURLs: string[] = null;
+	let finished = false;
 	onMount(() => {
-		console.log("GifReader mounted");
-		interval = setInterval(() => {
-			currentIndex = (currentIndex + 1) % images.length;
-		}, 200);
+		images = image_lists.map((image) => "/images/" + image.id);
+		localURLs = [];
+		images.forEach((imageURL) => {
+			fetch(imageURL)
+				.then((response) => response.blob())
+				.then((blob) => {
+					localURLs.push(URL.createObjectURL(blob));
+					finished = true;
+				});
+		});
+		if (tracked_states && tracked_states["frames"]) {
+			if (tracked_states["frames"].length > 5) {
+				const new_arr = tracked_states["frames"].slice(0, 2);
+				const new_arr_2 = tracked_states["frames"].slice(-3); // Corrected this line
+				tracked_states["frames"] = new_arr.concat(new_arr_2);
+				console.log("tracked_states", tracked_states);
+			}
+		}
 	});
 
+	// Reactive statement to manage the interval based on ifAnimated
+	$: {
+		if (interval) {
+			clearInterval(interval); // Clear existing interval if any
+			interval = undefined; // Reset interval variable
+		}
+
+		if (ifAnimated) {
+			interval = setInterval(() => {
+				currentIndex = (currentIndex + 1) % images.length;
+			}, 1000);
+		}
+	}
+
+	// Cleanup to clear the interval when the component is destroyed
 	onDestroy(() => {
-		clearInterval(interval);
+		if (interval) {
+			clearInterval(interval);
+		}
 	});
 </script>
 
 <div>
-	Tracked Emotions
+	<!-- create a list of button of index of frames -->
 	{#if images.length > 0}
-		<img src={localURLs[currentIndex]} alt="emotion" />
+		<div class={`grid grid-rows-${images.length}  grid-flow-col gap-4`}>
+			<button
+				class={"m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"}
+				on:click={() => (ifAnimated = !ifAnimated)}
+			>
+				{ifAnimated ? "Stop" : "Start"} Animation
+			</button>
+			{#each images as image, index}
+				<button
+					on:click={() => {
+						currentIndex = index;
+					}}
+					class={"m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400" +
+						(currentIndex === index ? " bg-gray-200" : "")}
+				>
+					{index + 1}
+				</button>
+			{/each}
+		</div>
+		{#if finished && localURLs && localURLs.length > 0}
+			<div class={`grid grid-cols-2`}>
+				<img src={localURLs[currentIndex]} alt="motion" />
+
+				{#if tracked_states && tracked_states["frames"]}
+					<div class={`flex flex-col`}>
+						{#if tracked_states["frames"][currentIndex] && tracked_states["frames"][currentIndex]["objects"] && tracked_states["frames"][currentIndex]["objects"].length > 0}
+							<div class={`flex flex-col`}>
+								<h2>Objects</h2>
+								<table class="">
+									<tr class="bg-gray-100 capitalize">
+										{#each Object.keys(tracked_states["frames"][currentIndex]["objects"][0]) as key}
+											<th>{key}</th>
+										{/each}
+									</tr>
+									{#each tracked_states["frames"][currentIndex]["objects"] as obj}
+										<tr>
+											{#each Object.keys(obj) as key}
+												<td>{obj[key]}</td>
+											{/each}
+										</tr>
+									{/each}
+								</table>
+							</div>
+						{/if}
+						{#if tracked_states["frames"][currentIndex] && tracked_states["frames"][currentIndex]["relations"] && tracked_states["frames"][currentIndex]["relations"].length > 0}
+							<div class={`flex flex-col`}>
+								<h2>Relations</h2>
+								<table>
+									<tr>
+										{#each Object.keys(tracked_states["frames"][currentIndex]["relations"][0]) as key}
+											<th>{key}</th>
+										{/each}
+									</tr>
+									{#each tracked_states["frames"][currentIndex]["relations"] as obj}
+										<tr>
+											{#each Object.keys(obj) as key}
+												<td>{obj[key]}</td>
+											{/each}
+										</tr>
+									{/each}
+								</table>
+							</div>
+						{/if}
+					</div>
+				{/if}
+			</div>
+		{/if}
+		{#if tracked_states["explanation"]}
+			<h2>Explainations</h2>
+			<p>{tracked_states["explanation"]}</p>
+		{/if}
 	{/if}
 </div>

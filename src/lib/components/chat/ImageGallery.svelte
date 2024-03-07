@@ -13,6 +13,9 @@
 	export let onSelectImage: (image: Image) => void;
 
 	export let images: Array<Image> = [];
+	export let maxVideos = 5;
+	export let maxImages = 5;
+	let shownImages = [];
 
 	let selectedImage: Image | null = null;
 
@@ -56,6 +59,7 @@
 		await fetchAllVideos();
 		await fetchAllOriginalImages();
 	});
+	$: console.log("images", images);
 </script>
 
 <div

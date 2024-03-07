@@ -167,7 +167,10 @@
 
 				{#if parsedJson["blended_imgs"]}
 					<p>Visual Activity Tracker</p>
-					<GifReader image_lists={parsedJson["blended_imgs"]} />
+					<GifReader
+						image_lists={parsedJson["blended_imgs"]}
+						tracked_states={parsedJson["state_tracking"]}
+					/>
 				{/if}
 			{/if}
 		{:else if contentType === "ecole-similar-videos"}

@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { data } from "autoprefixer";
-	import HorizontalBarCharts from "./d3figure/HorizontalBarCharts.svelte";
 	import HorizontalBarChartsCompare from "./d3figure/HorizontalBarChartsCompare.svelte";
 
 	export let json_data = {};

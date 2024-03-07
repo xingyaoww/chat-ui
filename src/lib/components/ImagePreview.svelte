@@ -4,6 +4,7 @@
 	import CarbonClose from "~icons/carbon/close";
 	import CarbonSubtract from "~icons/carbon/subtract";
 	import CarbonEdit from "~icons/carbon/edit";
+	import IntersectionObserver from "./IntersectionObserver.svelte";
 	import { goto } from "$app/navigation";
 	export let json = {
 		url: "https://via.placeholder.com/400x400",
@@ -35,12 +36,17 @@
 </script>
 
 <div class="border-grey-300 relative m-4 inline-block rounded-lg border hover:border-red-400">
-	<img
-		class="h-24 w-24 min-w-24 max-w-24 rounded-xl object-cover"
-		src={base + json.url}
-		alt="Image"
-		on:click={clickHandler}
-	/>
+	<IntersectionObserver once={true} let:intersecting>
+		{#if intersecting}
+			<img
+				class="h-24 w-24 min-w-24 max-w-24 rounded-xl object-cover"
+				src={base + json.url}
+				alt="Image"
+				on:click={clickHandler}
+			/>
+		{/if}
+	</IntersectionObserver>
+
 	<!-- <button
 		class="absolute -bottom-3 -right-3 cursor-pointer rounded-full bg-yellow-400 px-2 py-1 text-white"
 		on:click={editImage}>✎</button
