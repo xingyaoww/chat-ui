@@ -22,7 +22,7 @@
 			{ name: d, value: x2[i], class: "class2" },
 		])
 		.flat();
-	$: console.log("data", data);
+	// $: console.log("data", data);
 
 	// Axis labels
 	export let color_1 = "#69b3a2";

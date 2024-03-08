@@ -9,7 +9,6 @@
 	import GifReader from "./GifReader.svelte";
 	import ExplainBlock from "./ExplainBlock.svelte";
 	import DifferenceBlock from "./DifferenceBlock.svelte";
-	import { json } from "@sveltejs/kit";
 
 	export let code = "";
 	export let lang = "";
