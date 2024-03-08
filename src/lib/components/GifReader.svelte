@@ -107,9 +107,9 @@
 						{/if}
 						{#if tracked_states["frames"][currentIndex] && tracked_states["frames"][currentIndex]["relations"] && tracked_states["frames"][currentIndex]["relations"].length > 0}
 							<div class={`flex flex-col`}>
-								<h2 class="bg-gray-100 capitalize">Relations</h2>
+								<h2>Relations</h2>
 								<table>
-									<tr>
+									<tr class="bg-gray-100 capitalize">
 										{#each Object.keys(tracked_states["frames"][currentIndex]["relations"][0]) as key}
 											<th>{key}</th>
 										{/each}
@@ -128,9 +128,9 @@
 				{/if}
 			</div>
 		{/if}
-		{#if tracked_states["explanation"]}
+		<!-- {#if tracked_states["explanation"]}
 			<h2>Explanation</h2>
 			<p>{tracked_states["explanation"]}</p>
-		{/if}
+		{/if} -->
 	{/if}
 </div>

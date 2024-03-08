@@ -41,7 +41,7 @@
 	}
 
 	onMount(() => {
-		fetch(`${base}/ods/${json_data.image_id}`)
+		fetch(`${base}/ods/${json_data.prediction_id ? json_data.prediction_id : json_data.image_id}`)
 			.then((res) => {
 				if (!res.ok) {
 					throw new Error("HTTP error, status = " + res.status);
