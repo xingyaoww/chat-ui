@@ -10,7 +10,7 @@
 		{ name: "Category C", value: 45 },
 		// ... more categories
 	];
-	console.log("data", data);
+	// console.log("data", data);
 
 	// Axis labels
 	export let xAxisLabel = "Reasons";

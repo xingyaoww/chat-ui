@@ -62,7 +62,7 @@
 	<button
 		on:click={() => (showExplanation = !showExplanation)}
 		class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-		>{showExplanation ? "Hide explaination" : "Show explaination"}</button
+		>{showExplanation ? "Hide explanation" : "Show explanation"}</button
 	>
 </div>
 {#if showExplanation}
@@ -133,17 +133,15 @@
 			<div class="relative flex w-full w-full flex-row py-2">
 				<HorizontalBarChartsExplain
 					name="General Attributes: Image"
-					data={render_data["trained_attr_img_scores"].slice(
-						0,
-						Math.min(5, render_data["trained_attr_img_scores"].length)
-					)}
+					data={render_data["trained_attr_img_scores"]
+						.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+						.slice(0, Math.min(5, render_data["trained_attr_img_scores"].length))}
 				/>
 				<HorizontalBarChartsExplain
 					name="Concept Specific Attributes: Image"
-					data={render_data["zs_attr_img_scores"].slice(
-						0,
-						Math.min(5, render_data["zs_attr_img_scores"].length)
-					)}
+					data={render_data["zs_attr_img_scores"]
+						.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+						.slice(0, Math.min(5, render_data["zs_attr_img_scores"].length))}
 				/>
 			</div>
 		{/if}
@@ -160,22 +158,25 @@
             justify-center border-gray-300 shadow-lg"
 					>
 						<img src={maskingImage(imgElement, maskURLs[index])} class="w-[200px]" />
-						<h3>Region Matching Score: {render_data["region_scores"][index]}</h3>
+						<!-- <h3>Region Matching Score: {render_data["region_scores"][index]}</h3> -->
 					</div>
 					<div class="relative flex w-full w-full flex-row py-2">
 						<HorizontalBarChartsExplain
 							name="General Attributes: Regions"
-							data={render_data["trained_attr_region_scores"][index].slice(
-								0,
-								Math.min(5, render_data["trained_attr_region_scores"][index].length)
-							)}
+							data={render_data["trained_attr_region_scores"][index]
+								? render_data["trained_attr_region_scores"][index]
+										.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+										.slice(0, Math.min(5, render_data["trained_attr_region_scores"][index].length))
+								: []}
 						/>
+
 						<HorizontalBarChartsExplain
 							name="Concept Specific Attributes: Region"
-							data={render_data["zs_attr_region_scores"][index].slice(
-								0,
-								Math.min(5, render_data["zs_attr_region_scores"][index].length)
-							)}
+							data={render_data["zs_attr_region_scores"][index]
+								? render_data["zs_attr_region_scores"][index]
+										.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+										.slice(0, Math.min(5, render_data["zs_attr_region_scores"][index].length))
+								: []}
 						/>
 					</div>
 				{/each}
