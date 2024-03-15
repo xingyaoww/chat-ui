@@ -85,7 +85,7 @@
 					on:mousemove={handleMouseMove}
 					on:click={handleMouseClick}
 					on:mouseleave={handleMouseOut}
-					class="border-3 w-full border-blue-500"
+					class="w-full"
 				/>
 				{#each maskURLs as maskURL}
 					<img
