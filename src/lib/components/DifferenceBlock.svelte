@@ -98,14 +98,12 @@
 		console.log("pred2", pred2);
 		const pred1_dict: Record<string, number> = {};
 		pred1.map((item) => (pred1_dict[item.name] = item.value));
+		const keys = Object.keys(pred1_dict);
 		const pred1_list = keys.map((key) => pred1_dict[key]);
 		// make a dict key from pred 2
 		const pred2_dict: Record<string, number> = {};
 		pred2.map((item) => (pred2_dict[item.name] = item.value));
-
 		const pred2_list = keys.map((key) => pred2_dict[key]);
-		const keySet = new Set([...Object.keys(pred1_dict), ...Object.keys(pred2_dict)]);
-		const keys = Array.from(keySet);
 		let new_keys: Array<string> = [];
 		if (weight1 && weight2) {
 			// make a dict key from weight 1
@@ -306,7 +304,7 @@
 							render_data2["trained_attr_img_scores"],
 							render_data1["predictor_weights"],
 							render_data2["predictor_weights"],
-							true
+							false
 						)}
 						width="500px"
 						name="Top Detected Attribute Difference"
@@ -318,7 +316,7 @@
 							render_data2["trained_attr_img_scores"],
 							null,
 							null,
-							true
+							false
 						)}
 						width="500px"
 						name="Top Detected Attribute Difference"
