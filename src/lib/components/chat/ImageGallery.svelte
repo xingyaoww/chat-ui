@@ -67,8 +67,25 @@
 >
 	{#each images as image}
 		<ImagePreview
-			json={image}
+			json={image.url && image.url.includes("videos")
+				? { ...image, url: "/thumbnails/" + image.id }
+				: image}
 			on:deleteImage={async () => {
+				if (image.url.includes("videos")) {
+					await fetch(`${base}/videos/${image.id}`, {
+						method: "DELETE",
+						headers: {
+							accept: "application/json",
+						},
+					});
+				} else {
+					await fetch(`${base}/images/${image.id}`, {
+						method: "DELETE",
+						headers: {
+							accept: "application/json",
+						},
+					});
+				}
 				images = [];
 				await fetchAllOriginalImages();
 				await fetchAllVideos();

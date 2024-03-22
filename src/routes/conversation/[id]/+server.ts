@@ -376,8 +376,8 @@ export async function POST({ request, locals, params, getClientAddress }) {
 							method: "POST",
 							body: JSON.stringify({
 								convid: convId.toString(),
+								user_id: userId.toString(),
 								code: substringBetweenExecuteTags,
-								user_id: userId,
 							}),
 						});
 						if (resFromJupyter.ok) {

@@ -307,7 +307,7 @@
 					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 					on:click={handleUploadClick}
 				>
-					Upload Images
+					Upload Media
 				</button>
 				<button
 					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
@@ -324,7 +324,9 @@
 							<!-- check if images greater than 10 produces infinite scroll -->
 
 							<ImagePreview
-								json={image}
+								json={image.url && image.url.includes("videos")
+									? { ...image, url: "/thumbnails/" + image.id }
+									: image}
 								on:deleteImage={() => {
 									currentSelectedImages = currentSelectedImages.filter((i) => i.id !== image.id);
 								}}
