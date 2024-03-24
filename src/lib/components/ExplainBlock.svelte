@@ -49,21 +49,30 @@
 				return res.json();
 			})
 			.then((data) => {
-				[maskTensor, shape] = encodedTensorToTensor(data["segmentations"]["part_masks"]);
+				if (
+					data["segmentations"] !== undefined &&
+					data["segmentations"]["part_masks"] !== undefined
+				) {
+					[maskTensor, shape] = encodedTensorToTensor(data["segmentations"]["part_masks"]);
+					maskURLs = tensorToMasksCanvas(maskTensor, shape);
+				}
 				render_data = data;
-				render_data["segmentations"] = undefined;
-				maskURLs = tensorToMasksCanvas(maskTensor, shape);
+				if (render_data["segmentations"] !== undefined) {
+					render_data["segmentations"] = undefined;
+				}
 			});
 	});
 </script>
 
 <div>
 	<div>{render_data["interpretation"]}</div>
-	<button
-		on:click={() => (showExplanation = !showExplanation)}
-		class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-		>{showExplanation ? "Hide explanation" : "Show explanation"}</button
-	>
+	{#if render_data["concepts_prediction"] !== undefined}
+		<button
+			on:click={() => (showExplanation = !showExplanation)}
+			class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+			>{showExplanation ? "Hide explanation" : "Show explanation"}</button
+		>
+	{/if}
 </div>
 {#if showExplanation}
 	<div class="flex flex-col">
@@ -105,7 +114,7 @@
 					<HorizontalBarChartsExplain
 						name="Top 5 Predicted Classes"
 						yAxisLabel="Concept"
-						lineValue={0.1}
+						lineValue={0.7}
 						data={render_data["predicted_top_k"]}
 					/>
 				{:else if "total_score" in render_data && mode === "total_score"}
@@ -135,7 +144,7 @@
 					name="General Attributes: Image"
 					data={render_data["trained_attr_img_scores"]
 						.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
-						.slice(0, Math.min(5, render_data["trained_attr_img_scores"].length))}
+						.slice(0, Math.min(3, render_data["trained_attr_img_scores"].length))}
 				/>
 				<HorizontalBarChartsExplain
 					name="Concept Specific Attributes: Image"

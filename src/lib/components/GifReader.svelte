@@ -15,9 +15,9 @@
 	onMount(() => {
 		images = image_lists.map((image) => "/images/" + image.id);
 		localURLs = [];
-		if (images.length > 5) {
-			images = images.slice(0, 2).concat(images.slice(-3));
-		}
+		// if (images.length > 5) {
+		// 	images = images.slice(0, 2).concat(images.slice(-3));
+		// }
 		images.forEach((imageURL) => {
 			fetch(imageURL)
 				.then((response) => response.blob())
@@ -26,14 +26,6 @@
 					finished = true;
 				});
 		});
-		if (tracked_states && tracked_states["frames"]) {
-			if (tracked_states["frames"].length > 5) {
-				const new_arr = tracked_states["frames"].slice(0, 2);
-				const new_arr_2 = tracked_states["frames"].slice(-3); // Corrected this line
-				tracked_states["frames"] = new_arr.concat(new_arr_2);
-				console.log("tracked_states", tracked_states);
-			}
-		}
 	});
 
 	// Reactive statement to manage the interval based on ifAnimated

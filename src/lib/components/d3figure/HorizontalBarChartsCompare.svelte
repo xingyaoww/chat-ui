@@ -26,7 +26,7 @@
 
 	// Axis labels
 	export let color_1 = "#69b3a2";
-	export let color_2 = "#ff0000";
+	export let color_2 = "#D55E00";
 	export let xAxisLabel = "";
 	export let yAxisLabel = "Attributes";
 	export let name = "Graph Name";
@@ -34,7 +34,7 @@
 	export let lineValue = null; // Replace 'someValue' with the actual value
 
 	let id = "-" + uuid();
-	let windowWidth = 500;
+	let windowWidth = 400;
 	let element;
 	function wrapText(text, width) {
 		text.each(function () {
@@ -212,7 +212,7 @@
 	});
 </script>
 
-<div class="m-2 flex w-[700px] flex-col p-3" {id}>
+<div class="m-2 flex w-[550px] flex-col p-3" {id}>
 	<div class="w-full items-center text-center" bind:this={element}>
 		<div id={"bar-chart" + id} class="h-[400px]" />
 		<div id={"bar-chart-tooltip" + id} class="tooltip" style="opacity: 0;" />

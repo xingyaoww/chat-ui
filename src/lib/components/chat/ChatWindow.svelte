@@ -313,7 +313,7 @@
 					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 					on:click={handleImageGaleryClick}
 				>
-					{imageGaleryOpened ? "Close" : "Open"} Image Gallery
+					{imageGaleryOpened ? "Close" : "Open"} Media Gallery
 				</button>
 			</div>
 			<!-- End Image UI -->

@@ -11,7 +11,7 @@
 
 	export let json_data = {};
 	let color_1 = "#69b3a2";
-	let color_2 = "#ff0000";
+	let color_2 = "#D55E00";
 	let weighted = true;
 	type Pair = {
 		name: string;
@@ -93,9 +93,6 @@
 		weight2: Array<Pair> | null = null,
 		sigmoided: boolean = false
 	) {
-		// make a dict key from pred
-		console.log("pred1", pred1);
-		console.log("pred2", pred2);
 		const pred1_dict: Record<string, number> = {};
 		pred1.map((item) => (pred1_dict[item.name] = item.value));
 		const keys = Object.keys(pred1_dict);
@@ -280,19 +277,21 @@
 		{#if json_data.concept2}
 			<div class="flex w-full items-center justify-center">
 				<!-- draw a rectangle -->
-				<div class="mx-3 h-8 w-16 rounded-lg bg-[#ff0000]" />
+				<div class="mx-3 h-8 w-16 rounded-lg bg-[#D55E00]" />
 				<p>{json_data.concept2}</p>
 			</div>
 		{/if}
 	</div>
-	<button
-		class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-		on:click={() => {
-			weighted = !weighted;
-		}}
-	>
-		{weighted ? "Show Unweighted Difference" : "Show Weighted Difference"}
-	</button>
+	{#if render_data1["trained_attr_img_scores"] && render_data2["trained_attr_img_scores"]}
+		<button
+			class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+			on:click={() => {
+				weighted = !weighted;
+			}}
+		>
+			{weighted ? "Show Unweighted Difference" : "Show Weighted Difference"}
+		</button>
+	{/if}
 
 	<div class="flex flex-col">
 		<div class="flex w-full items-center justify-center">
@@ -306,8 +305,8 @@
 							render_data2["predictor_weights"],
 							false
 						)}
-						width="500px"
-						name="Top Detected Attribute Difference"
+						width="400px"
+						name="General Attribute Differences"
 					/>
 				{:else}
 					<HorizontalBarChartsCompare
@@ -318,8 +317,8 @@
 							null,
 							false
 						)}
-						width="500px"
-						name="Top Detected Attribute Difference"
+						width="400px"
+						name="General Attribute Differences"
 					/>
 				{/if}
 			{:else if json_data.probs1}
@@ -329,8 +328,21 @@
 					labels={json_data.name}
 					{color_1}
 					{color_2}
-					name="Top Detected Attribute Difference"
+					name="General Attribute Differences"
 				/>
+			{/if}
+			{#if json_data.diff_zs_attr}
+				<div class="flex w-full items-center justify-center">
+					<HorizontalBarChartsCompare
+						x1={json_data.diff_zs_attr.probs1}
+						x2={json_data.diff_zs_attr.probs2}
+						labels={json_data.diff_zs_attr.name}
+						{color_1}
+						{color_2}
+						width="400px"
+						name="Concept Specific Attribute Difference"
+					/>
+				</div>
 			{/if}
 		</div>
 	</div>
