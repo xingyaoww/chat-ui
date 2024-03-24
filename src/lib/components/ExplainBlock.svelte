@@ -5,6 +5,7 @@
 		checkPointInMask,
 		tensorToMasksCanvas,
 		maskingImage,
+		tensorToHeatmapCanvas,
 	} from "$lib/utils/tensor";
 	import { onMount } from "svelte";
 	import HorizontalBarChartsExplain from "./d3figure/HorizontalBarChartsExplain.svelte";
@@ -17,9 +18,13 @@
 	let maskURLs: HTMLImageElement[] = [];
 	let hoverMaskIndexes: number[] = [];
 	let selectedMaskIndexes: number[] = [];
+	let shapeHeatmap: number[] = [0, 1, 1];
 	let mode = "predicted_top_k";
 	let scale = 1;
 	let showExplanation = false;
+	let showHeatmap = false;
+	let heatmap = undefined;
+	let heatmapInfo = undefined;
 	$: if (imgElement) {
 		scale = imgElement.width / imgElement.naturalWidth;
 	}
@@ -56,23 +61,50 @@
 					[maskTensor, shape] = encodedTensorToTensor(data["segmentations"]["part_masks"]);
 					maskURLs = tensorToMasksCanvas(maskTensor, shape);
 				}
+				heatmapInfo = data["heatmap"];
+
 				render_data = data;
 				if (render_data["segmentations"] !== undefined) {
 					render_data["segmentations"] = undefined;
+				}
+				if (render_data["heatmap"] !== undefined) {
+					render_data["heatmap"] = undefined;
 				}
 			});
 	});
 </script>
 
 <div>
-	<div>{render_data["interpretation"]}</div>
-	{#if render_data["concepts_prediction"] !== undefined}
-		<button
-			on:click={() => (showExplanation = !showExplanation)}
-			class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
-			>{showExplanation ? "Hide explanation" : "Show explanation"}</button
-		>
-	{/if}
+	<div>
+		{render_data["interpretation"]
+			? render_data["interpretation"]
+			: "Rendering prediction results..."}
+	</div>
+	<div class="row flex flex">
+		{#if render_data["concepts_prediction"] !== undefined}
+			<button
+				on:click={() => (showExplanation = !showExplanation)}
+				class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+				>{showExplanation ? "Hide explanation" : "Show explanation"}</button
+			>
+			{#if showExplanation && heatmapInfo !== undefined}
+				<button
+					on:click={() => {
+						showHeatmap = !showHeatmap;
+						if (heatmap !== undefined) {
+							return;
+						}
+
+						let heatmapTensor = [];
+						[heatmapTensor, shapeHeatmap] = encodedTensorToTensor(heatmapInfo);
+						heatmap = tensorToHeatmapCanvas(heatmapTensor, shapeHeatmap);
+					}}
+					class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
+					>{showHeatmap ? "Hide heatmap" : "Show heatmap"}</button
+				>
+			{/if}
+		{/if}
+	</div>
 </div>
 {#if showExplanation}
 	<div class="flex flex-col">
@@ -87,28 +119,33 @@
             shadow-lg
     "
 			>
-				<img
-					bind:this={imgElement}
-					src={`/images/${json_data.image_id}`}
-					alt="image"
-					on:mousemove={handleMouseMove}
-					on:click={handleMouseClick}
-					on:mouseleave={handleMouseOut}
-					class="w-full"
-				/>
-				{#each maskURLs as maskURL}
+				{#if showHeatmap && heatmap}
+					<img bind:this={imgElement} src={heatmap} alt="image" class="w-full" />
+				{:else}
 					<img
-						src={maskURL.src}
-						class="border-3 pointer-events-none absolute left-0 top-0 z-10 w-full opacity-30"
+						bind:this={imgElement}
+						src={`/images/${json_data.image_id}`}
+						alt="image"
+						on:mousemove={handleMouseMove}
+						on:click={handleMouseClick}
+						on:mouseleave={handleMouseOut}
+						class="w-full"
 					/>
-				{/each}
-				{#each hoverMaskIndexes as index}
-					<img
-						src={maskURLs[index].src}
-						class="border-3 pointer-events-none absolute left-0 top-0 z-10 w-full opacity-60"
-					/>
-				{/each}
+					{#each maskURLs as maskURL}
+						<img
+							src={maskURL.src}
+							class="border-3 pointer-events-none absolute left-0 top-0 z-10 w-full opacity-30"
+						/>
+					{/each}
+					{#each hoverMaskIndexes as index}
+						<img
+							src={maskURLs[index].src}
+							class="border-3 pointer-events-none absolute left-0 top-0 z-10 w-full opacity-60"
+						/>
+					{/each}
+				{/if}
 			</div>
+
 			<div class="flex w-full flex-col items-center justify-center">
 				{#if "predicted_top_k" in render_data && mode === "predicted_top_k"}
 					<HorizontalBarChartsExplain

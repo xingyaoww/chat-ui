@@ -81,6 +81,77 @@ export function tensorToMasksCanvas(
 
 	return masksCanvas;
 }
+export function tensorToHeatmapCanvas(tensor, shape) {
+	const [height, width] = shape; // Assuming a 2D shape for simplicity
+	const canvas = document.createElement("canvas");
+	canvas.width = width;
+	canvas.height = height;
+	const ctx = canvas.getContext("2d");
+
+	if (!ctx) {
+		throw new Error("Unable to get canvas context");
+	}
+	function intensityToViridisColor(intensity) {
+		// Normalize intensity to a 0-1 scale
+		const normalizedIntensity = intensity / 255;
+
+		// Viridis key colors from yellow to dark blue
+		const colors = [
+			{ r: 253, g: 231, b: 37 }, // Yellow
+			{ r: 121, g: 209, b: 81 }, // Green
+			{ r: 34, g: 167, b: 132 }, // Cyan
+			{ r: 64, g: 67, b: 135 }, // Indigo
+			{ r: 25, g: 0, b: 51 }, // Dark Blue
+		];
+
+		// Determine which two colors to interpolate between
+		const fraction = (colors.length - 1) * normalizedIntensity;
+		const index = Math.floor(fraction);
+		const remainder = fraction - index;
+
+		// Ensure index is within bounds
+		const startIndex = Math.min(index, colors.length - 2);
+		const endIndex = Math.min(index + 1, colors.length - 1);
+
+		// Interpolate between the two selected colors
+		const startColor = colors[startIndex];
+		const endColor = colors[endIndex];
+		const r = startColor.r + (endColor.r - startColor.r) * remainder;
+		const g = startColor.g + (endColor.g - startColor.g) * remainder;
+		const b = startColor.b + (endColor.b - startColor.b) * remainder;
+
+		// Return the interpolated color as an RGB string
+		return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+	}
+	// Function to map tensor values to color intensity
+	const getColor = (value) => {
+		const intensity = Math.min(255, Math.max(0, Math.floor(value * 255)));
+		// return `rgb(${intensity}, ${intensity}, ${intensity})`; // Grayscale intensity
+		return intensityToViridisColor(intensity);
+	};
+
+	// Fill the canvas based on tensor values
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const value = tensor[y * width + x];
+			ctx.fillStyle = getColor(value);
+			ctx.fillRect(x, y, 1, 1); // Fill in each pixel
+		}
+	}
+
+	// Add interactivity, for example, log value on mouse move
+	canvas.addEventListener("mousemove", function (event) {
+		const rect = canvas.getBoundingClientRect();
+		const x = event.clientX - rect.left;
+		const y = event.clientY - rect.top;
+		const tensorValue = tensor[Math.floor(y) * width + Math.floor(x)];
+		console.log(`Value at (${x}, ${y}): ${tensorValue}`);
+		// You can also display this information on the page instead of just logging it
+	});
+
+	return canvas.toDataURL("image/png");
+}
+
 export function tensorToMask(
 	tensor: Float32Array | Int32Array | Uint8Array,
 	shape: number[]
