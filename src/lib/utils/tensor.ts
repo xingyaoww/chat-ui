@@ -95,13 +95,23 @@ export function tensorToHeatmapCanvas(tensor, shape) {
 		// Normalize intensity to a 0-1 scale
 		const normalizedIntensity = intensity / 255;
 
-		// Viridis key colors from yellow to dark blue
+		// Viridis key colors from dark blue to yellow
 		const colors = [
-			{ r: 253, g: 231, b: 37 }, // Yellow
-			{ r: 121, g: 209, b: 81 }, // Green
-			{ r: 34, g: 167, b: 132 }, // Cyan
-			{ r: 64, g: 67, b: 135 }, // Indigo
+			// { r: 25, g: 0, b: 51 }, // Dark Blue
+			// { r: 64, g: 67, b: 135 }, // Indigo
+			// { r: 34, g: 167, b: 132 }, // Cyan
+			// { r: 121, g: 209, b: 81 }, // Green
+			// { r: 253, g: 231, b: 37 }, // Yellow
+			{ r: 13, g: 0, b: 28 }, // Very Dark Purple
 			{ r: 25, g: 0, b: 51 }, // Dark Blue
+			{ r: 44, g: 33, b: 93 }, // Deep Purple Blue
+			{ r: 64, g: 67, b: 135 }, // Bluish Green
+			{ r: 34, g: 167, b: 132 }, // Cyan
+			{ r: 78, g: 188, b: 106 }, // Greenish Cyan
+			{ r: 121, g: 209, b: 81 }, // Green
+			{ r: 187, g: 220, b: 59 }, // Lime Green
+			{ r: 253, g: 231, b: 37 }, // Yellow
+			{ r: 255, g: 174, b: 0 }, // Orange
 		];
 
 		// Determine which two colors to interpolate between
