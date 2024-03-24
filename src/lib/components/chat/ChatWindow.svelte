@@ -319,10 +319,8 @@
 			<!-- End Image UI -->
 			<div class="w-full rounded-xl bg-black bg-opacity-20">
 				{#if currentSelectedImages && currentSelectedImages.length}
-					<div class="op flex w-full flex-row items-center justify-start p-4">
+					<div class="op flex w-full flex-row items-center justify-start overflow-x-auto p-4">
 						{#each currentSelectedImages as image}
-							<!-- check if images greater than 10 produces infinite scroll -->
-
 							<ImagePreview
 								json={image.url && image.url.includes("videos")
 									? { ...image, url: "/thumbnails/" + image.id }
