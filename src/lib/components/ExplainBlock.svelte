@@ -162,16 +162,16 @@
 					/>
 				{/if}
 				<div>
-					<button
+					<!-- <button
 						on:click={() => (mode = "predicted_top_k")}
 						class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 						>Top 5 Predicted Classes</button
-					>
-					<button
+					> -->
+					<!-- <button
 						on:click={() => (mode = "total_score")}
 						class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 						>Attributed Scores</button
-					>
+					> -->
 				</div>
 			</div>
 		</div>
@@ -181,6 +181,7 @@
 					name="General Attributes: Image"
 					data={render_data["trained_attr_img_scores"]
 						.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+						.filter((attr) => !["purple"].includes(attr.name))
 						.slice(0, Math.min(3, render_data["trained_attr_img_scores"].length))}
 				/>
 				<HorizontalBarChartsExplain
@@ -212,6 +213,7 @@
 							data={render_data["trained_attr_region_scores"][index]
 								? render_data["trained_attr_region_scores"][index]
 										.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
+										.filter((attr) => !["purple"].includes(attr.name))
 										.slice(0, Math.min(5, render_data["trained_attr_region_scores"][index].length))
 								: []}
 						/>

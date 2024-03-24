@@ -59,7 +59,6 @@
 		await fetchAllVideos();
 		await fetchAllOriginalImages();
 	});
-	$: console.log("images", images);
 </script>
 
 <div

@@ -212,9 +212,9 @@
 	});
 </script>
 
-<div class="m-2 flex w-[550px] flex-col p-3" {id}>
+<div class="m-2 flex w-[500px] flex-col p-3" {id}>
 	<div class="w-full items-center text-center" bind:this={element}>
-		<div id={"bar-chart" + id} class="h-[400px]" />
+		<div id={"bar-chart" + id} class="h-[300px]" />
 		<div id={"bar-chart-tooltip" + id} class="tooltip" style="opacity: 0;" />
 	</div>
 	<div class=" items-center text-center">

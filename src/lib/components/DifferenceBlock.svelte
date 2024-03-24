@@ -25,7 +25,7 @@
 	let maskURLs1: HTMLImageElement[] = [];
 	let hoverMaskIndexes1: number[] = [];
 	let selectedMaskIndexes1: number[] = [];
-	let imgElement1: HTMLImageElement;
+	let imgElement1: HTMLImageElement = null;
 	let scale1 = 1;
 
 	function sigmoid(z) {
@@ -58,7 +58,7 @@
 	let maskURLs2: HTMLImageElement[] = [];
 	let hoverMaskIndexes2: number[] = [];
 	let selectedMaskIndexes2: number[] = [];
-	let imgElement2: HTMLImageElement;
+	let imgElement2: HTMLImageElement = null;
 	function selectedData(
 		keys: Array<string>,
 		pred1: Array<number>,
@@ -282,7 +282,7 @@
 			</div>
 		{/if}
 	</div>
-	{#if render_data1["trained_attr_img_scores"] && render_data2["trained_attr_img_scores"]}
+	{#if render_data1["trained_attr_img_scores"] && render_data2["trained_attr_img_scores"] && render_data1["predictor_weights"] && render_data2["predictor_weights"]}
 		<button
 			class="m-4 rounded-lg border border-gray-200 px-2 py-2 text-sm shadow-sm transition-all hover:border-gray-300 active:shadow-inner dark:border-gray-600 dark:hover:border-gray-400"
 			on:click={() => {
@@ -373,7 +373,7 @@
 						<img
 							src={maskingImage(imgElement2, maskURLs2[index2])}
 							class="w-[200px] border-4 border-solid"
-							style="border-color: #ff0000"
+							style="border-color: #D55E00"
 						/>
 					</div>
 

@@ -30,6 +30,7 @@ export async function buildPrompt({
 	// 		messages = messages.slice(-9);
 	// 	}
 	// }
+	console.log("messages", messages);
 	if (webSearch && webSearch.context) {
 		const lastMsg = messages.slice(-1)[0];
 		const messagesWithoutLastUsrMsg = messages.slice(0, -1);
