@@ -31,6 +31,12 @@
 			acc[String(i + 1)] = frame;
 			return acc;
 		}, {});
+
+		return () => {
+			images.forEach((imageURL, i) => {
+				URL.revokeObjectURL(localURLs[String(i + 1)]);
+			});
+		};
 	});
 
 	// Reactive statement to manage the interval based on ifAnimated

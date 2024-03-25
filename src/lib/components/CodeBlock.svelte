@@ -127,7 +127,7 @@
 		{:else if contentType === "ecole-difference-concepts"}
 			<DifferenceBlock json_data={parsedJson} />
 		{:else if contentType === "ecole-json-reason"}
-			<ExplainBlock json_data={parsedJson} />
+			<ExplainBlock json_data={parsedJson} id={parsedJson.prediction_id} />
 		{:else if contentType === "ecole-video-activity"}
 			<p>{parsedJson.data}</p>
 			<button

@@ -20,25 +20,26 @@
 	let selectedMaskIndexes: number[] = [];
 	let shapeHeatmap: number[] = [0, 1, 1];
 	let mode = "predicted_top_k";
-	let scale = 1;
 	let showExplanation = false;
 	let showHeatmap = false;
 	let heatmap = undefined;
 	let heatmapInfo = undefined;
-	$: if (json_data) {
-		console.log(json_data);
-	}
-	$: if (imgElement) {
-		scale = imgElement.width / imgElement.naturalWidth;
-	}
 	function handleMouseMove(event: MouseEvent) {
-		const rect = imgElement.getBoundingClientRect();
+		if (!event.target) return;
+		if ((event.target as HTMLElement).tagName !== "IMG") return;
+		const triggeredElement = event.target as HTMLImageElement;
+		const rect = triggeredElement.getBoundingClientRect();
+		const scale = triggeredElement.width / triggeredElement.naturalWidth;
 		const x = Math.floor((event.clientX - rect.left) / scale); // x position within the element.
 		const y = Math.floor((event.clientY - rect.top) / scale); // y position within the element.
 		hoverMaskIndexes = checkPointInMask(maskTensor, shape, x, y);
 	}
 	function handleMouseClick(event: MouseEvent) {
-		const rect = imgElement.getBoundingClientRect();
+		if (!event.target) return;
+		if ((event.target as HTMLElement).tagName !== "IMG") return;
+		const triggeredElement = event.target as HTMLImageElement;
+		const rect = triggeredElement.getBoundingClientRect();
+		const scale = triggeredElement.width / triggeredElement.naturalWidth;
 		const x = Math.floor((event.clientX - rect.left) / scale); // x position within the element.
 		const y = Math.floor((event.clientY - rect.top) / scale); // y position within the element.
 		selectedMaskIndexes = checkPointInMask(maskTensor, shape, x, y);
@@ -49,6 +50,10 @@
 	}
 
 	onMount(() => {
+		if (json_data.image_id === undefined) {
+			return;
+		}
+
 		fetch(`${base}/ods/${json_data.prediction_id ? json_data.prediction_id : json_data.image_id}`)
 			.then((res) => {
 				if (!res.ok) {

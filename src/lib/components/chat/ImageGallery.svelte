@@ -29,7 +29,8 @@
 
 		if (responseFetch.ok) {
 			const result = await responseFetch.json();
-			images = images.concat(result);
+			images = images.concat(result).reverse();
+			// reverse the order of images
 		} else {
 			console.log("Could not fetch all images URLs");
 			images = [];

@@ -71,6 +71,14 @@
 
 		return () => {
 			resizeObserver.disconnect();
+
+			resizeObserver = null;
+
+			windowWidth = 0;
+
+			d3.select("#" + id)
+				.selectAll("*")
+				.remove();
 		};
 	});
 	const drawChart = (inputWidth) => {
