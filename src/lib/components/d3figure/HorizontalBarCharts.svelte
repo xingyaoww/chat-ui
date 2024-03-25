@@ -72,7 +72,7 @@
 			.selectAll("*")
 			.remove();
 		// Sort data
-		data = sortData(data);
+		data = sortData(data).slice(0, Math.min(3, data.length));
 		// Append the svg object to a div or other container
 		const svg = d3
 			.select("#bar-chart" + id)

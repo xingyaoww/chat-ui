@@ -9,6 +9,7 @@
 	import GifReader from "./GifReader.svelte";
 	import ExplainBlock from "./ExplainBlock.svelte";
 	import DifferenceBlock from "./DifferenceBlock.svelte";
+	import TwoHeatmapRenderer from "./TwoHeatmapRenderer.svelte";
 
 	export let code = "";
 	export let lang = "";
@@ -51,6 +52,7 @@
 			"ecole-json-reason",
 			"ecole-video-activity",
 			"ecole-similar-videos",
+			"ecole-heatmap-two-concepts",
 		];
 		return listToCheck.every((item) => expectedTypes.includes(item.type));
 	}
@@ -76,6 +78,8 @@
 			</div>
 		{:else if contentType === "ecole-message"}
 			<p>{parsedJson.data}</p>
+		{:else if contentType === "ecole-heatmap-two-concepts"}
+			<TwoHeatmapRenderer json_data={parsedJson} />
 		{:else if contentType === "ecole-image"}
 			<img src={parsedJson.data} />
 		{:else if contentType === "ecole-grounding-data"}
@@ -157,12 +161,10 @@
 					/>
 				{:else}
 					<HorizontalBarCharts
-						data={Object.keys(parsedJson.sims)
-							.map((key) => ({
-								name: key,
-								value: parsedJson.sims[key],
-							}))
-							.slice(0, Math.min(3, Object.keys(parsedJson.sims).length))}
+						data={Object.keys(parsedJson.sims).map((key) => ({
+							name: key,
+							value: parsedJson.sims[key],
+						}))}
 					/>
 				{/if}
 
