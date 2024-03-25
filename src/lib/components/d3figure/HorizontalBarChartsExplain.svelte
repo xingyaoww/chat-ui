@@ -21,6 +21,10 @@
 	let id = "-" + uuid();
 	let windowWidth = 400;
 	let element;
+
+	// Fixed x-axis values
+	export let fixedXAxis = false;
+	export let xFixedValues = [0, 1];
 	function wrapText(text, width) {
 		text.each(function () {
 			var new_text = d3.select(this),
@@ -59,9 +63,6 @@
 			new_text.attr("transform", "translate(0," + -lineNumber * lineHeight + ")");
 		});
 	}
-	function sortData(data) {
-		return data.sort((a, b) => d3.descending(a.value, b.value));
-	}
 	const drawChart = (windowWidth) => {
 		// Set dimensions and margins for the graph
 
@@ -88,7 +89,9 @@
 		const x = d3
 			.scaleLinear()
 			.domain(
-				allPositive
+				fixedXAxis
+					? xFixedValues
+					: allPositive
 					? [0, d3.max(dataSpliced, (d) => d.value)]
 					: [d3.min(dataSpliced, (d) => d.value), d3.max(dataSpliced, (d) => d.value)]
 			)
@@ -186,6 +189,12 @@
 
 	onMount(() => {
 		drawChart(windowWidth);
+
+		return () => {
+			d3.select("#bar-chart" + id)
+				.selectAll("*")
+				.remove();
+		};
 	});
 </script>
 

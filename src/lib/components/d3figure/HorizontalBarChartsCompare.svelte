@@ -3,6 +3,7 @@
 	import * as d3 from "d3";
 	import { v4 as uuid } from "uuid";
 
+	export let width = 550;
 	// Sample data
 	export let x1 = [30, 80, 45];
 	export let x2 = [40, 60, 55];
@@ -34,7 +35,6 @@
 	export let lineValue = null; // Replace 'someValue' with the actual value
 
 	let id = "-" + uuid();
-	let windowWidth = 400;
 	let element;
 	function wrapText(text, width) {
 		text.each(function () {
@@ -208,11 +208,11 @@
 	};
 
 	onMount(() => {
-		drawChart(windowWidth);
+		drawChart(width);
 	});
 </script>
 
-<div class="m-2 flex w-[500px] flex-col p-3" {id}>
+<div class={`m-2 flex w-[${width}px] flex-col p-3`} {id}>
 	<div class="w-full items-center text-center" bind:this={element}>
 		<div id={"bar-chart" + id} class="h-[300px]" />
 		<div id={"bar-chart-tooltip" + id} class="tooltip" style="opacity: 0;" />

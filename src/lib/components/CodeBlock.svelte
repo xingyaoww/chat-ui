@@ -157,10 +157,12 @@
 					/>
 				{:else}
 					<HorizontalBarCharts
-						data={Object.keys(parsedJson.sims).map((key) => ({
-							name: key,
-							value: parsedJson.sims[key],
-						}))}
+						data={Object.keys(parsedJson.sims)
+							.map((key) => ({
+								name: key,
+								value: parsedJson.sims[key],
+							}))
+							.slice(0, Math.min(3, Object.keys(parsedJson.sims).length))}
 					/>
 				{/if}
 

@@ -25,25 +25,31 @@
 	let maskURLs1: HTMLImageElement[] = [];
 	let hoverMaskIndexes1: number[] = [];
 	let selectedMaskIndexes1: number[] = [];
-	let imgElement1: HTMLImageElement = null;
-	let scale1 = 1;
+	let imgElement1: HTMLImageElement | null = null;
+	let imgElement2: HTMLImageElement | null = null;
+	const listExcluded = ["purple", "pink"];
 
 	function sigmoid(z) {
 		return 1 / (1 + Math.exp(-z));
 	}
-	$: if (imgElement1) {
-		scale1 = imgElement1.width / imgElement1.naturalWidth;
-	}
 	function handleMouseMove1(event: MouseEvent) {
-		const rect = imgElement1.getBoundingClientRect();
-		const x = Math.floor((event.clientX - rect.left) / scale1); // x position within the element.
-		const y = Math.floor((event.clientY - rect.top) / scale1); // y position within the element.
+		if (!event.target) return;
+		if ((event.target as HTMLElement).tagName !== "IMG") return;
+		const triggeredElement = event.target as HTMLImageElement;
+		const rect = triggeredElement.getBoundingClientRect();
+		const scale = triggeredElement.width / triggeredElement.naturalWidth;
+		const x = Math.floor((event.clientX - rect.left) / scale); // x position within the element.
+		const y = Math.floor((event.clientY - rect.top) / scale); // y position within the element.
 		hoverMaskIndexes1 = checkPointInMask(maskTensor1, shape1, x, y);
 	}
 	function handleMouseClick1(event: MouseEvent) {
-		const rect = imgElement1.getBoundingClientRect();
-		const x = Math.floor((event.clientX - rect.left) / scale1); // x position within the element.
-		const y = Math.floor((event.clientY - rect.top) / scale1); // y position within the element.
+		if (!event.target) return;
+		if ((event.target as HTMLElement).tagName !== "IMG") return;
+		const triggeredElement = event.target as HTMLImageElement;
+		const rect = triggeredElement.getBoundingClientRect();
+		const scale = triggeredElement.width / triggeredElement.naturalWidth;
+		const x = Math.floor((event.clientX - rect.left) / scale); // x position within the element.
+		const y = Math.floor((event.clientY - rect.top) / scale); // y position within the element.
 		selectedMaskIndexes1 = checkPointInMask(maskTensor1, shape1, x, y);
 	}
 	function handleMouseOut1(event: MouseEvent) {
@@ -58,7 +64,6 @@
 	let maskURLs2: HTMLImageElement[] = [];
 	let hoverMaskIndexes2: number[] = [];
 	let selectedMaskIndexes2: number[] = [];
-	let imgElement2: HTMLImageElement = null;
 	function selectedData(
 		keys: Array<string>,
 		pred1: Array<number>,
@@ -115,26 +120,34 @@
 		} else {
 			new_keys = selectedData(keys, pred1_list, pred2_list);
 		}
+
+		new_keys = new_keys
+			.filter((item) => !listExcluded.includes(item))
+			.slice(0, Math.min(3, new_keys.length));
 		return {
 			x1: new_keys.map((key) => (sigmoided ? sigmoid(pred1_dict[key]) : pred1_dict[key])),
 			x2: new_keys.map((key) => (sigmoided ? sigmoid(pred2_dict[key]) : pred2_dict[key])),
 			labels: new_keys,
 		};
 	}
-	let scale2 = 1;
-	$: if (imgElement2) {
-		scale2 = imgElement2.width / imgElement2.naturalWidth;
-	}
 	function handleMouseMove2(event: MouseEvent) {
-		const rect = imgElement2.getBoundingClientRect();
-		const x = Math.floor((event.clientX - rect.left) / scale2); // x position within the element.
-		const y = Math.floor((event.clientY - rect.top) / scale2); // y position within the element.
+		if (!event.target) return;
+		if ((event.target as HTMLElement).tagName !== "IMG") return;
+		const triggeredElement = event.target as HTMLImageElement;
+		const rect = triggeredElement.getBoundingClientRect();
+		const scale = triggeredElement.width / triggeredElement.naturalWidth;
+		const x = Math.floor((event.clientX - rect.left) / scale); // x position within the element.
+		const y = Math.floor((event.clientY - rect.top) / scale); // y position within the element.
 		hoverMaskIndexes2 = checkPointInMask(maskTensor2, shape2, x, y);
 	}
 	function handleMouseClick2(event: MouseEvent) {
-		const rect = imgElement2.getBoundingClientRect();
-		const x = Math.floor((event.clientX - rect.left) / scale2); // x position within the element.
-		const y = Math.floor((event.clientY - rect.top) / scale2); // y position within the element.
+		if (!event.target) return;
+		if ((event.target as HTMLElement).tagName !== "IMG") return;
+		const triggeredElement = event.target as HTMLImageElement;
+		const rect = triggeredElement.getBoundingClientRect();
+		const scale = triggeredElement.width / triggeredElement.naturalWidth;
+		const x = Math.floor((event.clientX - rect.left) / scale); // x position within the element.
+		const y = Math.floor((event.clientY - rect.top) / scale); // y position within the element.
 		selectedMaskIndexes2 = checkPointInMask(maskTensor2, shape2, x, y);
 	}
 
@@ -143,21 +156,8 @@
 		hoverMaskIndexes2 = [];
 	}
 
-	$: {
-		console.log("selectedMaskIndexes1", selectedMaskIndexes1);
-		console.log("selectedMaskIndexes2", selectedMaskIndexes2);
-		if (selectedMaskIndexes1.length > 0 && selectedMaskIndexes2.length > 0) {
-			console.log(
-				matchArr(
-					render_data1["trained_attr_region_scores"][0],
-					render_data2["trained_attr_region_scores"][0]
-				)
-			);
-		}
-	}
 	onMount(() => {
 		// for the first image
-		console.log("json_data", json_data);
 		if (json_data["pred_1_id"]) {
 			fetch(`${base}/ods/${json_data["pred_1_id"]}`)
 				.then((res) => {
@@ -167,10 +167,8 @@
 					return res.json();
 				})
 				.then((data) => {
-					console.log("data over here", data);
 					[maskTensor1, shape1] = encodedTensorToTensor(data["segmentations"]["part_masks"]);
 					render_data1 = data;
-					console.log("render_data1", render_data1);
 					render_data1["segmentations"] = undefined;
 					maskURLs1 = tensorToMasksCanvas(maskTensor1, shape1);
 				});
@@ -192,6 +190,15 @@
 					maskURLs2 = tensorToMasksCanvas(maskTensor2, shape2);
 				});
 		}
+
+		return () => {
+			maskURLs1.forEach((maskURL) => {
+				URL.revokeObjectURL(maskURL.src);
+			});
+			maskURLs2.forEach((maskURL) => {
+				URL.revokeObjectURL(maskURL.src);
+			});
+		};
 	});
 </script>
 
@@ -305,7 +312,7 @@
 							render_data2["predictor_weights"],
 							false
 						)}
-						width="400px"
+						width={350}
 						name="General Attribute Differences"
 					/>
 				{:else}
@@ -317,7 +324,7 @@
 							null,
 							false
 						)}
-						width="400px"
+						width={350}
 						name="General Attribute Differences"
 					/>
 				{/if}
@@ -328,6 +335,7 @@
 					labels={json_data.name}
 					{color_1}
 					{color_2}
+					width={350}
 					name="General Attribute Differences"
 				/>
 			{/if}
@@ -339,7 +347,7 @@
 						labels={json_data.diff_zs_attr.name}
 						{color_1}
 						{color_2}
-						width="400px"
+						width={350}
 						name="Concept Specific Attribute Difference"
 					/>
 				</div>
@@ -356,25 +364,30 @@
 				{#each selectedMaskIndexes2 as index2}
 					<div
 						class="
-			border-5
+						border-5
 			align-center
 			relative
+			flex
 			grid
 			w-full
 			grid-cols-2
 			items-center
 			justify-center overflow-hidden border-gray-300 shadow-lg"
 					>
-						<img
-							src={maskingImage(imgElement1, maskURLs1[index1])}
-							class="w-[200px] border-4 border-solid"
-							style="border-color: #69b3a2"
-						/>
-						<img
-							src={maskingImage(imgElement2, maskURLs2[index2])}
-							class="w-[200px] border-4 border-solid"
-							style="border-color: #D55E00"
-						/>
+						<div class="flex flex-col items-center justify-center">
+							<img
+								src={maskingImage(imgElement1, maskURLs1[index1])}
+								class="w-[200px] border-4 border-solid"
+								style="border-color: #69b3a2"
+							/>
+						</div>
+						<div class="flex flex-col items-center justify-center">
+							<img
+								src={maskingImage(imgElement2, maskURLs2[index2])}
+								class="w-[200px] border-4 border-solid"
+								style="border-color: #D55E00"
+							/>
+						</div>
 					</div>
 
 					<div class="flex w-full items-center justify-center">
@@ -397,7 +410,7 @@
 										render_data2["predictor_weights"],
 										false
 									)}
-									width="500px"
+									width={450}
 									name="Top Detected Attribute Difference"
 								/>
 							{:else}
@@ -409,7 +422,7 @@
 										null,
 										false
 									)}
-									width="500px"
+									width={450}
 									name="Top Detected Attribute Difference"
 								/>
 							{/if}

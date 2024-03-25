@@ -25,6 +25,9 @@
 	let showHeatmap = false;
 	let heatmap = undefined;
 	let heatmapInfo = undefined;
+	$: if (json_data) {
+		console.log(json_data);
+	}
 	$: if (imgElement) {
 		scale = imgElement.width / imgElement.naturalWidth;
 	}
@@ -71,6 +74,16 @@
 					render_data["heatmap"] = undefined;
 				}
 			});
+
+		return () => {
+			maskURLs.forEach((maskURL) => {
+				URL.revokeObjectURL(maskURL.src);
+			});
+
+			if (heatmap !== undefined) {
+				URL.revokeObjectURL(heatmap);
+			}
+		};
 	});
 </script>
 
@@ -152,6 +165,8 @@
 						name="Top 5 Predicted Classes"
 						yAxisLabel="Concept"
 						lineValue={0.7}
+						xFixedValues={[0, 1]}
+						fixedXAxis={true}
 						data={render_data["predicted_top_k"]}
 					/>
 				{:else if "total_score" in render_data && mode === "total_score"}
@@ -181,7 +196,7 @@
 					name="General Attributes: Image"
 					data={render_data["trained_attr_img_scores"]
 						.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
-						.filter((attr) => !["purple"].includes(attr.name))
+						.filter((attr) => !["purple", "pink"].includes(attr.name))
 						.slice(0, Math.min(3, render_data["trained_attr_img_scores"].length))}
 				/>
 				<HorizontalBarChartsExplain
@@ -213,8 +228,8 @@
 							data={render_data["trained_attr_region_scores"][index]
 								? render_data["trained_attr_region_scores"][index]
 										.sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
-										.filter((attr) => !["purple"].includes(attr.name))
-										.slice(0, Math.min(5, render_data["trained_attr_region_scores"][index].length))
+										.filter((attr) => !["purple", "pink"].includes(attr.name))
+										.slice(0, Math.min(3, render_data["trained_attr_region_scores"][index].length))
 								: []}
 						/>
 
