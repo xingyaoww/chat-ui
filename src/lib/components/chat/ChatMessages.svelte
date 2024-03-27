@@ -52,7 +52,6 @@
 					{message}
 					{isAuthor}
 					{readOnly}
-					key={message.id + String(i)}
 					model={currentModel}
 					webSearchMessages={i === messages.length - 1 ? webSearchMessages : []}
 					on:retry

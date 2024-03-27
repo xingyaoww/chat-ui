@@ -55,7 +55,6 @@
 	export let isAuthor = true;
 	export let readOnly = false;
 	export let isTapped = false;
-	export let key = "a";
 
 	export let webSearchMessages: WebSearchUpdate[];
 
@@ -107,7 +106,9 @@
 	$: tokens = marked.lexer(sanitizeMd(message.displayContent ?? message.content));
 
 	afterUpdate(() => {
-		loadingEl?.$destroy();
+		if (loadingEl) {
+			loadingEl.$destroy();
+		}
 		clearTimeout(pendingTimeout);
 
 		// Add loading animation to the last message if update takes more than 600ms
@@ -146,6 +147,7 @@
 			isCopied = false;
 		}, 1000);
 	}
+	$: console.log("message", message);
 </script>
 
 {#if message.from === "assistant"}

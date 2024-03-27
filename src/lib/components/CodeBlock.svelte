@@ -35,9 +35,10 @@
 
 	function isValidJson(jsonString: string) {
 		try {
-			if (jsonString.indexOf("\n{") !== -1) {
-				return JSON5.parse("[" + jsonString.replace("\n{", ",{") + "]");
-			}
+			// if (jsonString.indexOf("\n{") !== -1) {
+			// 	return JSON5.parse("[" + jsonString.replace("\n{", ",{") + "]");
+			// }
+			console.log("over here", jsonString);
 			return JSON5.parse(jsonString);
 		} catch (e) {
 			return false;

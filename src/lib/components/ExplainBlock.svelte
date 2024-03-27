@@ -7,7 +7,7 @@
 		maskingImage,
 		tensorToHeatmapCanvas,
 	} from "$lib/utils/tensor";
-	import { afterUpdate } from "svelte";
+	import { onMount } from "svelte";
 	import HorizontalBarChartsExplain from "./d3figure/HorizontalBarChartsExplain.svelte";
 
 	let imgElement: HTMLImageElement;
@@ -49,7 +49,7 @@
 		hoverMaskIndexes = [];
 	}
 
-	afterUpdate(() => {
+	onMount(() => {
 		if (json_data.image_id === undefined) {
 			return;
 		}
