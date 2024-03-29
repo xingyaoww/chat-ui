@@ -11,6 +11,7 @@
 	import HorizontalBarChartsExplain from "./d3figure/HorizontalBarChartsExplain.svelte";
 
 	let imgElement: HTMLImageElement;
+	export let id = "";
 	export let json_data = {};
 	let render_data = {};
 	let maskTensor: Uint8Array | Float32Array | Int32Array = [];
@@ -92,7 +93,7 @@
 	});
 </script>
 
-<div>
+<div {id}>
 	<div>
 		{render_data["interpretation"]
 			? render_data["interpretation"]

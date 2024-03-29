@@ -35,10 +35,6 @@
 
 	function isValidJson(jsonString: string) {
 		try {
-			// if (jsonString.indexOf("\n{") !== -1) {
-			// 	return JSON5.parse("[" + jsonString.replace("\n{", ",{") + "]");
-			// }
-			console.log("over here", jsonString);
 			return JSON5.parse(jsonString);
 		} catch (e) {
 			return false;
@@ -132,7 +128,10 @@
 		{:else if contentType === "ecole-difference-concepts"}
 			<DifferenceBlock json_data={parsedJson} />
 		{:else if contentType === "ecole-json-reason"}
-			<ExplainBlock json_data={parsedJson} id={parsedJson.prediction_id} />
+			<ExplainBlock
+				json_data={parsedJson}
+				id={parsedJson?.prediction_id ? parsedJson?.prediction_id : parsedJson?.image_id}
+			/>
 		{:else if contentType === "ecole-video-activity"}
 			<p>{parsedJson.data}</p>
 			<button

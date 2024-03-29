@@ -148,3 +148,11 @@ export async function validateAndParseCsrfToken(
 	}
 	return null;
 }
+
+import { ECOLE_PASSWORD } from "$env/static/private";
+export async function ECOLE_password_check(locals: App.Locals) {
+	const ECOLE_password = locals.ECOLE_password;
+	if (!ECOLE_password || ECOLE_password !== ECOLE_PASSWORD) {
+		throw new Error("ECOLE_password is not correct");
+	}
+}

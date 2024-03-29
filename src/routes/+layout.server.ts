@@ -12,11 +12,20 @@ import {
 	MESSAGES_BEFORE_LOGIN,
 	YDC_API_KEY,
 	USE_LOCAL_WEBSEARCH,
+	ECOLE_PASSWORD,
 } from "$env/static/private";
+import { redirect } from "@sveltejs/kit";
 
-export const load: LayoutServerLoad = async ({ locals, depends }) => {
+export const load: LayoutServerLoad = async ({ locals, depends, url }) => {
 	const { conversations } = collections;
 	depends(UrlDependency.ConversationList);
+
+	const ECOLE_password = locals.ECOLE_password;
+	console.log("ECOLE_password", ECOLE_password);
+	if ((!ECOLE_password || ECOLE_password !== ECOLE_PASSWORD) && url.pathname !== "/password") {
+		console.log("Redirecting to password page");
+		throw redirect(307, `/password`);
+	}
 
 	const settings = await collections.settings.findOne(authCondition(locals));
 

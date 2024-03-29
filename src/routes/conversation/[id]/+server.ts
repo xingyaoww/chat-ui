@@ -1,9 +1,4 @@
-import {
-	MESSAGES_BEFORE_LOGIN,
-	RATE_LIMIT,
-	JUPYTER_API_URL,
-	N_EXECUTION_LIMIT,
-} from "$env/static/private";
+import { MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL } from "$env/static/private";
 import { authCondition, requiresUser } from "$lib/server/auth";
 import { collections } from "$lib/server/database";
 import { models } from "$lib/server/models";
@@ -16,7 +11,7 @@ import type { MessageUpdate } from "$lib/types/MessageUpdate";
 import { runWebSearch } from "$lib/server/websearch/runWebSearch";
 import type { WebSearch } from "$lib/types/WebSearch";
 import { abortedGenerations } from "$lib/server/abortedGenerations";
-import { summarize } from "$lib/server/summarize";
+// import { summarize } from "$lib/server/summarize";
 import { uploadFile } from "$lib/server/files/uploadFile";
 import sizeof from "image-size";
 

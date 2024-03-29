@@ -50,7 +50,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	event.locals.sessionId = sessionId;
-
 	// CSRF protection
 	const requestContentType = event.request.headers.get("content-type")?.split(";")[0] ?? "";
 	/** https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form#attr-enctype */
@@ -59,6 +58,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 		"application/x-www-form-urlencoded",
 		"text/plain",
 	];
+
+	event.locals.ECOLE_password = event.cookies.get("ECOLE_password");
 
 	if (event.request.method === "POST") {
 		refreshSessionCookie(event.cookies, event.locals.sessionId);

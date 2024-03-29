@@ -11,6 +11,7 @@ declare global {
 		interface Locals {
 			sessionId: string;
 			user?: User;
+			ECOLE_password: string | undefined;
 		}
 		// interface PageData {}
 		// interface Platform {}

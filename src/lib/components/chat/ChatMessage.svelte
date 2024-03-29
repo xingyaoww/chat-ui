@@ -147,7 +147,6 @@
 			isCopied = false;
 		}, 1000);
 	}
-	$: console.log("message", message);
 </script>
 
 {#if message.from === "assistant"}

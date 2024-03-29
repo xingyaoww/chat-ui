@@ -3,10 +3,18 @@ import { ObjectId } from "mongodb";
 import { error } from "@sveltejs/kit";
 import { authCondition } from "$lib/server/auth";
 import { UrlDependency } from "$lib/types/UrlDependency";
+import { ECOLE_PASSWORD } from "$env/static/private";
+import { redirect } from "@sveltejs/kit";
+import { base } from "$app/paths";
 
 export const load = async ({ params, depends, locals }) => {
 	let conversation;
 	let shared = false;
+	const ECOLE_password = locals.ECOLE_password;
+	console.log("ECOLE_password", ECOLE_password);
+	if (!ECOLE_password || ECOLE_password !== ECOLE_PASSWORD) {
+		throw redirect(302, `${base}/password`);
+	}
 
 	// if the conver
 	if (params.id.length === 7) {
