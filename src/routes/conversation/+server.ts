@@ -7,7 +7,6 @@ import { z } from "zod";
 import type { Message } from "$lib/types/Message";
 import { models, validateModel } from "$lib/server/models";
 import { ECOLE_PASSWORD } from "$env/static/private";
-import { goto } from "$app/navigation";
 
 export const POST: RequestHandler = async ({ locals, request }) => {
 	const body = await request.text();
@@ -16,8 +15,8 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 	let messages: Message[] = [];
 
 	const ECOLE_password = locals.ECOLE_password;
-	if (!ECOLE_password || ECOLE_password === ECOLE_PASSWORD) {
-		goto(`${base}/password`);
+	if (!ECOLE_password || ECOLE_password !== ECOLE_PASSWORD) {
+		throw redirect(307, `${base}/password`);
 	}
 
 	const values = z
