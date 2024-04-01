@@ -1,7 +1,7 @@
 import type { RequestHandler } from "@sveltejs/kit";
 import { ECOLE_PASSWORD } from "$env/static/private";
 
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request }) => {
 	const body = await request.json();
 	const password = body.password;
 
