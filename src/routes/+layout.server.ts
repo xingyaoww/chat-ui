@@ -13,7 +13,7 @@ import {
 	YDC_API_KEY,
 	USE_LOCAL_WEBSEARCH,
 	ECOLE_PASSWORD,
-} from "$env/static/private";
+} from "$env/dynamic/private";
 import { redirect } from "@sveltejs/kit";
 
 export const load: LayoutServerLoad = async ({ locals, depends, url }) => {

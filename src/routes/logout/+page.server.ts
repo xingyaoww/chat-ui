@@ -1,6 +1,6 @@
 import { dev } from "$app/environment";
 import { base } from "$app/paths";
-import { COOKIE_NAME } from "$env/static/private";
+import { COOKIE_NAME } from "$env/dynamic/private";
 import { collections } from "$lib/server/database";
 import { redirect } from "@sveltejs/kit";
 

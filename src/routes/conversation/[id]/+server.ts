@@ -1,4 +1,4 @@
-import { MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL } from "$env/static/private";
+import { MESSAGES_BEFORE_LOGIN, RATE_LIMIT, JUPYTER_API_URL } from "$env/dynamic/private";
 import { authCondition, requiresUser } from "$lib/server/auth";
 import { collections } from "$lib/server/database";
 import { models } from "$lib/server/models";

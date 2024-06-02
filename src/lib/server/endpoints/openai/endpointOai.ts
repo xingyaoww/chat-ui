@@ -2,7 +2,7 @@ import { z } from "zod";
 import { openAICompletionToTextGenerationStream } from "./openAICompletionToTextGenerationStream";
 import { openAIChatToTextGenerationStream } from "./openAIChatToTextGenerationStream";
 import { buildPrompt } from "$lib/buildPrompt";
-import { OPENAI_API_KEY } from "$env/static/private";
+import { OPENAI_API_KEY } from "$env/dynamic/private";
 import type { Endpoint } from "../endpoints";
 import { format } from "date-fns";
 

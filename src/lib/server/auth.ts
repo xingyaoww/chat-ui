@@ -9,7 +9,7 @@ import {
 	OPENID_TOLERANCE,
 	OPENID_RESOURCE,
 	OPENID_CONFIG,
-} from "$env/static/private";
+} from "$env/dynamic/private";
 import { sha256 } from "$lib/utils/sha256";
 import { z } from "zod";
 import { dev } from "$app/environment";
@@ -149,7 +149,7 @@ export async function validateAndParseCsrfToken(
 	return null;
 }
 
-import { ECOLE_PASSWORD } from "$env/static/private";
+import { ECOLE_PASSWORD } from "$env/dynamic/private";
 export async function ECOLE_password_check(locals: App.Locals) {
 	const ECOLE_password = locals.ECOLE_password;
 	if (!ECOLE_password || ECOLE_password !== ECOLE_PASSWORD) {

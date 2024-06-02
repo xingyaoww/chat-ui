@@ -1,4 +1,4 @@
-import { LLM_SUMMERIZATION } from "$env/static/private";
+import { LLM_SUMMERIZATION } from "$env/dynamic/private";
 import { generateFromDefaultEndpoint } from "$lib/server/generateFromDefaultEndpoint";
 import type { Message } from "$lib/types/Message";
 

@@ -1,5 +1,5 @@
 import type { RequestHandler } from "@sveltejs/kit";
-import { VIDEO_SERVER_URL } from "$env/static/private";
+import { VIDEO_SERVER_URL } from "$env/dynamic/private";
 import fetch from "node-fetch"; // Ensure you have node-fetch installed if running in a Node environment
 
 export const GET: RequestHandler = async ({ request, params }) => {

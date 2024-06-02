@@ -1,4 +1,4 @@
-import { HF_ACCESS_TOKEN, HF_TOKEN } from "$env/static/private";
+import { HF_ACCESS_TOKEN, HF_TOKEN } from "$env/dynamic/private";
 import { buildPrompt } from "$lib/buildPrompt";
 import type { TextGenerationStreamOutput } from "@huggingface/inference";
 import type { Endpoint } from "../endpoints";

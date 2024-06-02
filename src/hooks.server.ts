@@ -1,10 +1,10 @@
-import { COOKIE_NAME, MESSAGES_BEFORE_LOGIN } from "$env/static/private";
+import { COOKIE_NAME, MESSAGES_BEFORE_LOGIN } from "$env/dynamic/private";
 import type { Handle } from "@sveltejs/kit";
 import {
 	PUBLIC_GOOGLE_ANALYTICS_ID,
 	PUBLIC_ORIGIN,
 	PUBLIC_APP_DISCLAIMER,
-} from "$env/static/public";
+} from "$env/dynamic/public";
 import { collections } from "$lib/server/database";
 import { base } from "$app/paths";
 import { findUser, refreshSessionCookie, requiresUser } from "$lib/server/auth";

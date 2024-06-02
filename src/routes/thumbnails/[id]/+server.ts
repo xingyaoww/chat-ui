@@ -1,5 +1,5 @@
 import type { RequestHandler } from "@sveltejs/kit";
-import { VIDEO_SERVER_URL } from "$env/static/private";
+import { VIDEO_SERVER_URL } from "$env/dynamic/private";
 
 export const GET: RequestHandler = async ({ params }) => {
 	try {

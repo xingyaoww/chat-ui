@@ -2,7 +2,7 @@ import {
 	PARQUET_EXPORT_DATASET,
 	PARQUET_EXPORT_HF_TOKEN,
 	PARQUET_EXPORT_SECRET,
-} from "$env/static/private";
+} from "$env/dynamic/private";
 import { collections } from "$lib/server/database";
 import type { Message } from "$lib/types/Message";
 import { error } from "@sveltejs/kit";

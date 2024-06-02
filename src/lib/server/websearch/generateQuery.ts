@@ -1,7 +1,7 @@
 import type { Message } from "$lib/types/Message";
 import { format } from "date-fns";
 import { generateFromDefaultEndpoint } from "../generateFromDefaultEndpoint";
-import { WEBSEARCH_ALLOWLIST, WEBSEARCH_BLOCKLIST } from "$env/static/private";
+import { WEBSEARCH_ALLOWLIST, WEBSEARCH_BLOCKLIST } from "$env/dynamic/private";
 import { z } from "zod";
 
 const listSchema = z.array(z.string()).default([]);

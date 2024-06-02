@@ -6,7 +6,7 @@ import {
 	SERPSTACK_API_KEY,
 	USE_LOCAL_WEBSEARCH,
 	YDC_API_KEY,
-} from "$env/static/private";
+} from "$env/dynamic/private";
 import { getJson } from "serpapi";
 import type { GoogleParameters } from "serpapi";
 import { searchWebLocal } from "./searchWebLocal";

@@ -5,7 +5,7 @@ import {
 	OLD_MODELS,
 	TASK_MODEL,
 	HF_ACCESS_TOKEN,
-} from "$env/static/private";
+} from "$env/dynamic/private";
 import type { ChatTemplateInput } from "$lib/types/Template";
 import { compileTemplate } from "$lib/utils/template";
 import { z } from "zod";
