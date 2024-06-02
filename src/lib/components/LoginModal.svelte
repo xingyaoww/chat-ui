@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { base } from "$app/paths";
 	import { page } from "$app/stores";
-	import { PUBLIC_APP_DESCRIPTION, PUBLIC_APP_NAME } from "$env/static/public";
+	import { PUBLIC_APP_DESCRIPTION, PUBLIC_APP_NAME } from "$env/dynamic/public";
 	import LogoHuggingFaceBorderless from "$lib/components/icons/LogoHuggingFaceBorderless.svelte";
 	import Modal from "$lib/components/Modal.svelte";
 	import { useSettingsStore } from "$lib/stores/settings";

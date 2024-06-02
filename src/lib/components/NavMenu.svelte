@@ -4,7 +4,7 @@
 	import Logo from "$lib/components/icons/Logo.svelte";
 	import { switchTheme } from "$lib/switchTheme";
 	import { isAborted } from "$lib/stores/isAborted";
-	import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from "$env/static/public";
+	import { PUBLIC_APP_NAME, PUBLIC_ORIGIN } from "$env/dynamic/public";
 	import NavConversationItem from "./NavConversationItem.svelte";
 	import type { LayoutData } from "../../routes/$types";
 

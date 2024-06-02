@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { PUBLIC_APP_NAME, PUBLIC_VERSION } from "$env/static/public";
-	import { PUBLIC_ANNOUNCEMENT_BANNERS } from "$env/static/public";
-	import { PUBLIC_APP_DESCRIPTION } from "$env/static/public";
+	import { PUBLIC_APP_NAME, PUBLIC_VERSION } from "$env/dynamic/public";
+	import { PUBLIC_ANNOUNCEMENT_BANNERS } from "$env/dynamic/public";
+	import { PUBLIC_APP_DESCRIPTION } from "$env/dynamic/public";
 	import Logo from "$lib/components/icons/Logo.svelte";
 	import { createEventDispatcher } from "svelte";
 	import IconGear from "~icons/bi/gear-fill";

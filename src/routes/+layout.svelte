@@ -4,7 +4,7 @@
 	import { page } from "$app/stores";
 	import "../styles/main.css";
 	import { base } from "$app/paths";
-	import { PUBLIC_ORIGIN } from "$env/static/public";
+	import { PUBLIC_ORIGIN } from "$env/dynamic/public";
 
 	import { shareConversation } from "$lib/shareConversation";
 	import { UrlDependency } from "$lib/types/UrlDependency";
@@ -13,7 +13,7 @@
 	import MobileNav from "$lib/components/MobileNav.svelte";
 	import NavMenu from "$lib/components/NavMenu.svelte";
 	import Toast from "$lib/components/Toast.svelte";
-	import { PUBLIC_APP_ASSETS, PUBLIC_APP_NAME } from "$env/static/public";
+	import { PUBLIC_APP_ASSETS, PUBLIC_APP_NAME } from "$env/dynamic/public";
 	import titleUpdate from "$lib/stores/titleUpdate";
 	import { createSettingsStore } from "$lib/stores/settings";
 	import { browser } from "$app/environment";

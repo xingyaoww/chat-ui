@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from "$app/stores";
 	import { base } from "$app/paths";
-	import { PUBLIC_ORIGIN } from "$env/static/public";
+	import { PUBLIC_ORIGIN } from "$env/dynamic/public";
 	import type { BackendModel } from "$lib/server/models";
 	import { useSettingsStore } from "$lib/stores/settings";
 	import CopyToClipBoardBtn from "$lib/components/CopyToClipBoardBtn.svelte";

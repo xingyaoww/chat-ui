@@ -10,7 +10,7 @@
 
 	import { useSettingsStore } from "$lib/stores/settings";
 	import Switch from "$lib/components/Switch.svelte";
-	import { PUBLIC_APP_DATA_SHARING } from "$env/static/public";
+	import { PUBLIC_APP_DATA_SHARING } from "$env/dynamic/public";
 
 	let isConfirmingDeletion = false;
 
